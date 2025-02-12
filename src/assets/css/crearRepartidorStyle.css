@@ -1,0 +1,118 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #E5EDF9;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.contenedor-principal {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    width: 400px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.titulo-bienvenida {
+    color: #3278C5;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.seccion {
+    margin-bottom: 25px;
+}
+
+.seccion h2 {
+    color: #5896D8;
+    font-size: 14px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+/* Servicios */
+.lista-servicios {
+    background: #E5EDF9;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.servicio {
+    color: #3278C5;
+    padding: 8px;
+    margin: 4px 0;
+    border-radius: 4px;
+}
+
+/* Detalles de orden */
+.tabla-encabezados {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    color: #3278C5;
+    font-weight: bold;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #5896D8;
+}
+
+/* Cargos */
+.fila-cargo {
+    display: flex;
+    justify-content: space-between;
+    color: #3278C5;
+    margin: 8px 0;
+    padding: 0 10px;
+}
+
+/* Servicio a domicilio */
+.fila-doble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.grupo-input label {
+    display: block;
+    color: #3278C5;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+select, input[type="time"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #5896D8;
+    border-radius: 6px;
+    background: white;
+    color: #3278C5;
+}
+
+/* Botones */
+.botones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-cancelar {
+    background: #E5EDF9;
+    color: #3278C5;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-enviar {
+    background: #3278C5;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
