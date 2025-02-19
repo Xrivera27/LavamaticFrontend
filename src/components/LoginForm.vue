@@ -30,7 +30,7 @@
         <button @click="login" class="login-button">Iniciar Sesión</button>
         <div class="links-container">
           <a href="#" class="forgot-password" @click.prevent="switchToRecovery">¿Olvidaste tu contraseña?</a>
-          <p class="register-text">¿No tienes una cuenta? <a href="#" @click.prevent="$emit('switch-to-register')">Regístrate</a></p>
+          <p class="register-text">¿No tienes una cuenta? <router-link to="/register">Regístrate</router-link></p>
         </div>
       </div>
     </div>
@@ -92,7 +92,5 @@ export default {
   },
 };
 </script>
-
-
 
 <style src="@/assets/css/loginStyle.css" scoped></style>

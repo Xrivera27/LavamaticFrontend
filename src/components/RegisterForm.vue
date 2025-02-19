@@ -46,7 +46,7 @@
         required
       >
       <button @click="register" :disabled="!isFormValid">Registrarse</button>
-      <p>¿Ya tienes una cuenta? <a href="#" @click.prevent="$emit('switch-to-login')">Inicia Sesión</a></p>
+      <p>¿Ya tienes una cuenta? <router-link to="/login">Inicia Sesión</router-link></p>
     </div>
   </div>
 </template>
@@ -95,7 +95,5 @@ export default {
   },
 };
 </script>
-
-
 
 <style src="@/assets/css/loginStyle.css" scoped></style>
