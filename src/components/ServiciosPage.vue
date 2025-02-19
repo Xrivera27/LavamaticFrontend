@@ -51,11 +51,11 @@
           <h2>CARGOS</h2>
           <div class="fila-cargo">
             <span>Subtotal</span>
-            <span>${{ calcularSubtotal().toFixed(2) }}</span>
+            <span>L.{{ calcularSubtotal().toFixed(2) }}</span>
           </div>
           <div class="fila-cargo total">
             <span>Total</span>
-            <span>${{ calcularTotal().toFixed(2) }}</span>
+            <span>L.{{ calcularTotal().toFixed(2) }}</span>
           </div>
         </div>
   

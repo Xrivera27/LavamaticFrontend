@@ -1,11 +1,12 @@
 /* serviciosPageStyle.css */
 .contenedor-principal {
     background-color: #f5f7fa;
-    width: 200%;
+    width: 180%;
     margin: 0 auto;
-    margin-left: -50%;
-    margin-top: 90%;
+    margin-left: -40%;
+    margin-top: 105%;
     border-radius: 25px;
+    margin-bottom: 10%;
 }
 
 .tarjeta-contenido {
@@ -119,6 +120,11 @@
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 30px;
+    color: black;
+}
+
+.detalles-orden h2{
+    color: black;
 }
 
 .tabla-encabezados {
