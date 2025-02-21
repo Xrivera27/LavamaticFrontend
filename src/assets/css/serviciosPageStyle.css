@@ -7,7 +7,12 @@
     margin-top: 105%;
     border-radius: 25px;
     margin-bottom: 10%;
+    transition: margin-left 0.3s ease;
 }
+
+
+
+
 
 .tarjeta-contenido {
     background: white;
@@ -354,4 +359,30 @@ select:focus {
     .tarjeta-contenido {
         padding: 10px; /* Reducido el padding para móviles pequeños */
     }
+}
+
+
+:root {
+    --sidebar-width: 56px;
+    --sidebar-width-expanded: 200px;
+  }
+
+  .page-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s ease;
+  }
+
+  .main-content.content-expanded {
+    margin-left: var(--sidebar-width-expanded);
+  }
+
+  .main-content.content-expanded .contenedor-principal {
+    margin-left: calc(-40%(var(--sidebar-width-expanded) - var(--sidebar-width)));
 }
