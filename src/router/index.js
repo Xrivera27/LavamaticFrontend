@@ -3,7 +3,8 @@ import LoginForm from '../components/LoginForm.vue'
 import RegisterForm from '../components/RegisterForm.vue'
 import ServiciosPage from '../components/ServiciosPage.vue'
 import DashboardCliente from '../components/Dashboardcliente.vue'
-import ConfiguracionUsuarioCliente from '../components/ConfiguracionUsuarioCliente.vue'
+import ConfiguracionUsuario from '../components/ConfiguracionUsuarioCliente.vue'
+import HistorialPedidos from '../components/HistorialPedidoCliente.vue'
 
 const routes = [
   {
@@ -31,9 +32,14 @@ const routes = [
     component: ServiciosPage
   },
   {
+    path: '/historial',
+    name: 'historial',
+    component: HistorialPedidos
+  },
+  {
     path: '/configuracion',
     name: 'configuracion',
-    component: ConfiguracionUsuarioCliente
+    component: ConfiguracionUsuario
   }
 ]
 
