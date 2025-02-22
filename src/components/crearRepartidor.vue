@@ -1,666 +1,613 @@
 <template>
-    <div class="empleados-wrapper">
-      <ModalLoading :isLoading="isLoading" />
-      <PageHeader :titulo="titulo" />
-  
-      <div class="opciones">
-        <button
-          id="btnAdd"
-          class="btn btn-primary"
-          @click="openModal"
-          style="width: 200px; white-space: nowrap"
-        >
-          Agregar Usuario
-        </button>
-  
-        <div class="search-bar">
-          <input
-            class="busqueda"
-            type="text"
-            v-model="searchQuery"
-            placeholder="Buscar empleado..."
-          />
+  <div class="admin-layout">
+    <SidebarAdmin @sidebar-toggle="handleSidebarToggle" />
+    <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
+      <div class="empleados-wrapper">
+        <div v-if="isLoading" class="loading-overlay">
+          <div class="loading-spinner"></div>
+          <p>Cargando...</p>
         </div>
-  
-        <div class="registros" v-if="sucursales.length > 1">
-          <span>
-            <select class="custom-select" v-model="searchSucursal">
-              <option value="default" selected>Todas</option>
-              <option
-                v-for="(sucursal, index) in this.sucursales"
-                :key="index"
-                :value="sucursal.id_sucursal"
+        
+        <div class="header-section">
+          <h1 class="page-title">Gestión de Repartidores</h1>
+        </div>
+    
+        <div class="opciones">
+          <button
+            id="btnAdd"
+            class="btn btn-primary"
+            @click="openModal"
+            style="width: 200px; white-space: nowrap"
+          >
+            Agregar Repartidor
+          </button>
+    
+          <div class="search-bar">
+            <input
+              class="busqueda"
+              type="text"
+              v-model="searchQuery"
+              placeholder="Buscar repartidor..."
+            />
+          </div>
+        </div>
+    
+        <div class="table-container">
+          <div v-if="isLoading" class="loading-indicator">
+            Cargando repartidores...
+          </div>
+    
+          <div v-else-if="paginatedEmpleados.length === 0" class="no-data">
+            No se encontraron repartidores para mostrar.
+          </div>
+    
+          <table v-else class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Teléfono</th>
+                <th>Código Mochila</th>
+                <th>GPS Asignado</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(empleado, index) in paginatedEmpleados" :key="index">
+                <td data-label="#">
+                  {{ (currentPage - 1) * pageSize + index + 1 }}
+                </td>
+                <td data-label="Nombre">{{ empleado.nombre }}</td>
+                <td data-label="Apellido">{{ empleado.apellido }}</td>
+                <td data-label="Teléfono">{{ empleado.telefono }}</td>
+                <td data-label="Código Mochila">{{ empleado.codigo_mochila }}</td>
+                <td data-label="GPS Asignado">{{ empleado.gps_asignado }}</td>
+                <td data-label="Estado">
+                  <span :class="'badge ' + getEstadoClass(empleado.estado)">
+                    {{ empleado.estado }}
+                  </span>
+                </td>
+                <td data-label="Acciones">
+                  <button
+                    id="btnEditar"
+                    class="btn btn-warning"
+                    @click="editEmpleado(empleado)"
+                  >
+                    <i class="fa-solid fa-pencil"></i>
+                  </button>
+                  <button
+                    id="btnEliminar"
+                    class="btn btn-danger"
+                    @click="deleteUsuariol(empleado)"
+                  >
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+    
+          <div class="pagination-wrapper">
+            <div class="pagination-info">
+              Mostrando {{ paginatedEmpleados.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
+              {{ Math.min(currentPage * pageSize, filteredEmpleados.length) }} de
+              {{ filteredEmpleados.length }} registros
+            </div>
+            <div class="pagination-container">
+              <button
+                class="pagination-button"
+                :disabled="currentPage === 1"
+                @click="previousPage"
               >
-                {{ sucursal.nombre_administrativo }}
-              </option>
-            </select>
-          </span>
-        </div>
-      </div>
-  
-      <div class="table-container">
-        <div v-if="isLoading" class="loading-indicator">
-          Cargando empleados...
-        </div>
-  
-        <div v-else-if="paginatedEmpleados.length === 0" class="no-data">
-          No se encontraron empleados para mostrar.
-        </div>
-  
-        <table v-else class="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Nombre</th>
-              <th>Apellido</th>
-              <th>Nombre Usuario</th>
-              <th>Teléfono</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(empleado, index) in paginatedEmpleados" :key="index">
-              <td data-label="#">
-                {{ (currentPage - 1) * pageSize + index + 1 }}
-              </td>
-              <td data-label="Nombre">{{ empleado.nombre }}</td>
-              <td data-label="Apellido">{{ empleado.apellido }}</td>
-              <td data-label="Nombre Usuario">{{ empleado.nombre_usuario }}</td>
-              <td data-label="Teléfono">{{ empleado.telefono }}</td>
-              <td data-label="Email">{{ empleado.correo }}</td>
-              <td data-label="Rol">{{ getRol(empleado.id_rol) }}</td>
-              <td data-label="Acciones">
-                <button
-                  id="btnEditar"
-                  class="btn btn-warning"
-                  @click="editEmpleado(empleado)"
-                >
-                  <i class="bi bi-pencil-fill"></i>
-                </button>
-                <button
-                  id="btnEliminar"
-                  class="btn btn-danger"
-                  @click="deleteUsuariol(empleado)"
-                >
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-  
-        <div class="pagination-wrapper">
-          <div class="pagination-info">
-            Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
-            {{ Math.min(currentPage * pageSize, filteredEmpleados.length) }} de
-            {{ filteredEmpleados.length }} registros
-          </div>
-          <div class="pagination-container">
-            <button
-              class="pagination-button"
-              :disabled="currentPage === 1"
-              @click="previousPage"
-            >
-              Anterior
-            </button>
-            <button
-              class="pagination-button"
-              :disabled="currentPage === totalPages"
-              @click="nextPage"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-      </div>
-  
-      <div class="modal" v-if="showConfirmModal">
-        <div class="modal-confirm">
-          <div class="modal-header">
-            <h2>Confirmación</h2>
-          </div>
-          <div class="modal-body-confirm">
-            <p>¿Estás seguro de que quieres eliminar este usuario?</p>
-          </div>
-          <div class="modal-footer">
-            <div class="action-buttons">
-              <btnGuardarModal
-                texto="Sí, eliminar"
-                style="background-color: red"
-                @click="deleteUsuariol(empleado)"
-              />
-              <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
+                Anterior
+              </button>
+              <button
+                class="pagination-button"
+                :disabled="currentPage === totalPages"
+                @click="nextPage"
+              >
+                Siguiente
+              </button>
             </div>
           </div>
         </div>
-      </div>
-  
-      <div v-if="isModalOpen" class="modal">
-        <div class="modal-usuario">
-          <div class="modal-header">
-            <h2 class="h2-modal-content">
-              {{ isEditing ? "Editar Usuario" : "Agregar Usuario" }}
-            </h2>
-          </div>
-  
-          <div class="modal-body">
-            <div class="contenedor contenedor-izquierdo">
-              <div class="form-group">
-                <label>Nombre:</label>
-                <input
-                  ref="nombreInput"
-                  v-model="usuarioForm.nombre"
-                  type="text"
-                  required
-                />
-              </div>
-  
-              <div class="form-group">
-                <label>Apellido:</label>
-                <input v-model="usuarioForm.apellido" type="text" required />
-              </div>
-  
-              <div class="form-group">
-                <label>Nombre de Usuario:</label>
-                <input
-                  v-model="usuarioForm.nombre_usuario"
-                  type="text"
-                  required
-                />
-              </div>
-  
-              <div class="form-group">
-                <label>Correo:</label>
-                <input v-model="usuarioForm.correo" type="text" required />
-              </div>
-  
-              <div class="form-group">
-                <label for="rol">Selecciona rol:</label>
-                <select
-                  class="form-select"
-                  id="rol"
-                  name="rol"
-                  value="default"
-                  v-model="usuarioForm.rol"
-                  required
-                >
-                  <option value="" disabled selected>Selecciona un rol</option>
-                  <option
-                    v-for="(rol, index) in roles"
-                    :key="index"
-                    :value="rol.id_rol"
-                  >
-                    {{ rol.cargo }}
-                  </option>
-                </select>
+    
+        <div class="modal" v-if="showConfirmModal">
+          <div class="modal-confirm">
+            <div class="modal-header">
+              <h2>Confirmación</h2>
+            </div>
+            <div class="modal-body-confirm">
+              <p>¿Estás seguro de que quieres eliminar este repartidor?</p>
+            </div>
+            <div class="modal-footer">
+              <div class="action-buttons">
+                <button class="btn btn-danger" @click="confirmDelete">
+                  Sí, eliminar
+                </button>
+                <button class="btn btn-secondary" @click="cancelDelete">
+                  No, regresar
+                </button>
               </div>
             </div>
-  
-            <div class="contenedor contenedor-derecho">
-              <div class="form-group">
-                <label>
-                  <span
-                    class="info-icon"
-                    @mouseover="showTooltip = true"
-                    @mouseleave="showTooltip = false"
-                    >ℹ️</span
-                  >
-                  Contraseña:
-                </label>
-                <div class="password-wrapper">
+          </div>
+        </div>
+    
+        <div v-if="isModalOpen" class="modal">
+          <div class="modal-usuario">
+            <div class="modal-header">
+              <h2 class="h2-modal-content">
+                {{ isEditing ? "Editar Repartidor" : "Agregar Repartidor" }}
+              </h2>
+            </div>
+    
+            <div class="modal-body">
+              <div class="contenedor contenedor-izquierdo">
+                <div class="form-group">
+                  <label>Nombre:</label>
                   <input
-                    v-model="usuarioForm.password"
-                    :type="showPassword ? 'text' : 'password'"
-                    required
-                    :disabled="!isPassEdit"
-                  />
-                  <button
-                    type="button"
-                    class="toggle-password"
-                    @click="showPassword = !showPassword"
-                    :disabled="!isPassEdit"
-                  >
-                    <i
-                      :class="
-                        showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'
-                      "
-                    ></i>
-                  </button>
-                </div>
-                <div v-if="showTooltip" class="tooltip">
-                  La contraseña debe tener al menos 8 caracteres, incluir una
-                  letra mayúscula, una letra minúscula, un número y un símbolo.
-                </div>
-              </div>
-  
-              <div class="form-group">
-                <label>Confirmar contraseña:</label>
-                <div class="password-wrapper">
-                  <input
-                    v-model="usuarioForm.confirmPassword"
-                    :type="showConfirmPassword ? 'text' : 'password'"
-                    required
-                    :disabled="!isPassEdit"
-                  />
-                  <button
-                    type="button"
-                    class="toggle-password"
-                    @click="showConfirmPassword = !showConfirmPassword"
-                    :disabled="!isPassEdit"
-                  >
-                    <i
-                      :class="
-                        showConfirmPassword
-                          ? 'bi bi-eye-slash-fill'
-                          : 'bi bi-eye-fill'
-                      "
-                    ></i>
-                  </button>
-                </div>
-              </div>
-  
-              <div class="form-group">
-                <label>Teléfono:</label>
-                <div class="phone-input-container">
-                  <select
-                    v-model="selectedCountry"
-                    @change="updatePhoneValidation"
-                    class="select-phone"
-                  >
-                    <option value="">País</option>
-                    <option
-                      v-for="(country, code) in countryData"
-                      :key="code"
-                      :value="code"
-                    >
-                      {{ country.emoji }} {{ country.code }}
-                    </option>
-                  </select>
-                  <input
-                    v-model="usuarioForm.telefono"
+                    ref="nombreInput"
+                    v-model="usuarioForm.nombre"
                     type="text"
-                    class="input-phone"
-                    :placeholder="'Número (' + phoneLength + ' dígitos)'"
                     required
                   />
                 </div>
+    
+                <div class="form-group">
+                  <label>Apellido:</label>
+                  <input v-model="usuarioForm.apellido" type="text" required />
+                </div>
+    
+                <div class="form-group">
+                  <label>Correo:</label>
+                  <input v-model="usuarioForm.correo" type="email" required />
+                </div>
+                
+                <div class="form-group">
+                  <label>Teléfono:</label>
+                  <div class="phone-input-container">
+                    <select
+                      v-model="selectedCountryCode"
+                      class="select-phone"
+                    >
+                      <option value="+504">🇭🇳 +504</option>
+                      <option value="+1">🇺🇸 +1</option>
+                      <option value="+52">🇲🇽 +52</option>
+                      <option value="+34">🇪🇸 +34</option>
+                    </select>
+                    <input
+                      v-model="usuarioForm.telefono"
+                      type="text"
+                      class="input-phone"
+                      placeholder="Número de teléfono"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label>Dirección:</label>
+                  <input v-model="usuarioForm.direccion" type="text" required />
+                </div>
               </div>
-  
-              <div class="form-group">
-                <label>Dirección:</label>
-                <input v-model="usuarioForm.direccion" type="text" required />
+    
+              <div class="contenedor contenedor-derecho">
+                <div class="form-group">
+                  <label>
+                    <span
+                      class="info-icon"
+                      @mouseover="showTooltip = true"
+                      @mouseleave="showTooltip = false"
+                      >ℹ️</span
+                    >
+                    Contraseña:
+                  </label>
+                  <div class="password-wrapper">
+                    <input
+                      v-model="usuarioForm.password"
+                      :type="showPassword ? 'text' : 'password'"
+                      required
+                      :disabled="!isPassEdit"
+                    />
+                    <button
+                      type="button"
+                      class="toggle-password"
+                      @click="showPassword = !showPassword"
+                      :disabled="!isPassEdit"
+                    >
+                      <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                    </button>
+                  </div>
+                  <div v-if="showTooltip" class="tooltip">
+                    La contraseña debe tener al menos 8 caracteres, incluir una
+                    letra mayúscula, una letra minúscula, un número y un símbolo.
+                  </div>
+                </div>
+    
+                <div class="form-group">
+                  <label>Confirmar contraseña:</label>
+                  <div class="password-wrapper">
+                    <input
+                      v-model="usuarioForm.confirmPassword"
+                      :type="showConfirmPassword ? 'text' : 'password'"
+                      required
+                      :disabled="!isPassEdit"
+                    />
+                    <button
+                      type="button"
+                      class="toggle-password"
+                      @click="showConfirmPassword = !showConfirmPassword"
+                      :disabled="!isPassEdit"
+                    >
+                      <i class="fa-solid" :class="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Campos específicos de repartidor -->
+                <div class="form-group">
+                  <label>Código de Mochila:</label>
+                  <input 
+                    v-model="usuarioForm.codigo_mochila" 
+                    type="text" 
+                    required 
+                    placeholder="Ej: MOCH-001" 
+                    :class="{ 'input-error': validationErrors.codigo_mochila }"
+                  />
+                  <span v-if="validationErrors.codigo_mochila" class="error-message">
+                    {{ validationErrors.codigo_mochila }}
+                  </span>
+                </div>
+                
+                <div class="form-group">
+                  <label>GPS Asignado:</label>
+                  <input 
+                    v-model="usuarioForm.gps_asignado" 
+                    type="text" 
+                    required 
+                    placeholder="Ej: GPS-12345" 
+                    :class="{ 'input-error': validationErrors.gps_asignado }"
+                  />
+                  <span v-if="validationErrors.gps_asignado" class="error-message">
+                    {{ validationErrors.gps_asignado }}
+                  </span>
+                </div>
+                
+                <div class="form-group">
+                  <label>Estado:</label>
+                  <select v-model="usuarioForm.estado" required>
+                    <option value="">Seleccione un estado</option>
+                    <option value="Activo">Activo</option>
+                    <option value="En ruta">En ruta</option>
+                    <option value="Descanso">Descanso</option>
+                    <option value="Inactivo">Inactivo</option>
+                  </select>
+                </div>
               </div>
-  
-              <div class="form-group" v-if="sucursales.length > 1">
-                <label for="sucursal">Selecciona sucursal:</label>
-                <select
-                  class="form-select"
-                  id="sucursal"
-                  name="sucursal"
-                  value="default"
-                  v-model="usuarioForm.sucursal"
-                  required
+            </div>
+            <div class="modal-footer">
+              <div class="action-buttons">
+                <button 
+                  class="btn btn-primary"
+                  @click="guardarUsuario"
                 >
-                  <option value="" disabled selected>
-                    Selecciona una sucursal
-                  </option>
-                  <option
-                    v-for="(sucursal, index) in sucursales"
-                    :key="index"
-                    :value="sucursal.id_sucursal"
-                  >
-                    {{ sucursal.nombre_administrativo }}
-                  </option>
-                </select>
+                  {{ isEditing ? 'Guardar Cambios' : 'Agregar Repartidor' }}
+                </button>
+                <button 
+                  class="btn btn-secondary"
+                  @click="closeModal"
+                >
+                  Cerrar
+                </button>
               </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <div class="action-buttons">
-              <btnGuardarModal
-                :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'"
-                @click="guardarUsuario"
-                type="submit"
+              <button
+                class="btn editar-password"
+                :disabled="!isEditing"
+                @click="editarPassword"
               >
-              </btnGuardarModal>
-              <btnCerrarModal
-                :texto="'Cerrar'"
-                @click="closeModal"
-              ></btnCerrarModal>
+                Editar Contraseña
+              </button>
             </div>
-            <button
-              class="btn editar-password"
-              :disabled="!isEditing"
-              @click="editarPassword"
-            >
-              Editar Contraseña
-            </button>
           </div>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
-  import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-  import solicitudes from "../../services/solicitudes.js";
-  import { notis } from "../../services/notificaciones.js";
-  const {
-    esCeo,
-    getUsuariosEmpresa,
-    getRolesUsuarioPage,
-    getUsuariosSucrusal,
-  } = require("../../services/usuariosSolicitudes");
-  import PageHeader from "@/components/PageHeader.vue";
-  import { getSucursalesbyEmmpresaSumm } from "../../services/sucursalesSolicitudes.js";
-  import { COUNTRY_CODES } from "../../services/countrySelector.js";
-  import { validacionesUsuario } from "../../services/validarCampos.js";
-  import ModalLoading from "@/components/ModalLoading.vue";
-  import { setPageTitle } from "@/components/pageMetadata";
-  
-  export default {
-    name: "AdministrarEmpleados",
-    components: {
-      btnGuardarModal,
-      btnCerrarModal,
-      PageHeader,
-      ModalLoading,
-    },
-    data() {
-      return {
-        showConfirmModal: false,
-        empleadoToDelete: null,
-        titulo: "Usuarios",
-        isLoading: false,
-        showTooltip: false,
-        searchQuery: "",
-        searchSucursal: "default",
+  </div>
+</template>
+
+<script>
+import SidebarAdmin from './SidebarAdmin.vue';
+
+export default {
+  name: "crearRepartidor",
+  components: {
+    SidebarAdmin
+  },
+  data() {
+    return {
+      isSidebarExpanded: false,
+      showConfirmModal: false,
+      empleadoToDelete: null,
+      isLoading: false,
+      showTooltip: false,
+      searchQuery: "",
+      isModalOpen: false,
+      isEditing: false,
+      isPassEdit: true,
+      showPassword: false,
+      showConfirmPassword: false,
+      selectedCountryCode: "+504",
+      editIndex: null,
+      currentPage: 1,
+      pageSize: 10,
+      validationErrors: {
+        codigo_mochila: '',
+        gps_asignado: ''
+      },
+      usuarioForm: {
         id_usuario: 0,
-        isModalOpen: false,
-        isEditing: false,
-        isPassEdit: true,
-        showPassword: false,
-        showConfirmPassword: false,
-        selectedCountry: "HN",
-        countryData: COUNTRY_CODES,
-        phoneLength: 8,
-        editIndex: null,
-        currentPage: 1,
-        pageSize: 10,
-        sucursales: [],
-        esCeo: false,
-        roles: [],
-        usuarioForm: {
-          id_usuario: 0,
-          nombre: "",
-          apellido: "",
-          nombre_usuario: "",
-          correo: "",
-          telefono: "",
-          direccion: "",
-          sucursal: "",
-          password: "",
-          confirmPassword: "",
-          rol: "",
+        nombre: "",
+        apellido: "",
+        correo: "",
+        telefono: "",
+        direccion: "",
+        password: "",
+        confirmPassword: "",
+        codigo_mochila: "",
+        gps_asignado: "",
+        estado: ""
+      },
+      empleados: [
+        {
+          id_usuario: 1,
+          id_repartidor: 101,
+          nombre: "Juan",
+          apellido: "Pérez",
+          correo: "juan@example.com",
+          telefono: "99887766",
+          direccion: "Colonia Kennedy",
+          codigo_mochila: "MOCH-001",
+          gps_asignado: "GPS-12345",
+          estado: "Activo"
         },
-        empleados: [],
-      };
+        {
+          id_usuario: 2,
+          id_repartidor: 102,
+          nombre: "María",
+          apellido: "López",
+          correo: "maria@example.com",
+          telefono: "88776655",
+          direccion: "Col. Miraflores",
+          codigo_mochila: "MOCH-002",
+          gps_asignado: "GPS-67890",
+          estado: "En ruta"
+        }
+      ],
+    };
+  },
+  computed: {
+    filteredEmpleados() {
+      return this.empleados.filter(
+        (empleado) =>
+          empleado.nombre
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          empleado.apellido
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          empleado.codigo_mochila
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          empleado.gps_asignado
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
+      );
     },
-    computed: {
-      filteredEmpleados() {
-        return this.empleados
-          .filter(
-            (empleado) =>
-              empleado.sucursales == this.searchSucursal ||
-              this.searchSucursal === "default"
-          )
-          .filter(
-            (empleado) =>
-              empleado.nombre
-                .toLowerCase()
-                .includes(this.searchQuery.toLowerCase()) ||
-              empleado.apellido
-                .toLowerCase()
-                .includes(this.searchQuery.toLowerCase()) ||
-              empleado.nombre_usuario
-                .toLowerCase()
-                .includes(this.searchQuery.toLowerCase())
-          );
-      },
-      paginatedEmpleados() {
-        const startIndex = (this.currentPage - 1) * this.pageSize;
-        const endIndex = startIndex + this.pageSize;
-        return this.filteredEmpleados.slice(startIndex, endIndex);
-      },
-      totalPages() {
-        return Math.ceil(this.filteredEmpleados.length / this.pageSize);
-      },
+    paginatedEmpleados() {
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredEmpleados.slice(startIndex, endIndex);
     },
-    methods: {
-      updatePhoneValidation() {
-        if (this.selectedCountry && this.countryData[this.selectedCountry]) {
-          this.phoneLength = this.countryData[this.selectedCountry].length;
-        }
-      },
-      openModal() {
-        this.isModalOpen = true;
-        this.$nextTick(() => {
-          this.$refs.nombreInput?.focus();
-        });
-      },
-      closeModal() {
-        this.isModalOpen = false;
-        this.clearForm();
-      },
-      clearForm() {
-        this.usuarioForm = {
-          id_usuario: "",
-          nombre: "",
-          apellido: "",
-          nombre_usuario: "",
-          correo: "",
-          telefono: "",
-          direccion: "",
-          sucursal: "",
-          password: "",
-          confirmPassword: "",
-          rol: "",
-        };
-        this.isEditing = false;
-        this.editIndex = null;
-        this.isPassEdit = true;
-        this.showPassword = false;
-        this.showConfirmPassword = false;
-      },
-      getRol(id_rol) {
-        const rol = this.roles.find((rol) => rol.id_rol === id_rol);
-        return rol ? rol.cargo : "Desconocido";
-      },
-      async getUsuarios(sucursales) {
-        try {
-          if (sucursales.length === 1) {
-            this.empleados = await getUsuariosSucrusal(
-              this.id_usuario,
-              sucursales[0].id_sucursal
-            );
-            this.searchSucursal = sucursales[0].id_sucursal;
-            this.usuarioForm.sucursal = sucursales[0].id_sucursal;
-          } else {
-            this.empleados = await getUsuariosEmpresa(this.id_usuario);
-          }
-        } catch (error) {
-          notis("error", "Error al obtener usuarios.");
-        }
-      },
-      editarPassword() {
-        this.isPassEdit = true;
-      },
-      async guardarUsuario() {
-        if (
-          !(await validacionesUsuario.validarCampos(
-            this.usuarioForm,
-            this.isPassEdit,
-            this.selectedCountry,
-            this.isEditing
-          ))
-        ) {
-          return;
-        }
-  
-        this.isLoading = true;
-  
-        try {
-          let response;
-          let parametros;
-  
-          if (this.isEditing) {
-            parametros = `/usuario/actualizar/${
-              this.empleados[this.editIndex].id_usuario
-            }`;
-            response = await solicitudes.patchRegistro(
-              parametros,
-              this.limpiarForm(this.usuarioForm)
-            );
-  
-            if (response === true) {
-              notis("success", "Actualizando datos del usuario...");
-              Object.assign(this.empleados[this.editIndex], this.usuarioForm);
-            } else {
-              notis("error", response);
-            }
-          } else {
-            parametros = `/usuario/crear`;
-            response = await solicitudes.postRegistro(
-              parametros,
-              this.limpiarForm(this.usuarioForm)
-            );
-  
-            if (response.length > 0) {
-              notis("success", "Usuario guardado correctamente...");
-              this.empleados.push(response[0]);
-            } else {
-              throw response;
-            }
-          }
-  
-          this.closeModal();
-        } catch (error) {
-          notis("error", error.message);
-        } finally {
-          this.isLoading = false;
-        }
-      },
-      previousPage() {
-        if (this.currentPage > 1) {
-          this.currentPage--;
-        }
-      },
-      nextPage() {
-        if (this.currentPage < this.totalPages) {
-          this.currentPage++;
-        }
-      },
-      async deleteUsuariol(empleado) {
-        if (!this.showConfirmModal) {
-          this.empleadoToDelete = empleado;
-          this.showConfirmModal = true;
-          return;
-        }
-  
-        this.isLoading = true;
-        try {
-          const parametros = `/usuario/desactivar/${this.empleadoToDelete.id_usuario}`;
-          const response = await solicitudes.desactivarRegistro(parametros, {
-            estado: false,
-          });
-  
-          if (response === true) {
-            const index = this.empleados.findIndex(
-              (e) => e.id_usuario === this.empleadoToDelete.id_usuario
-            );
-            if (index !== -1) {
-              this.empleados.splice(index, 1);
-            }
-            notis("success", "Usuario eliminado correctamente");
-          }
-        } catch (error) {
-          notis("error", error.message);
-        } finally {
-          this.isLoading = false;
-          this.showConfirmModal = false;
-          this.empleadoToDelete = null;
-        }
-      },
-  
-      cancelDelete() {
-        this.showConfirmModal = false;
-        this.empleadoToDelete = null;
-      },
-  
-      editEmpleado(empleado) {
-        this.editIndex = this.empleados.findIndex(
-          (item) => item.id_usuario === empleado.id_usuario
-        );
-        this.usuarioForm = { ...empleado };
-        this.usuarioForm.sucursal = empleado.sucursales;
-        this.usuarioForm.rol = empleado.id_rol;
-        this.isEditing = true;
-        this.isPassEdit = false;
-        this.openModal();
-      },
-  
-      limpiarForm(formulario) {
-        return {
-          nombre: formulario.nombre,
-          apellido: formulario.apellido,
-          nombre_usuario: formulario.nombre_usuario,
-          correo: formulario.correo,
-          telefono: formulario.telefono,
-          direccion: formulario.direccion,
-          id_sucursal: formulario.sucursal,
-          contraseña: formulario.password,
-          id_rol: formulario.rol,
-        };
-      },
-  
-      changeFavicon(iconPath) {
-        const link =
-          document.querySelector("link[rel*='icon']") ||
-          document.createElement("link");
-        link.type = "image/x-icon";
-        link.rel = "icon";
-        link.href = iconPath;
-        document.getElementsByTagName("head")[0].appendChild(link);
-      },
+    totalPages() {
+      return Math.ceil(this.filteredEmpleados.length / this.pageSize) || 1;
     },
-    watch: {
-      searchQuery() {
-        this.currentPage = 1;
-      },
-      searchSucursal() {
-        this.currentPage = 1;
-      },
+  },
+  methods: {
+    handleSidebarToggle(expanded) {
+      this.isSidebarExpanded = expanded;
     },
-    async mounted() {
-      this.isLoading = true;
-      setPageTitle("Usuarios");
-  
-      try {
-        this.id_usuario = await solicitudes.solicitarUsuarioToken();
-        this.esCeo = await esCeo(this.id_usuario);
-        this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
-        await this.getUsuarios(this.sucursales);
-        this.roles = await getRolesUsuarioPage();
-      } catch (error) {
-        notis("error", error.message);
-      } finally {
-        this.isLoading = false;
+    getEstadoClass(estado) {
+      switch(estado) {
+        case 'Activo': return 'badge-success';
+        case 'En ruta': return 'badge-primary';
+        case 'Descanso': return 'badge-warning';
+        case 'Inactivo': return 'badge-danger';
+        default: return 'badge-secondary';
       }
     },
-  };
-  </script>
+    openModal() {
+      this.isModalOpen = true;
+      this.validationErrors = {
+        codigo_mochila: '',
+        gps_asignado: ''
+      };
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
+    },
+    closeModal() {
+      this.isModalOpen = false;
+      this.clearForm();
+    },
+    clearForm() {
+      this.usuarioForm = {
+        id_usuario: 0,
+        nombre: "",
+        apellido: "",
+        correo: "",
+        telefono: "",
+        direccion: "",
+        password: "",
+        confirmPassword: "",
+        codigo_mochila: "",
+        gps_asignado: "",
+        estado: ""
+      };
+      this.isEditing = false;
+      this.editIndex = null;
+      this.isPassEdit = true;
+      this.showPassword = false;
+      this.showConfirmPassword = false;
+      this.validationErrors = {
+        codigo_mochila: '',
+        gps_asignado: ''
+      };
+    },
+    editarPassword() {
+      this.isPassEdit = true;
+    },
+    validarCodigosMochilasGPS() {
+      let isValid = true;
+      this.validationErrors = {
+        codigo_mochila: '',
+        gps_asignado: ''
+      };
 
-<style src="@/assets/css/crearRepartidorStyle.css" scoped></style>  
+      // Validar que el código de mochila sea único
+      if (this.usuarioForm.codigo_mochila) {
+        const existeMochila = this.empleados.some(
+          e => 
+            e.codigo_mochila.toLowerCase() === this.usuarioForm.codigo_mochila.toLowerCase() && 
+            (!this.isEditing || e.id_usuario !== this.usuarioForm.id_usuario)
+        );
+        
+        if (existeMochila) {
+          this.validationErrors.codigo_mochila = "Este código de mochila ya está en uso";
+          isValid = false;
+        }
+      }
+
+      // Validar que el código GPS sea único
+      if (this.usuarioForm.gps_asignado) {
+        const existeGPS = this.empleados.some(
+          e => 
+            e.gps_asignado.toLowerCase() === this.usuarioForm.gps_asignado.toLowerCase() && 
+            (!this.isEditing || e.id_usuario !== this.usuarioForm.id_usuario)
+        );
+        
+        if (existeGPS) {
+          this.validationErrors.gps_asignado = "Este código GPS ya está en uso";
+          isValid = false;
+        }
+      }
+
+      return isValid;
+    },
+    guardarUsuario() {
+      // Validaciones básicas
+      if (!this.usuarioForm.nombre || 
+          !this.usuarioForm.apellido || 
+          !this.usuarioForm.correo ||
+          !this.usuarioForm.codigo_mochila ||
+          !this.usuarioForm.gps_asignado ||
+          !this.usuarioForm.estado) {
+        alert("Por favor complete todos los campos obligatorios");
+        return;
+      }
+      
+      if (this.isPassEdit && this.usuarioForm.password !== this.usuarioForm.confirmPassword) {
+        alert("Las contraseñas no coinciden");
+        return;
+      }
+
+      // Validar que los códigos de mochila y GPS sean únicos
+      if (!this.validarCodigosMochilasGPS()) {
+        return;
+      }
+
+      // Simulación de guardado
+      this.isLoading = true;
+      
+      setTimeout(() => {
+        if (this.isEditing) {
+          // Actualizar empleado existente
+          this.empleados[this.editIndex] = {...this.usuarioForm};
+          alert("Repartidor actualizado correctamente");
+        } else {
+          // Crear email a partir del nombre y apellido si no está editando
+          if (!this.usuarioForm.correo) {
+            const nombreLimpio = this.usuarioForm.nombre.toLowerCase().replace(/\s+/g, '');
+            const apellidoLimpio = this.usuarioForm.apellido.toLowerCase().replace(/\s+/g, '');
+            this.usuarioForm.correo = `${nombreLimpio}.${apellidoLimpio}@lavamatic.com`;
+          }
+
+          // Agregar nuevo empleado
+          const newId = Math.max(...this.empleados.map(e => e.id_usuario), 0) + 1;
+          const newRepartidorId = Math.max(...this.empleados.map(e => e.id_repartidor || 0), 100) + 1;
+          this.empleados.push({
+            ...this.usuarioForm,
+            id_usuario: newId,
+            id_repartidor: newRepartidorId
+          });
+          alert("Repartidor agregado correctamente");
+        }
+        this.isLoading = false;
+        this.closeModal();
+      }, 1000);
+    },
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    deleteUsuariol(empleado) {
+      this.empleadoToDelete = empleado;
+      this.showConfirmModal = true;
+    },
+    confirmDelete() {
+      this.isLoading = true;
+      
+      setTimeout(() => {
+        const index = this.empleados.findIndex(e => e.id_usuario === this.empleadoToDelete.id_usuario);
+        if (index !== -1) {
+          this.empleados.splice(index, 1);
+        }
+        alert("Repartidor eliminado correctamente");
+        this.isLoading = false;
+        this.showConfirmModal = false;
+        this.empleadoToDelete = null;
+      }, 1000);
+    },
+    cancelDelete() {
+      this.showConfirmModal = false;
+      this.empleadoToDelete = null;
+    },
+    editEmpleado(empleado) {
+      this.editIndex = this.empleados.findIndex(
+        (item) => item.id_usuario === empleado.id_usuario
+      );
+      this.usuarioForm = { ...empleado };
+      this.isEditing = true;
+      this.isPassEdit = false;
+      this.openModal();
+    }
+  },
+  mounted() {
+    // Simulación de carga de datos
+    this.isLoading = true;
+    
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 1000);
+  }
+};
+</script>
+
+<style src="@/assets/css/CrearRepartidor.css" scoped></style>

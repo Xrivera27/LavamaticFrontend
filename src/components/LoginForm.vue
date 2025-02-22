@@ -71,7 +71,39 @@ export default {
   },
   methods: {
     login() {
-      alert(`Iniciando sesión con: ${this.loginEmail}`);
+      // Simulamos autenticación básica
+      // En una aplicación real, harías una llamada a tu API
+      let user = null;
+      
+      // Simulemos tres usuarios para pruebas:
+      const users = [
+        { email: "admin@lavamatic.com", password: "admin123", id_rol: 1, nombre: "Administrador" },
+        { email: "cliente@lavamatic.com", password: "cliente123", id_rol: 2, nombre: "Gerson Rivera" },
+        { email: "repartidor@lavamatic.com", password: "repartidor123", id_rol: 3, nombre: "Juan Repartidor" }
+      ];
+      
+      // Buscar el usuario
+      user = users.find(u => u.email === this.loginEmail && u.password === this.loginPassword);
+      
+      if (user) {
+        // Guardar información del usuario
+        localStorage.setItem('token', 'token-simulado-123');
+        localStorage.setItem('userRole', user.id_rol);
+        localStorage.setItem('userName', user.nombre);
+        
+        // Redireccionar según el rol
+        if (user.id_rol === 1) {
+          this.$router.push('/admin/dashboard');
+        } else if (user.id_rol === 2) {
+          this.$router.push('/dashboard');
+        } else if (user.id_rol === 3) {
+          // Si implementas la vista de repartidor, redirige ahí
+          alert("Vista de repartidor aún no implementada");
+          // this.$router.push('/repartidor/dashboard');
+        }
+      } else {
+        alert("Credenciales incorrectas. Intenta de nuevo.");
+      }
     },
     switchToRecovery() {
       this.isRecoveryMode = true;
