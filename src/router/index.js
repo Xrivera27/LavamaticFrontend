@@ -8,6 +8,10 @@ import HistorialPedidos from '../components/HistorialPedidoCliente.vue'
 import DashboardAdmin from '../components/DashboardAdmin.vue'
 import crearRepartidor from '../components/crearRepartidor.vue'
 import crearCliente from '../components/crearCliente.vue'
+import gestionMantenimiento from '../components/Mantenimientoequipo.vue'
+import gestionInventario from '../components/Inventarioequipo.vue'
+import gestionServicios from '../components/Servicios.vue'
+import ConfiguracionUsuarioAdmin from '../components/ConfiguracionUsuarioAdmin.vue'
 
 const routes = [
   {
@@ -56,7 +60,6 @@ const routes = [
     name: 'adminCrearRepartidor',
     component: crearRepartidor
   },
-  // Usar el mismo componente para ambas rutas
   {
     path: '/admin/clientes',
     name: 'adminClientes',
@@ -67,6 +70,31 @@ const routes = [
     name: 'adminCrearCliente',
     component: crearCliente
   },
+  // Nueva ruta para mantenimiento de equipos
+  {
+    path: '/admin/mantenimiento',
+    name: 'adminMantenimiento',
+    component: gestionMantenimiento
+  },
+  // Ruta para inventario de equipos
+  {
+    path: '/admin/inventario',
+    name: 'adminInventario',
+    component: gestionInventario
+  },
+  // Ruta para gestión de servicios
+  {
+    path: '/admin/servicios',
+    name: 'adminServicios',
+    component: gestionServicios
+  }
+  ,
+  // Ruta para gestión de servicios
+  {
+    path: '/admin/configuser',
+    name: 'configuser',
+    component: ConfiguracionUsuarioAdmin
+  }
 ]
 
 const router = createRouter({

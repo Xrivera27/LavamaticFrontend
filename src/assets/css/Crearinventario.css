@@ -1,0 +1,129 @@
+/* src/assets/css/Crearinventario.css */
+
+/* Importamos los estilos básicos que ya existen */
+@import url('@/assets/css/CrearRepartidor.css');
+
+/* Estilos específicos para la gestión de inventario */
+.inventario-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Estilos para el botón de ver detalles */
+.btn-info {
+  background-color: #17a2b8;
+  color: white;
+  margin-right: 5px;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+}
+
+/* Estilo para la columna de disponibles */
+.disponible-badge {
+  display: inline-block;
+  padding: 0.25em 0.6em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+  background-color: #28a745;
+  color: white;
+}
+
+.disponible-badge.warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.disponible-badge.danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Estilos para el modal de detalles */
+.modal-detalle {
+  background-color: white;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-body-detalle {
+  padding: 20px;
+}
+
+.detalle-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.detalle-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.detalle-row strong {
+  font-weight: 600;
+}
+
+.detalle-descripcion {
+  margin-top: 10px;
+}
+
+.detalle-descripcion strong {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.detalle-descripcion p {
+  margin: 0;
+  line-height: 1.5;
+  text-align: justify;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+  border-left: 4px solid #4a7dcb;
+}
+
+/* Estilos para el textarea */
+textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+/* Responsive para el modal de detalles */
+@media (max-width: 768px) {
+  .modal-detalle {
+    width: 95%;
+  }
+  
+  .detalle-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .detalle-row strong {
+    margin-bottom: 5px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}

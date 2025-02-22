@@ -21,6 +21,12 @@
           <span class="nav-text">Configuración</span>
         </router-link>
       </div>
+      <div class="sidebar-footer">
+      <router-link to="/login" class="nav-item logout" @click="logout">
+        <i class="fas fa-sign-out-alt"></i>
+        <span class="nav-text">Cerrar Sesión</span>
+      </router-link>
+    </div>
     </div>
   </template>
   

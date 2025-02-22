@@ -32,7 +32,7 @@
         <i class="fas fa-clipboard-list"></i>
         <span class="nav-text">Pedidos</span>
       </router-link>
-      <router-link to="/admin/configuracion" class="nav-item" :class="{ active: currentRoute === 'adminConfiguracion' }">
+      <router-link to="/admin/configuser" class="nav-item" :class="{ active: currentRoute === 'adminConfiguraciones' }">
         <i class="fas fa-cog"></i>
         <span class="nav-text">Configuración</span>
       </router-link>
