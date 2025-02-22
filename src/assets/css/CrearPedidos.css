@@ -1,0 +1,213 @@
+/* src/assets/css/CrearPedidos.css */
+
+/* Importamos los estilos básicos que ya existen */
+@import url('@/assets/css/CrearRepartidor.css');
+
+/* Estilos para las pestañas */
+.tabs-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: #f0f2f5;
+  color: #6c757d;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-button:hover {
+  background-color: #e2e6ea;
+}
+
+.tab-button.active {
+  background-color: #4a7dcb;
+  color: white;
+}
+
+.tab-button .badge {
+  background-color: #dc3545;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+}
+
+/* Estilos para la lista de servicios en la tabla */
+.servicios-lista {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Estilos para las badges de estado */
+.badge {
+  display: inline-block;
+  padding: 0.25em 0.6em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.badge-primary {
+  background-color: #4a7dcb;
+  color: white;
+}
+
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Estilos para el botón de info */
+.btn-info {
+  background-color: #17a2b8;
+  color: white;
+  margin-right: 5px;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+}
+
+/* Estilos para el modal de detalles */
+.modal-detalle {
+  background-color: white;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-body-detalle {
+  padding: 20px;
+}
+
+.detalle-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.detalle-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.detalle-servicios {
+  margin-top: 10px;
+}
+
+.servicios-list {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.servicio-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px dashed #dee2e6;
+}
+
+.servicio-item:last-child {
+  border-bottom: none;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 2px solid #dee2e6;
+  font-weight: bold;
+}
+
+.detalle-notas {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+  border-left: 4px solid #4a7dcb;
+}
+
+.detalle-notas p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Estilos para el modal de asignar repartidor */
+.modal-asignar {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  overflow-y: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tabs-container {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .tab-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .servicios-lista {
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .modal-detalle,
+  .modal-asignar {
+    width: 95%;
+  }
+
+  .detalle-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .detalle-row strong {
+    margin-bottom: 5px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}

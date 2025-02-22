@@ -12,6 +12,7 @@ import gestionMantenimiento from '../components/Mantenimientoequipo.vue'
 import gestionInventario from '../components/Inventarioequipo.vue'
 import gestionServicios from '../components/Servicios.vue'
 import ConfiguracionUsuarioAdmin from '../components/ConfiguracionUsuarioAdmin.vue'
+import Pedidos from '../components/PedidosAdmin.vue'
 
 const routes = [
   {
@@ -94,6 +95,13 @@ const routes = [
     path: '/admin/configuser',
     name: 'configuser',
     component: ConfiguracionUsuarioAdmin
+  }
+  ,
+  // Ruta para gestión de servicios
+  {
+    path: '/admin/pedidos',
+    name: 'adminPedidos',
+    component: Pedidos
   }
 ]
 
