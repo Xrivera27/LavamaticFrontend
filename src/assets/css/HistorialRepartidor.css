@@ -1,0 +1,125 @@
+/* src/assets/css/HistorialRepartidor.css */
+
+/* Importamos los estilos básicos que ya existen */
+@import url('@/assets/css/CrearRepartidor.css');
+
+/* Estilos específicos para el historial */
+.historial-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Estilos para las celdas de la tabla */
+.direccion-cell,
+.servicios-lista {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Estilos para el botón de info */
+.btn-info {
+  background-color: #17a2b8;
+  color: white;
+  margin-right: 5px;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+}
+
+/* Estilos para el modal de detalles */
+.modal-detalle {
+  background-color: white;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.detalle-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.detalle-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.detalle-servicios {
+  margin-top: 10px;
+}
+
+.servicios-list {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.servicio-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px dashed #dee2e6;
+}
+
+.servicio-item:last-child {
+  border-bottom: none;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 2px solid #dee2e6;
+  font-weight: bold;
+}
+
+.detalle-notas {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+  border-left: 4px solid #4a7dcb;
+}
+
+.detalle-notas p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .direccion-cell,
+  .servicios-lista {
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .modal-detalle {
+    width: 95%;
+  }
+
+  .detalle-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .detalle-row strong {
+    margin-bottom: 5px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}

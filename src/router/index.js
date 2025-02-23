@@ -13,6 +13,9 @@ import gestionInventario from '../components/Inventarioequipo.vue'
 import gestionServicios from '../components/Servicios.vue'
 import ConfiguracionUsuarioAdmin from '../components/ConfiguracionUsuarioAdmin.vue'
 import Pedidos from '../components/PedidosAdmin.vue'
+import PedidosRepartidor from '../components/PedidosRepartidor.vue'
+import ConfiguracionRepartidor from '../components/ConfiguracionUsuarioRepartidor.vue'
+import HistorialRepartidor from '../components/HistorialRepartidor.vue'
 
 const routes = [
   {
@@ -102,6 +105,25 @@ const routes = [
     path: '/admin/pedidos',
     name: 'adminPedidos',
     component: Pedidos
+  },
+
+  {
+    path: '/repartidor/pedidos',
+    name: 'repartidorPedidos',
+    component: PedidosRepartidor
+  },
+
+  {
+    path: '/repartidor/configuracion',
+    name: 'repartidorConfiguracion',
+    component: ConfiguracionRepartidor
+  }
+  ,
+  // Ruta para gestión de servicios
+  {
+    path: '/repartidor/historial',
+    name: 'repartidorHistorial',
+    component: HistorialRepartidor
   }
 ]
 

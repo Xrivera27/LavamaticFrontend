@@ -72,10 +72,9 @@ export default {
   methods: {
     login() {
       // Simulamos autenticación básica
-      // En una aplicación real, harías una llamada a tu API
       let user = null;
       
-      // Simulemos tres usuarios para pruebas:
+      // Usuarios para pruebas:
       const users = [
         { email: "admin@lavamatic.com", password: "admin123", id_rol: 1, nombre: "Administrador" },
         { email: "cliente@lavamatic.com", password: "cliente123", id_rol: 2, nombre: "Gerson Rivera" },
@@ -97,9 +96,7 @@ export default {
         } else if (user.id_rol === 2) {
           this.$router.push('/dashboard');
         } else if (user.id_rol === 3) {
-          // Si implementas la vista de repartidor, redirige ahí
-          alert("Vista de repartidor aún no implementada");
-          // this.$router.push('/repartidor/dashboard');
+          this.$router.push('/repartidor/pedidos'); // Redirige a la vista de pedidos
         }
       } else {
         alert("Credenciales incorrectas. Intenta de nuevo.");
