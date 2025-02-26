@@ -386,3 +386,188 @@ select:focus {
   .main-content.content-expanded .contenedor-principal {
     margin-left: calc(-40%(var(--sidebar-width-expanded) - var(--sidebar-width)));
 }
+
+/* Estilos adicionales para serviciosPageStyle.css */
+
+/* Fila completa para formularios */
+.fila-completa {
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  
+  /* Estilos para input de fecha y texto */
+  input[type="date"],
+  input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccd4e5;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    font-size: 14px;
+    transition: border-color 0.2s;
+  }
+  
+  input[type="date"]:focus,
+  input[type="text"]:focus {
+    border-color: #4a7dcb;
+    outline: none;
+  }
+  
+  /* Estilos para campos con error */
+  .input-error {
+    border-color: #dc3545 !important;
+    background-color: rgba(220, 53, 69, 0.05);
+  }
+  
+  .mensaje-error {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+    font-weight: 500;
+  }
+  
+  /* Estilos para el modal */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-contenido {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+  
+  .modal-header {
+    background: #4a7dcb;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .btn-cerrar {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  
+  .btn-cerrar:hover {
+    transform: scale(1.1);
+  }
+  
+  .modal-body {
+    padding: 20px;
+    color: #333;
+  }
+  
+  .detalle-precio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .precio {
+    font-size: 18px;
+    font-weight: bold;
+    color: #4a7dcb;
+  }
+  
+  .detalle-descripcion {
+    margin-bottom: 20px;
+  }
+  
+  .detalle-descripcion p {
+    margin: 0;
+    line-height: 1.6;
+  }
+  
+  .detalle-info {
+    background: #f5f7fa;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .info-item i {
+    color: #4a7dcb;
+  }
+  
+  .modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .btn-agregar {
+    background: #4a7dcb;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+  
+  .btn-agregar:hover {
+    background: #3a6db8;
+  }
+  
+  /* Ajustes responsive para el modal */
+  @media (max-width: 480px) {
+    .modal-contenido {
+      width: 95%;
+    }
+    
+    .modal-body {
+      padding: 15px;
+    }
+    
+    .modal-footer {
+      flex-direction: column;
+    }
+    
+    .btn-agregar {
+      width: 100%;
+    }
+  }
