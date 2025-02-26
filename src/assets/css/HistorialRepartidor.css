@@ -4,6 +4,11 @@
 @import url('@/assets/css/CrearRepartidor.css');
 
 /* Estilos específicos para el historial */
+.repartidor-layout{
+  background-color: white;
+  border-radius: 15px;
+}
+
 .historial-wrapper {
   max-width: 1200px;
   margin: 0 auto;
@@ -33,6 +38,8 @@
 /* Estilos para el modal de detalles */
 .modal-detalle {
   background-color: white;
+  color: black;
+  padding: 15px;
   border-radius: 8px;
   width: 80%;
   max-width: 600px;

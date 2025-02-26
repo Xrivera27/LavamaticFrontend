@@ -1,10 +1,22 @@
 /* Estilos básicos para el layout */
 .admin-layout {
     display: flex;
-    min-height: 100vh;
+    min-height: auto;
     background-color: #f8f9fa;
   }
+
+  #paginacion{
+    color: black;
+  }
   
+  #desc{
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    padding: 5px;
+    resize: none;
+  }
+
   .main-content {
     flex: 1;
     margin-left: var(--sidebar-width, 60px);
@@ -150,6 +162,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    color: black;
   }
   
   .modal-usuario {
@@ -271,11 +284,17 @@
     border-radius: 8px;
     width: 400px;
     padding: 20px;
+    color: black;
   }
   
   .modal-body-confirm {
     padding: 20px 0;
     text-align: center;
+    
+  }
+  
+  p{
+    color: black;
   }
   
   /* Responsive */

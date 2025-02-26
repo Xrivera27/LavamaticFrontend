@@ -78,7 +78,7 @@
                 {{ pedidosFiltrados.length }} registros
               </div>
               <div class="pagination-container">
-                <button
+                <button style="margin-bottom: 1rem;"
                   class="pagination-button"
                   :disabled="currentPage === 1"
                   @click="previousPage"

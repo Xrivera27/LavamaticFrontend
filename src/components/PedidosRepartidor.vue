@@ -77,7 +77,7 @@
                 <td data-label="Total">${{ pedido.total.toFixed(2) }}</td>
                 <td data-label="Fecha">{{ formatDate(pedido.fecha) }}</td>
                 <td data-label="Acciones">
-                  <button
+                  <button style="width: 46%;"
                     class="btn btn-info"
                     @click="verDetalles(pedido)"
                     title="Ver detalles"
@@ -86,7 +86,7 @@
                   </button>
                   
                   <!-- Botón para aceptar pedido (solo en estado 'asignados') -->
-                  <button
+                  <button style="width: 46%;"
                     v-if="estadoActual === 'asignados'"
                     class="btn btn-success"
                     @click="aceptarPedido(pedido)"
@@ -96,7 +96,7 @@
                   </button>
 
                   <!-- Botón para finalizar entrega (solo en estado 'encamino') -->
-                  <button
+                  <button style="width: 46%;"
                     v-if="estadoActual === 'encamino'"
                     class="btn btn-success"
                     @click="finalizarEntrega(pedido)"

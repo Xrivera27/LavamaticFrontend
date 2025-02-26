@@ -4,10 +4,20 @@
 @import url('@/assets/css/CrearRepartidor.css');
 
 /* Estilos específicos para la gestión de inventario */
+#gesteq{
+  margin-top: 20%;
+  margin-bottom: 10%;
+}
+
+#detalleview{
+  color: black;
+}
+
 .inventario-wrapper {
-  max-width: 1200px;
+  max-width: auto;
   margin: 0 auto;
   position: relative;
+  height: auto;
 }
 
 /* Estilos para el botón de ver detalles */

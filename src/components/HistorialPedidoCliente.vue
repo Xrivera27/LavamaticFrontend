@@ -41,7 +41,7 @@
             <div class="search-bar">
               <div class="search-input">
                 <i class="fas fa-search"></i>
-                <input 
+                <input
                   type="text" 
                   v-model="searchQuery" 
                   placeholder="Buscar por número o tipo de servicio..."

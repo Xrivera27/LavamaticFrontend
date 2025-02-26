@@ -4,6 +4,21 @@
 @import url('@/assets/css/CrearRepartidor.css');
 
 /* Estilos específicos para la gestión de servicios */
+.admin-layout{
+  height: auto;
+  margin-top: 15%;
+  margin-bottom: 5%;
+  
+}
+
+#paginacion{
+  color: black;
+}
+
+#detalleview{
+  color: black;
+}
+
 .servicios-wrapper {
   max-width: 1200px;
   margin: 0 auto;

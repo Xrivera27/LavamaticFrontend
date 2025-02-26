@@ -1,5 +1,5 @@
 <template>
-    <div class="admin-layout">
+    <div class="admin-layout" id="gestc">
       <SidebarAdmin @sidebar-toggle="handleSidebarToggle" />
       <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
         <div class="clientes-wrapper">
@@ -64,7 +64,7 @@
                   <td data-label="Teléfono">{{ cliente.telefono }}</td>
                   <td data-label="Dirección">{{ cliente.direccion }}</td>
                   <td data-label="Acciones">
-                    <button
+                    <button  style="margin-bottom: 1rem; color: white;"
                       id="btnEditar"
                       class="btn btn-warning"
                       @click="editCliente(cliente)"
@@ -90,7 +90,7 @@
                 {{ filteredClientes.length }} registros
               </div>
               <div class="pagination-container">
-                <button
+                <button  style="margin-bottom: 1rem;"
                   class="pagination-button"
                   :disabled="currentPage === 1"
                   @click="previousPage"

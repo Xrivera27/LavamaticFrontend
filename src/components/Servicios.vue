@@ -62,21 +62,21 @@
                   <td data-label="Precio">${{ servicio.precio.toFixed(2) }}</td>
                   <td data-label="Tiempo Estimado">{{ servicio.tiempo_estimado }} minutos</td>
                   <td data-label="Acciones">
-                    <button
+                    <button style="margin-bottom: 1rem; width: 30%;"
                       class="btn btn-info"
                       @click="verDetalles(servicio)"
                       title="Ver detalles"
                     >
                       <i class="fa-solid fa-eye"></i>
                     </button>
-                    <button
+                    <button style="margin-bottom: 1rem; width: 30%;"
                       class="btn btn-warning"
                       @click="editServicio(servicio)"
                       title="Editar"
                     >
-                      <i class="fa-solid fa-pencil"></i>
+                      <i class="fa-solid fa-pencil" style="color: white"></i>
                     </button>
-                    <button
+                    <button style="margin-bottom: 1rem; width: 30%;"
                       class="btn btn-danger"
                       @click="deleteServicio(servicio)"
                       title="Eliminar"
@@ -89,13 +89,13 @@
             </table>
       
             <div class="pagination-wrapper">
-              <div class="pagination-info">
+              <div class="pagination-info" id="paginacion">
                 Mostrando {{ paginatedServicios.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
                 {{ Math.min(currentPage * pageSize, filteredServicios.length) }} de
                 {{ filteredServicios.length }} registros
               </div>
               <div class="pagination-container">
-                <button
+                <button style="margin-bottom: 1rem;"
                   class="pagination-button"
                   :disabled="currentPage === 1"
                   @click="previousPage"
@@ -120,7 +120,7 @@
                 <h2>Detalles del Servicio</h2>
               </div>
               <div class="modal-body-detalle">
-                <div v-if="servicioDetalle" class="detalle-content">
+                <div v-if="servicioDetalle" class="detalle-content" id="detalleview">
                   <div class="detalle-row">
                     <strong>Nombre:</strong> 
                     <span>{{ servicioDetalle.nombre }}</span>
@@ -238,7 +238,7 @@
   
                   <div class="form-group">
                     <label>Descripción:</label>
-                    <textarea 
+                    <textarea style="resize: none;"
                       v-model="servicioForm.descripcion" 
                       rows="5" 
                       placeholder="Descripción detallada del servicio..."

@@ -1,5 +1,5 @@
 <template>
-    <div class="admin-layout">
+    <div class="admin-layout" id="gesteq">
       <SidebarAdmin @sidebar-toggle="handleSidebarToggle" />
       <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
         <div class="inventario-wrapper">
@@ -59,26 +59,26 @@
                   </td>
                   <td data-label="Nombre">{{ equipo.nombre }}</td>
                   <td data-label="Cantidad Total">{{ equipo.cantidad_total }}</td>
-                  <td data-label="En Mantenimiento">{{ equipo.cantidad_mantenimiento }}</td>
+                  <td  data-label="En Mantenimiento">{{ equipo.cantidad_mantenimiento }}</td>
                   <td data-label="Disponibles">
                     {{ equipo.cantidad_total - equipo.cantidad_mantenimiento }}
                   </td>
                   <td data-label="Acciones">
-                    <button
+                    <button  style="margin-bottom: 1rem; width: 30%;"
                       class="btn btn-info"
                       @click="verDetalles(equipo)"
                       title="Ver detalles"
                     >
                       <i class="fa-solid fa-eye"></i>
                     </button>
-                    <button
+                    <button  style="margin-bottom: 1rem; width: 30%;"
                       class="btn btn-warning"
                       @click="editEquipo(equipo)"
                       title="Editar"
                     >
-                      <i class="fa-solid fa-pencil"></i>
+                      <i class="fa-solid fa-pencil" style="color: white;"></i>
                     </button>
-                    <button
+                    <button style="width: 30%;"
                       class="btn btn-danger"
                       @click="deleteEquipo(equipo)"
                       title="Eliminar"
@@ -97,7 +97,7 @@
                 {{ filteredEquipos.length }} registros
               </div>
               <div class="pagination-container">
-                <button
+                <button  style="margin-bottom: 1rem;"
                   class="pagination-button"
                   :disabled="currentPage === 1"
                   @click="previousPage"
@@ -122,7 +122,7 @@
                 <h2>Detalles del Equipo</h2>
               </div>
               <div class="modal-body-detalle">
-                <div v-if="equipoDetalle" class="detalle-content">
+                <div v-if="equipoDetalle" class="detalle-content" id="detalleview">
                   <div class="detalle-row">
                     <strong>Nombre:</strong> 
                     <span>{{ equipoDetalle.nombre }}</span>

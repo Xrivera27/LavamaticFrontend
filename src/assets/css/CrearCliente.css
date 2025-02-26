@@ -1,8 +1,13 @@
 /* Estilos básicos para el layout */
+#gestc{
+  margin-top: 15%;
+}
+
 .admin-layout {
     display: flex;
-    min-height: 100vh;
+    min-height: auto;
     background-color: #f8f9fa;
+    height: auto;
   }
   
   .main-content {

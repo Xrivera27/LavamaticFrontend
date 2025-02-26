@@ -66,21 +66,21 @@
                     </span>
                   </td>
                   <td data-label="Acciones">
-                    <button
+                    <button style="margin-bottom: 1rem; width: 30%;"
                       class="btn btn-info btn-view"
                       @click="verDetalles(mantenimiento)"
                       title="Ver detalles"
                     >
                       <i class="fa-solid fa-eye"></i>
                     </button>
-                    <button
+                    <button style="margin-bottom: 1rem; width: 30%;"
                       class="btn btn-warning"
                       @click="editMantenimiento(mantenimiento)"
                       title="Editar"
                     >
-                      <i class="fa-solid fa-pencil"></i>
+                      <i class="fa-solid fa-pencil" style="color: white;"></i>
                     </button>
-                    <button
+                    <button style="margin-bottom: 1rem; width: 30%;"
                       class="btn btn-danger"
                       @click="deleteMantenimiento(mantenimiento)"
                       title="Eliminar"
@@ -93,13 +93,13 @@
             </table>
       
             <div class="pagination-wrapper">
-              <div class="pagination-info">
+              <div class="pagination-info" id="paginacion">
                 Mostrando {{ paginatedMantenimientos.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
                 {{ Math.min(currentPage * pageSize, filteredMantenimientos.length) }} de
                 {{ filteredMantenimientos.length }} registros
               </div>
               <div class="pagination-container">
-                <button
+                <button style="margin-bottom: 1rem;"
                   class="pagination-button"
                   :disabled="currentPage === 1"
                   @click="previousPage"
@@ -226,7 +226,7 @@
                 <div class="contenedor contenedor-derecho">
                   <div class="form-group">
                     <label>Descripción:</label>
-                    <textarea 
+                    <textarea id="desc"
                       v-model="mantenimientoForm.descripcion" 
                       rows="5" 
                       required 
@@ -235,6 +235,7 @@
                   </div>
                   
                   <div class="form-group">
+                    <br>
                     <label>Estado:</label>
                     <select v-model="mantenimientoForm.activo" required>
                       <option :value="true">Activo</option>

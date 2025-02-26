@@ -23,7 +23,7 @@
           </button>
     
           <div class="search-bar">
-            <input
+            <input style="border-radius: 10px;"
               class="busqueda"
               type="text"
               v-model="searchQuery"
@@ -71,11 +71,12 @@
                 </td>
                 <td data-label="Acciones">
                   <button
+                  style="margin-bottom: 1rem;"
                     id="btnEditar"
                     class="btn btn-warning"
                     @click="editEmpleado(empleado)"
                   >
-                    <i class="fa-solid fa-pencil"></i>
+                    <i class="fa-solid fa-pencil" style="color: white;"></i>
                   </button>
                   <button
                     id="btnEliminar"
@@ -97,6 +98,7 @@
             </div>
             <div class="pagination-container">
               <button
+              style="margin-bottom: 1rem;"
                 class="pagination-button"
                 :disabled="currentPage === 1"
                 @click="previousPage"
@@ -289,13 +291,13 @@
             </div>
             <div class="modal-footer">
               <div class="action-buttons">
-                <button 
+                <button style="margin-bottom: 1rem;"
                   class="btn btn-primary"
                   @click="guardarUsuario"
                 >
                   {{ isEditing ? 'Guardar Cambios' : 'Agregar Repartidor' }}
                 </button>
-                <button 
+                <button
                   class="btn btn-secondary"
                   @click="closeModal"
                 >

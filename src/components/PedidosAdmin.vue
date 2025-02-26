@@ -94,7 +94,7 @@
                     </span>
                   </td>
                   <td data-label="Acciones">
-                    <button
+                    <button style="margin-bottom: .5rem; width: 45%;"
                       class="btn btn-info"
                       @click="verDetalles(pedido)"
                       title="Ver detalles"
@@ -103,7 +103,7 @@
                     </button>
                     
                     <!-- Botón para asignar repartidor (solo en estado 'en espera') -->
-                    <button
+                    <button style="width: 45%;"
                       v-if="estadoActual === 'espera'"
                       class="btn btn-primary"
                       @click="asignarRepartidor(pedido)"
@@ -113,7 +113,7 @@
                     </button>
   
                     <!-- Botón para volver a poner en espera (solo en estado 'asignados') -->
-                    <button
+                    <button  style="width: 45%; color: white;"
                       v-if="estadoActual === 'asignados'"
                       class="btn btn-warning"
                       @click="volverAEspera(pedido)"
@@ -127,13 +127,13 @@
             </table>
       
             <div class="pagination-wrapper">
-              <div class="pagination-info">
+              <div class="pagination-info" id="infoPag">
                 Mostrando {{ paginatedPedidos.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
                 {{ Math.min(currentPage * pageSize, pedidosFiltrados.length) }} de
                 {{ pedidosFiltrados.length }} registros
               </div>
               <div class="pagination-container">
-                <button
+                <button style="margin-bottom: 1rem;"
                   class="pagination-button"
                   :disabled="currentPage === 1"
                   @click="previousPage"
@@ -218,7 +218,7 @@
               </div>
               <div class="modal-body">
                 <div class="form-group">
-                  <label>Seleccionar Repartidor:</label>
+                  <label id="texttop">Seleccionar Repartidor:</label>
                   <select v-model="repartidorSeleccionado" required>
                     <option value="">Seleccione un repartidor</option>
                     <option v-for="repartidor in repartidoresDisponibles" :key="repartidor.id" :value="repartidor">
@@ -256,7 +256,7 @@
               </div>
               <div class="modal-footer">
                 <div class="action-buttons">
-                  <button class="btn btn-warning" @click="confirmarVolverAEspera">
+                  <button class="btn btn-warning" @click="confirmarVolverAEspera" style="color: white;">
                     Sí, volver a espera
                   </button>
                   <button class="btn btn-secondary" @click="cancelarVolverAEspera">

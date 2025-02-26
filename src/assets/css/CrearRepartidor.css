@@ -1,8 +1,9 @@
 /* Estilos básicos para el layout */
 .admin-layout {
     display: flex;
-    min-height: 100vh;
+    min-height: auto;
     background-color: #f8f9fa;
+    border-radius: 15px;
   }
   
   .main-content {
@@ -25,6 +26,7 @@
   
   .header-section {
     margin-bottom: 20px;
+    color: black;
   }
   
   .page-title {
@@ -45,6 +47,10 @@
   .search-bar {
     flex: 1;
     max-width: 400px;
+  }
+
+  .search-bar .busqueda input {
+    color: black;
   }
   
   .busqueda {
@@ -73,6 +79,7 @@
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #eee;
+    color: black;
   }
   
   .table th {
@@ -151,6 +158,14 @@
     align-items: center;
     z-index: 1000;
   }
+
+  h2{
+    color: black;
+  }
+
+  input::placeholder{
+    color: gray;
+  }
   
   .modal-usuario {
     background-color: white;
@@ -159,6 +174,7 @@
     max-width: 800px;
     max-height: 90vh;
     overflow-y: auto;
+    color: black;
   }
   
   .modal-header {
@@ -186,6 +202,14 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
+  }
+
+  p{
+    color: black;
+  }
+
+  .action-buttons button{
+    margin-bottom: 1rem;
   }
   
   .form-group {
