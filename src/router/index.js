@@ -1,3 +1,4 @@
+// src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginForm from '../components/LoginForm.vue'
 import RegisterForm from '../components/RegisterForm.vue'
@@ -132,14 +133,14 @@ const router = createRouter({
   routes
 })
 
-// Middleware para protección de rutas
+// Middleware para protección de rutas - Actualizado para usar sessionStorage
 router.beforeEach((to, from, next) => {
   const publicPages = ['/login', '/register'];
   const authRequired = !publicPages.includes(to.path);
-  const userRole = parseInt(localStorage.getItem('userRole'));
+  const userRole = parseInt(sessionStorage.getItem('userRole'));
 
   // Si requiere autenticación y no está logueado
-  if (authRequired && !localStorage.getItem('token')) {
+  if (authRequired && !sessionStorage.getItem('token')) {
     return next('/login');
   }
 
@@ -148,8 +149,14 @@ router.beforeEach((to, from, next) => {
     return next('/dashboard');
   }
 
+  // Proteger rutas de repartidor
+  if (to.path.startsWith('/repartidor') && userRole !== 3) {
+    return next('/dashboard');
+  }
+
   // Proteger rutas de cliente
   if (!to.path.startsWith('/admin') && 
+      !to.path.startsWith('/repartidor') &&
       !publicPages.includes(to.path) && 
       userRole === 1) {
     return next('/admin/dashboard');

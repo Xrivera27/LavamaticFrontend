@@ -45,15 +45,24 @@
         rows="3"
         required
       >
-      <button @click="register" :disabled="!isFormValid">Registrarse</button>
+      <button @click="register" :disabled="loading || !isFormValid" class="register-button">
+        {{ loading ? 'Procesando...' : 'Registrarse' }}
+      </button>
       <p>¿Ya tienes una cuenta? <router-link to="/login">Inicia Sesión</router-link></p>
     </div>
   </div>
 </template>
 
 <script>
+import api from '@/services/apiService';
+import { useToast } from "vue-toastification";
+
 export default {
   name: 'RegisterForm',
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       form: {
@@ -63,7 +72,8 @@ export default {
         telefono: "",
         direccion: "",
       },
-      showPassword: false
+      showPassword: false,
+      loading: false
     };
   },
   computed: {
@@ -76,22 +86,66 @@ export default {
     }
   },
   methods: {
-    register() {
+    async register() {
       if (!this.isFormValid) {
-        alert('Por favor, complete todos los campos');
+        this.toast.error("Por favor, complete todos los campos");
         return;
       }
 
-      const userData = {
-        ...this.form,
-        id_rol: 2,
-        activo: true,
-        fecha_creacion: new Date().toISOString()
-      };
+      this.loading = true;
 
-      console.log('Datos de registro:', userData);
-      alert(`Registrando usuario: ${this.form.nombre} con email: ${this.form.email}`);
+      try {
+        // Validaciones básicas de formato
+        if (!this.validateEmail(this.form.email)) {
+          this.toast.error("Email inválido");
+          this.loading = false;
+          return;
+        }
+
+        if (this.form.password.length < 6) {
+          this.toast.error("La contraseña debe tener al menos 6 caracteres");
+          this.loading = false;
+          return;
+        }
+
+        // Creamos el objeto de datos a enviar
+        const userData = {
+          ...this.form,
+          id_rol: 2, // Rol de cliente
+          activo: true
+        };
+
+        // Enviamos la solicitud al backend
+        await api.auth.register(userData);
+        
+        // Mostramos mensaje de éxito
+        this.toast.success("Registro exitoso. Ya puedes iniciar sesión");
+        
+        // Redireccionamos al login después de un breve delay
+        setTimeout(() => {
+          this.$router.push('/login');
+        }, 1500);
+      } catch (error) {
+        console.error('Error en registro:', error);
+        
+        // Extraer el mensaje de error
+        let errorMsg = "Error al registrar usuario";
+        
+        if (error.response && error.response.data) {
+          errorMsg = error.response.data.error || errorMsg;
+        } else if (error.error) {
+          errorMsg = error.error;
+        }
+        
+        this.toast.error(errorMsg);
+      } finally {
+        this.loading = false;
+      }
     },
+    validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
   },
 };
 </script>

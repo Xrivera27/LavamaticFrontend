@@ -27,7 +27,9 @@
           </div>
         </div>
 
-        <button @click="login" class="login-button">Iniciar Sesión</button>
+        <button @click="login" class="login-button" :disabled="loading">
+          {{ loading ? 'Cargando...' : 'Iniciar Sesión' }}
+        </button>
         <div class="links-container">
           <a href="#" class="forgot-password" @click.prevent="switchToRecovery">¿Olvidaste tu contraseña?</a>
           <p class="register-text">¿No tienes una cuenta? <router-link to="/register">Regístrate</router-link></p>
@@ -48,7 +50,9 @@
           />
         </div>
 
-        <button @click="sendRecoveryEmail" class="login-button">Enviar enlace</button>
+        <button @click="sendRecoveryEmail" class="login-button" :disabled="loading">
+          {{ loading ? 'Enviando...' : 'Enviar enlace' }}
+        </button>
         <div class="links-container">
           <a href="#" class="back-to-login" @click.prevent="switchToLogin">Volver al inicio de sesión</a>
         </div>
@@ -58,48 +62,97 @@
 </template>
 
 <script>
+import AuthService from '@/services/authService';
+import { useToast } from "vue-toastification";
+
 export default {
   name: 'LoginForm',
+  setup() {
+    // Usar el toast a través del composable
+    const toast = useToast();
+    return { toast };
+  },
   data() {
     return {
       loginEmail: "",
       loginPassword: "",
       showPassword: false,
       isRecoveryMode: false,
-      recoveryEmail: ""
+      recoveryEmail: "",
+      loading: false
     };
   },
   methods: {
-    login() {
-      // Simulamos autenticación básica
-      let user = null;
+    async login() {
+      this.loading = true;
       
-      // Usuarios para pruebas:
-      const users = [
-        { email: "admin@lavamatic.com", password: "admin123", id_rol: 1, nombre: "Administrador" },
-        { email: "cliente@lavamatic.com", password: "cliente123", id_rol: 2, nombre: "Gerson Rivera" },
-        { email: "repartidor@lavamatic.com", password: "repartidor123", id_rol: 3, nombre: "Juan Repartidor" }
-      ];
-      
-      // Buscar el usuario
-      user = users.find(u => u.email === this.loginEmail && u.password === this.loginPassword);
-      
-      if (user) {
-        // Guardar información del usuario
-        localStorage.setItem('token', 'token-simulado-123');
-        localStorage.setItem('userRole', user.id_rol);
-        localStorage.setItem('userName', user.nombre);
+      try {
+        if (!this.loginEmail || !this.loginPassword) {
+          this.toast.error("Por favor, completa todos los campos");
+          this.loading = false;
+          return;
+        }
+
+        const response = await AuthService.login(this.loginEmail, this.loginPassword);
+        console.log('Login exitoso:', response);
+        
+        // Notificación de éxito
+        this.toast.success("Inicio de sesión exitoso");
         
         // Redireccionar según el rol
-        if (user.id_rol === 1) {
-          this.$router.push('/admin/dashboard');
-        } else if (user.id_rol === 2) {
-          this.$router.push('/dashboard');
-        } else if (user.id_rol === 3) {
-          this.$router.push('/repartidor/pedidos'); // Redirige a la vista de pedidos
+        if (response.user && response.user.id_rol) {
+          const role = response.user.id_rol;
+          console.log('Rol del usuario:', role);
+          
+          try {
+            if (role === 1) {
+              console.log('Redirigiendo a admin/dashboard');
+              this.$router.push('/admin/dashboard');
+            } else if (role === 2) {
+              console.log('Redirigiendo a dashboard');
+              this.$router.push('/dashboard');
+            } else if (role === 3) {
+              console.log('Redirigiendo a repartidor/pedidos');
+              this.$router.push('/repartidor/pedidos');
+            }
+          } catch (routerError) {
+            console.error('Error de navegación:', routerError);
+            this.toast.error("Error de navegación: " + routerError.message);
+            
+            // Plan B: usar navegación directa si el router falla
+            if (role === 1) {
+              window.location.href = '/admin/dashboard';
+            } else if (role === 2) {
+              window.location.href = '/dashboard';
+            } else if (role === 3) {
+              window.location.href = '/repartidor/pedidos';
+            }
+          }
+        } else {
+          this.toast.error("La respuesta del servidor no incluye información del usuario o su rol");
         }
-      } else {
-        alert("Credenciales incorrectas. Intenta de nuevo.");
+      } catch (error) {
+        console.error('Error durante el login:', error);
+        
+        // Extraer el mensaje de error de diferentes posibles estructuras
+        let errorMsg = "Error en la autenticación. Intenta de nuevo.";
+        
+        if (error) {
+          if (typeof error === 'string') {
+            errorMsg = error;
+          } else if (error.error) {
+            errorMsg = error.error;
+          } else if (error.message) {
+            errorMsg = error.message;
+          } else if (error.response && error.response.data) {
+            errorMsg = error.response.data.error || "Error en el servidor";
+          }
+        }
+        
+        // Mostrar la notificación de error
+        this.toast.error(errorMsg);
+      } finally {
+        this.loading = false;
       }
     },
     switchToRecovery() {
@@ -108,17 +161,48 @@ export default {
     },
     switchToLogin() {
       this.isRecoveryMode = false;
-      this.recoveryEmail = "";
     },
-    sendRecoveryEmail() {
-      if (!this.recoveryEmail) {
-        alert('Por favor, ingresa tu correo electrónico');
-        return;
+    async sendRecoveryEmail() {
+      this.loading = true;
+      
+      try {
+        if (!this.recoveryEmail) {
+          this.toast.error('Por favor, ingresa tu correo electrónico');
+          this.loading = false;
+          return;
+        }
+        
+        const response = await AuthService.resetPassword(this.recoveryEmail);
+        this.toast.success(response.message || "Se ha enviado un enlace de recuperación a tu correo");
+        
+        // Volvemos al login después de 3 segundos
+        setTimeout(() => {
+          this.switchToLogin();
+        }, 3000);
+      } catch (error) {
+        console.error('Error de recuperación:', error);
+        
+        // Extraer el mensaje de error
+        let errorMsg = "Error al solicitar recuperación de contraseña";
+        
+        if (error) {
+          if (typeof error === 'string') {
+            errorMsg = error;
+          } else if (error.error) {
+            errorMsg = error.error;
+          } else if (error.message) {
+            errorMsg = error.message;
+          } else if (error.response && error.response.data) {
+            errorMsg = error.response.data.error || "Error en el servidor";
+          }
+        }
+        
+        this.toast.error(errorMsg);
+      } finally {
+        this.loading = false;
       }
-      alert(`Se enviará un enlace de recuperación a: ${this.recoveryEmail}`);
-      this.switchToLogin();
     }
-  },
+  }
 };
 </script>
 

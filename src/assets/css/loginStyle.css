@@ -270,3 +270,27 @@ a:hover {
   text-align: center;
   margin-bottom: 1rem;
 }
+
+.error-message {
+  color: #e74c3c;
+  margin-bottom: 15px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.success-message {
+  color: #2ecc71;
+  margin-bottom: 15px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.register-button {
+  position: relative;
+  cursor: pointer;
+}
+
+.register-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
