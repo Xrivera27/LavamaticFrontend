@@ -58,9 +58,18 @@ const api = {
     resetPassword: (email) => apiClient.post('/auth/reset-password', { email }),
     register: (userData) => apiClient.post('/auth/register', userData)
   },
-  client: {
-    update: (id, data) => apiClient.put(`/client/${id}`, data),
-    getProfile: () => apiClient.get('/client/profile')
+  clients: {
+    getAll: () => apiClient.get('/clients'),
+    create: (clientData) => apiClient.post('/clients/create', clientData),
+    update: (id, clientData) => apiClient.put(`/clients/${id}`, clientData),
+    delete: (id) => apiClient.delete(`/clients/${id}`)
+  },
+  repartidores: {
+    getAll: () => apiClient.get('/repartidores'),
+    getById: (id) => apiClient.get(`/repartidores/${id}`),
+    create: (repartidorData) => apiClient.post('/repartidores', repartidorData),
+    update: (id, repartidorData) => apiClient.put(`/repartidores/${id}`, repartidorData),
+    delete: (id) => apiClient.delete(`/repartidores/${id}`)
   }
 };
 

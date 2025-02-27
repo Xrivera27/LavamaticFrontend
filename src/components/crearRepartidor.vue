@@ -342,11 +342,17 @@
 
 <script>
 import SidebarAdmin from './SidebarAdmin.vue';
+import api from '@/services/apiService';
+import { useToast } from "vue-toastification";
 
 export default {
   name: "crearRepartidor",
   components: {
     SidebarAdmin
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
   data() {
     return {
@@ -364,7 +370,7 @@ export default {
       selectedCountryCode: "+504",
       editIndex: null,
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 4,
       validationErrors: {
         nombre_completo: '',
         correo: '',
@@ -377,6 +383,7 @@ export default {
       },
       usuarioForm: {
         id_usuario: 0,
+        id_repartidor: 0,
         nombre_completo: "",
         correo: "",
         telefono: "",
@@ -386,28 +393,7 @@ export default {
         codigo_mochila: "",
         gps_asignado: ""
       },
-      empleados: [
-        {
-          id_usuario: 1,
-          id_repartidor: 101,
-          nombre_completo: "Juan Pérez",
-          correo: "juan@example.com",
-          telefono: "9988-7766",
-          direccion: "Colonia Kennedy",
-          codigo_mochila: "MOCH-001",
-          gps_asignado: "GPS-12345"
-        },
-        {
-          id_usuario: 2,
-          id_repartidor: 102,
-          nombre_completo: "María López",
-          correo: "maria@example.com",
-          telefono: "8877-6655",
-          direccion: "Col. Miraflores",
-          codigo_mochila: "MOCH-002",
-          gps_asignado: "GPS-67890"
-        }
-      ],
+      empleados: []
     };
   },
   computed: {
@@ -415,9 +401,12 @@ export default {
       return this.empleados.filter(
         (empleado) => {
           const nombreCompleto = empleado.nombre_completo || '';
+          const codigoMochila = empleado.codigo_mochila || '';
+          const gpsAsignado = empleado.gps_asignado || '';
+          
           return nombreCompleto.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            empleado.codigo_mochila.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            empleado.gps_asignado.toLowerCase().includes(this.searchQuery.toLowerCase());
+            codigoMochila.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            gpsAsignado.toLowerCase().includes(this.searchQuery.toLowerCase());
         }
       );
     },
@@ -433,6 +422,51 @@ export default {
   methods: {
     handleSidebarToggle(expanded) {
       this.isSidebarExpanded = expanded;
+    },
+    
+    // Cargar datos desde el backend
+    async cargarRepartidores() {
+      this.isLoading = true;
+      try {
+        const response = await api.repartidores.getAll();
+        console.log("Datos recibidos de API:", response.data);
+        
+        // Procesar los datos del servidor
+        this.empleados = response.data.map(repartidor => {
+          // Verificar la estructura de los datos para adaptarla
+          let datosUsuario = {};
+          
+          // Buscar los datos del usuario según la estructura que venga
+          if (repartidor.usuario && typeof repartidor.usuario === 'object') {
+            datosUsuario = repartidor.usuario;
+          } else if (repartidor.user && typeof repartidor.user === 'object') {
+            datosUsuario = repartidor.user;
+          }
+          
+          return {
+            id_usuario: repartidor.id_usuario,
+            id_repartidor: repartidor.id_repartidor,
+            nombre_completo: datosUsuario.nombre || "Sin nombre",
+            nombre: datosUsuario.nombre || "Sin nombre",
+            correo: datosUsuario.email || "",
+            telefono: datosUsuario.telefono || "",
+            direccion: datosUsuario.direccion || "",
+            codigo_mochila: repartidor.codigo_mochila || "",
+            gps_asignado: repartidor.gps_asignado || ""
+          };
+        });
+        
+        if (this.empleados.length > 0) {
+          this.toast.success("Repartidores cargados correctamente");
+        } else {
+          this.toast.info("No hay repartidores registrados");
+        }
+      } catch (error) {
+        console.error("Error al cargar repartidores:", error);
+        this.toast.error("Error al cargar repartidores");
+      } finally {
+        this.isLoading = false;
+      }
     },
     
     // Métodos de validación en tiempo real
@@ -578,73 +612,60 @@ export default {
     },
 
     // Validar que los códigos de mochila y GPS sean únicos
-    validarCodigosMochilasGPS() {
-      let isValid = true;
+// Reemplaza este método en tu componente
+validarCodigosMochilasGPS() {
+  let isValid = true;
+  
+  // Validar que el código de mochila no esté vacío
+  if (!this.usuarioForm.codigo_mochila) {
+    this.validationErrors.codigo_mochila = "El código de mochila es obligatorio";
+    isValid = false;
+  } else {
+    // Si NO estamos en modo edición, o si cambiamos el código en modo edición
+    if (!this.isEditing) {
+      // Verificar solo en modo creación (no edición)
+      const existeMochila = this.empleados.some(e => 
+        e.codigo_mochila.toLowerCase() === this.usuarioForm.codigo_mochila.toLowerCase()
+      );
       
-      // Validar que el código de mochila no esté vacío
-      if (!this.usuarioForm.codigo_mochila) {
-        this.validationErrors.codigo_mochila = "El código de mochila es obligatorio";
+      if (existeMochila) {
+        this.validationErrors.codigo_mochila = "Este código de mochila ya está en uso";
         isValid = false;
       } else {
-        // Validar que el código de mochila sea único
-        const existeMochila = this.empleados.some(
-          e => 
-            e.codigo_mochila.toLowerCase() === this.usuarioForm.codigo_mochila.toLowerCase() && 
-            (!this.isEditing || e.id_usuario !== this.usuarioForm.id_usuario)
-        );
-        
-        if (existeMochila) {
-          this.validationErrors.codigo_mochila = "Este código de mochila ya está en uso";
-          isValid = false;
-        } else {
-          this.validationErrors.codigo_mochila = "";
-        }
+        this.validationErrors.codigo_mochila = "";
       }
+    } else {
+      // En modo edición, no mostrar error
+      this.validationErrors.codigo_mochila = "";
+    }
+  }
 
-      // Validar que el código GPS no esté vacío
-      if (!this.usuarioForm.gps_asignado) {
-        this.validationErrors.gps_asignado = "El código GPS es obligatorio";
+  // Validar que el código GPS no esté vacío
+  if (!this.usuarioForm.gps_asignado) {
+    this.validationErrors.gps_asignado = "El código GPS es obligatorio";
+    isValid = false;
+  } else {
+    // Si NO estamos en modo edición, o si cambiamos el código en modo edición
+    if (!this.isEditing) {
+      // Verificar solo en modo creación (no edición)
+      const existeGPS = this.empleados.some(e => 
+        e.gps_asignado.toLowerCase() === this.usuarioForm.gps_asignado.toLowerCase()
+      );
+      
+      if (existeGPS) {
+        this.validationErrors.gps_asignado = "Este código GPS ya está en uso";
         isValid = false;
       } else {
-        // Validar que el código GPS sea único
-        const existeGPS = this.empleados.some(
-          e => 
-            e.gps_asignado.toLowerCase() === this.usuarioForm.gps_asignado.toLowerCase() && 
-            (!this.isEditing || e.id_usuario !== this.usuarioForm.id_usuario)
-        );
-        
-        if (existeGPS) {
-          this.validationErrors.gps_asignado = "Este código GPS ya está en uso";
-          isValid = false;
-        } else {
-          this.validationErrors.gps_asignado = "";
-        }
+        this.validationErrors.gps_asignado = "";
       }
+    } else {
+      // En modo edición, no mostrar error
+      this.validationErrors.gps_asignado = "";
+    }
+  }
 
-      return isValid;
-    },
-
-    // Extraer nombres y apellidos desde el nombre completo
-    extraerNombresApellidos() {
-      // Dividir el nombre completo en partes
-      const partes = this.usuarioForm.nombre_completo.trim().split(/\s+/);
-      
-      if (partes.length === 0) return { nombre: '', apellido: '' };
-      
-      // Si solo hay una palabra, es el nombre
-      if (partes.length === 1) {
-        return { 
-          nombre: partes[0], 
-          apellido: '' 
-        };
-      }
-      
-      // Si hay dos o más palabras, la primera es el nombre y la segunda es el apellido
-      const nombre = partes[0];
-      const apellido = partes.slice(1).join(' ');
-      
-      return { nombre, apellido };
-    },
+  return isValid;
+},
     
     // Método que ejecuta todas las validaciones
     validarFormulario() {
@@ -684,6 +705,7 @@ export default {
     clearForm() {
       this.usuarioForm = {
         id_usuario: 0,
+        id_repartidor: 0,
         nombre_completo: "",
         correo: "",
         telefono: "",
@@ -714,53 +736,97 @@ export default {
       this.isPassEdit = true;
     },
     
-    guardarUsuario() {
-      // Ejecutar todas las validaciones
-      if (!this.validarFormulario()) {
-        // Si hay errores de validación, no continuar
-        return;
+    async guardarUsuario() {
+  // Ejecutar todas las validaciones
+  if (!this.validarFormulario()) {
+    return;
+  }
+
+  this.isLoading = true;
+
+  try {
+    if (this.isEditing) {
+      // Actualizar repartidor existente
+      console.log("Actualizando repartidor ID:", this.usuarioForm.id_repartidor);
+      
+      // Verificar que el ID del repartidor esté disponible
+      if (!this.usuarioForm.id_repartidor) {
+        throw new Error("ID del repartidor no disponible para actualización");
       }
-
-      // Simulación de guardado
-      this.isLoading = true;
       
-      // Extraer nombre y apellido desde nombre completo para compatibilidad interna
-      const { nombre, apellido } = this.extraerNombresApellidos();
+      // Solo enviamos los campos que pueden haber cambiado
+      const datosActualizacion = {};
       
-      setTimeout(() => {
-        if (this.isEditing) {
-          // Actualizar empleado existente
-          const empleadoActualizado = {
-            ...this.usuarioForm,
-            nombre: nombre,
-            apellido: apellido
-          };
-          this.empleados[this.editIndex] = empleadoActualizado;
-          alert("Repartidor actualizado correctamente");
-        } else {
-          // Crear email a partir del nombre completo si no está editando
-          if (!this.usuarioForm.correo) {
-            const nombreLimpio = nombre.toLowerCase().replace(/\s+/g, '');
-            const apellidoLimpio = apellido.toLowerCase().replace(/\s+/g, '');
-            this.usuarioForm.correo = `${nombreLimpio}.${apellidoLimpio}@lavamatic.com`;
-          }
-
-          // Agregar nuevo empleado
-          const newId = Math.max(...this.empleados.map(e => e.id_usuario), 0) + 1;
-          const newRepartidorId = Math.max(...this.empleados.map(e => e.id_repartidor || 0), 100) + 1;
-          this.empleados.push({
-            ...this.usuarioForm,
-            id_usuario: newId,
-            id_repartidor: newRepartidorId,
-            nombre: nombre,
-            apellido: apellido
-          });
-          alert("Repartidor agregado correctamente");
-        }
-        this.isLoading = false;
-        this.closeModal();
-      }, 1000);
-    },
+      // Agregar solo los campos que queremos actualizar
+      if (this.usuarioForm.nombre_completo) {
+        datosActualizacion.nombre = this.usuarioForm.nombre_completo;
+      }
+      
+      if (this.usuarioForm.correo) {
+        datosActualizacion.email = this.usuarioForm.correo;
+      }
+      
+      if (this.usuarioForm.telefono) {
+        datosActualizacion.telefono = this.usuarioForm.telefono;
+      }
+      
+      if (this.usuarioForm.direccion) {
+        datosActualizacion.direccion = this.usuarioForm.direccion;
+      }
+      
+      if (this.usuarioForm.codigo_mochila) {
+        datosActualizacion.codigo_mochila = this.usuarioForm.codigo_mochila;
+      }
+      
+      if (this.usuarioForm.gps_asignado) {
+        datosActualizacion.gps_asignado = this.usuarioForm.gps_asignado;
+      }
+      
+      // Si se está editando la contraseña, incluirla
+      if (this.isPassEdit && this.usuarioForm.password) {
+        datosActualizacion.password = this.usuarioForm.password;
+      }
+      
+      console.log("Datos de actualización:", datosActualizacion);
+      
+      // Llamar a la API con el ID del repartidor
+      await api.repartidores.update(this.usuarioForm.id_repartidor, datosActualizacion);
+      this.toast.success("Repartidor actualizado correctamente");
+    } else {
+      // Crear nuevo repartidor
+      const datosCreacion = {
+        nombre: this.usuarioForm.nombre_completo,
+        email: this.usuarioForm.correo,
+        password: this.usuarioForm.password,
+        telefono: this.usuarioForm.telefono,
+        direccion: this.usuarioForm.direccion,
+        codigo_mochila: this.usuarioForm.codigo_mochila,
+        gps_asignado: this.usuarioForm.gps_asignado
+      };
+      
+      console.log("Datos para crear repartidor:", datosCreacion);
+      await api.repartidores.create(datosCreacion);
+      this.toast.success("Repartidor agregado correctamente");
+    }
+    
+    // Recargar la lista de repartidores
+    await this.cargarRepartidores();
+    
+    // Cerrar el modal y limpiar el formulario
+    this.closeModal();
+  } catch (error) {
+    console.error("Error al guardar repartidor:", error);
+    let errorMsg = "Error al guardar repartidor";
+    
+    if (error.response && error.response.data && error.response.data.error) {
+      errorMsg = error.response.data.error;
+    }
+    
+    this.toast.error(errorMsg);
+  } finally {
+    this.isLoading = false;
+  }
+},
     
     previousPage() {
       if (this.currentPage > 1) {
@@ -779,19 +845,34 @@ export default {
       this.showConfirmModal = true;
     },
     
-    confirmDelete() {
+    async confirmDelete() {
       this.isLoading = true;
       
-      setTimeout(() => {
+      try {
+        // Usamos el ID de usuario para eliminar, ya que el backend manejará la eliminación en ambas tablas
+        await api.repartidores.delete(this.empleadoToDelete.id_usuario);
+        this.toast.success("Repartidor eliminado correctamente");
+        
+        // Remover de la lista local
         const index = this.empleados.findIndex(e => e.id_usuario === this.empleadoToDelete.id_usuario);
         if (index !== -1) {
           this.empleados.splice(index, 1);
         }
-        alert("Repartidor eliminado correctamente");
-        this.isLoading = false;
+        
         this.showConfirmModal = false;
         this.empleadoToDelete = null;
-      }, 1000);
+      } catch (error) {
+        console.error("Error al eliminar repartidor:", error);
+        let errorMsg = "Error al eliminar repartidor";
+        
+        if (error.response && error.response.data && error.response.data.error) {
+          errorMsg = error.response.data.error;
+        }
+        
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
+      }
     },
     
     cancelDelete() {
@@ -800,30 +881,30 @@ export default {
     },
     
     editEmpleado(empleado) {
-      this.editIndex = this.empleados.findIndex(
-        (item) => item.id_usuario === empleado.id_usuario
-      );
-      
       // Copiar los datos del empleado al formulario
       this.usuarioForm = { 
-        ...empleado,
-        // Si el empleado ya tiene nombre_completo, usarlo. Si no, construirlo a partir de nombre y apellido
-        nombre_completo: empleado.nombre_completo || `${empleado.nombre} ${empleado.apellido}`
+        id_usuario: empleado.id_usuario,
+        id_repartidor: empleado.id_repartidor,
+        nombre_completo: empleado.nombre_completo,
+        correo: empleado.correo,
+        telefono: empleado.telefono,
+        direccion: empleado.direccion,
+        password: "",
+        confirmPassword: "",
+        codigo_mochila: empleado.codigo_mochila,
+        gps_asignado: empleado.gps_asignado
       };
       
+      // Configurar estado de edición
       this.isEditing = true;
-      this.isPassEdit = false;
+      this.isPassEdit = false; // No editar contraseña por defecto
       this.openModal();
     }
   },
   
   mounted() {
-    // Simulación de carga de datos
-    this.isLoading = true;
-    
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 1000);
+    // Cargar datos iniciales
+    this.cargarRepartidores();
   }
 };
 </script>

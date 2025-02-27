@@ -307,14 +307,19 @@
     </div>
   </div>
 </template>
-
 <script>
 import SidebarAdmin from './SidebarAdmin.vue';
+import api from '@/services/apiService';
+import { useToast } from "vue-toastification";
 
 export default {
   name: "crearCliente",
   components: {
     SidebarAdmin
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
   data() {
     return {
@@ -332,7 +337,7 @@ export default {
       selectedCountryCode: "+504",
       editIndex: null,
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 4,
       validationErrors: {
         nombre_completo: '',
         correo: '',
@@ -351,55 +356,22 @@ export default {
         confirmPassword: "",
         id_rol: 2 // Siempre será cliente (rol 2)
       },
-      clientes: [
-        {
-          id_usuario: 1,
-          nombre: "Carlos",
-          apellido: "González",
-          nombre_completo: "Carlos González",
-          correo: "carlos@example.com",
-          telefono: "9911-2233",
-          direccion: "Colonia Palmira, Calle Principal"
-        },
-        {
-          id_usuario: 2,
-          nombre: "Ana",
-          apellido: "Martínez",
-          nombre_completo: "Ana Martínez",
-          correo: "ana@example.com",
-          telefono: "8822-3344",
-          direccion: "Colonia El Prado, Av. República"
-        },
-        {
-          id_usuario: 3,
-          nombre: "Roberto",
-          apellido: "Mendoza",
-          nombre_completo: "Roberto Mendoza",
-          correo: "roberto@example.com",
-          telefono: "9512-3456",
-          direccion: "Residencial Maya, Bloque 5"
-        },
-        {
-          id_usuario: 4,
-          nombre: "Sofía",
-          apellido: "Hernández",
-          nombre_completo: "Sofía Hernández",
-          correo: "sofia@example.com",
-          telefono: "9678-9012",
-          direccion: "Colonia Lomas, Calle Principal"
-        }
-      ],
+      clientes: []
     };
   },
   computed: {
     filteredClientes() {
       return this.clientes.filter(
         (cliente) => {
-          const nombreCompleto = cliente.nombre_completo || `${cliente.nombre} ${cliente.apellido}` || '';
+          const nombreCompleto = cliente.nombre_completo || cliente.nombre || '';
+          const correo = cliente.correo || cliente.email || '';
+          const telefono = cliente.telefono || '';
+          const direccion = cliente.direccion || '';
+          
           return nombreCompleto.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            cliente.correo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            cliente.telefono.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            cliente.direccion.toLowerCase().includes(this.searchQuery.toLowerCase());
+            correo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            telefono.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            direccion.toLowerCase().includes(this.searchQuery.toLowerCase());
         }
       );
     },
@@ -415,6 +387,38 @@ export default {
   methods: {
     handleSidebarToggle(expanded) {
       this.isSidebarExpanded = expanded;
+    },
+    
+    // Cargar clientes desde el backend
+    async cargarClientes() {
+      this.isLoading = true;
+      try {
+        const response = await api.clients.getAll();
+        console.log("Datos de clientes recibidos:", response.data);
+        
+        // Procesar los datos del servidor
+        this.clientes = response.data.map(cliente => {
+          return {
+            id_usuario: cliente.id_usuario,
+            nombre_completo: cliente.nombre || '',
+            nombre: cliente.nombre || '',
+            correo: cliente.email || '',
+            telefono: cliente.telefono || '',
+            direccion: cliente.direccion || ''
+          };
+        });
+        
+        if (this.clientes.length > 0) {
+          this.toast.success("Clientes cargados correctamente");
+        } else {
+          this.toast.info("No hay clientes registrados");
+        }
+      } catch (error) {
+        console.error("Error al cargar clientes:", error);
+        this.toast.error("Error al cargar clientes");
+      } finally {
+        this.isLoading = false;
+      }
     },
     
     // Métodos de validación en tiempo real
@@ -467,7 +471,7 @@ export default {
         // Validar que el correo sea único (excepto para el cliente actual en edición)
         const existeEmail = this.clientes.some(
           c => 
-            c.correo.toLowerCase() === this.clienteForm.correo.toLowerCase() && 
+            (c.correo || c.email).toLowerCase() === this.clienteForm.correo.toLowerCase() && 
             (!this.isEditing || c.id_usuario !== this.clienteForm.id_usuario)
         );
         
@@ -564,27 +568,17 @@ export default {
         return true;
       }
     },
-
-    // Extraer nombres y apellidos desde el nombre completo
-    extraerNombresApellidos() {
-      // Dividir el nombre completo en partes
-      const partes = this.clienteForm.nombre_completo.trim().split(/\s+/);
+    
+    // Método que ejecuta todas las validaciones
+    validarFormulario() {
+      const nombreValido = this.validarNombreCompleto();
+      const correoValido = this.validarCorreo();
+      const telefonoValido = this.validarTelefono();
+      const direccionValida = this.validarDireccion();
+      const passwordValido = this.validarPassword();
       
-      if (partes.length === 0) return { nombre: '', apellido: '' };
-      
-      // Si solo hay una palabra, es el nombre
-      if (partes.length === 1) {
-        return { 
-          nombre: partes[0], 
-          apellido: '' 
-        };
-      }
-      
-      // Si hay dos o más palabras, la primera es el nombre y la segunda es el apellido
-      const nombre = partes[0];
-      const apellido = partes.slice(1).join(' ');
-      
-      return { nombre, apellido };
+      return nombreValido && correoValido && telefonoValido && 
+             direccionValida && passwordValido;
     },
     
     openModal() {
@@ -637,76 +631,61 @@ export default {
       this.isPassEdit = true;
     },
     
-    // Método que ejecuta todas las validaciones
-    validarFormulario() {
-      const nombreValido = this.validarNombreCompleto();
-      const correoValido = this.validarCorreo();
-      const telefonoValido = this.validarTelefono();
-      const direccionValida = this.validarDireccion();
-      const passwordValido = this.validarPassword();
-      
-      return nombreValido && correoValido && telefonoValido && 
-             direccionValida && passwordValido;
-    },
-    
-    guardarCliente() {
+    async guardarCliente() {
       // Ejecutar todas las validaciones
       if (!this.validarFormulario()) {
-        // Si hay errores de validación, no continuar
         return;
       }
 
-      // Simulación de guardado
       this.isLoading = true;
-      
-      // Extraer nombre y apellido desde nombre completo para compatibilidad interna
-      const { nombre, apellido } = this.extraerNombresApellidos();
-      
-      setTimeout(() => {
+
+      try {
+        // Preparar datos según el formato esperado por el backend
+        const datosEnvio = {
+          nombre: this.clienteForm.nombre_completo,
+          email: this.clienteForm.correo,
+          telefono: this.clienteForm.telefono,
+          direccion: this.clienteForm.direccion
+        };
+        
         if (this.isEditing) {
-          // Actualizar cliente existente
-          const clienteActualizado = {
-            ...this.clienteForm,
-            nombre: nombre,
-            apellido: apellido
-          };
-          
-          const index = this.clientes.findIndex(c => c.id_usuario === this.clienteForm.id_usuario);
-          if (index !== -1) {
-            // Si la contraseña está vacía y no está en modo edición de contraseña, no la actualizamos
-            if (!this.isPassEdit) {
-              const passwordOriginal = this.clientes[index].password;
-              clienteActualizado.password = passwordOriginal;
-            }
-            
-            this.clientes.splice(index, 1, clienteActualizado);
+          // Actualización de cliente
+          if (this.isPassEdit && this.clienteForm.password) {
+            datosEnvio.password = this.clienteForm.password;
           }
-          alert("Cliente actualizado correctamente");
+          
+          console.log("Actualizando cliente:", datosEnvio);
+          
+          await api.clients.update(this.clienteForm.id_usuario, datosEnvio);
+          this.toast.success("Cliente actualizado correctamente");
         } else {
-          // Crear nuevo cliente
-          const newId = Math.max(...this.clientes.map(c => c.id_usuario), 0) + 1;
+          // Creación de nuevo cliente
+          datosEnvio.password = this.clienteForm.password;
+          datosEnvio.id_rol = 2; // Cliente
           
-          // Crear email a partir del nombre completo si no está editando
-          if (!this.clienteForm.correo) {
-            const nombreLimpio = nombre.toLowerCase().replace(/\s+/g, '');
-            const apellidoLimpio = apellido.toLowerCase().replace(/\s+/g, '');
-            this.clienteForm.correo = `${nombreLimpio}.${apellidoLimpio}@example.com`;
-          }
+          console.log("Creando cliente:", datosEnvio);
           
-          const nuevoCliente = { 
-            ...this.clienteForm,
-            id_usuario: newId,
-            nombre: nombre,
-            apellido: apellido
-          };
-          
-          this.clientes.push(nuevoCliente);
-          alert("Cliente agregado correctamente");
+          await api.clients.create(datosEnvio);
+          this.toast.success("Cliente agregado correctamente");
         }
         
-        this.isLoading = false;
+        // Recargar lista de clientes
+        await this.cargarClientes();
+        
+        // Cerrar modal y limpiar formulario
         this.closeModal();
-      }, 1000);
+      } catch (error) {
+        console.error("Error al guardar cliente:", error);
+        let errorMsg = "Error al guardar cliente";
+        
+        if (error.response && error.response.data && error.response.data.error) {
+          errorMsg = error.response.data.error;
+        }
+        
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
+      }
     },
     
     previousPage() {
@@ -726,21 +705,33 @@ export default {
       this.showConfirmModal = true;
     },
     
-    confirmDelete() {
+    async confirmDelete() {
       this.isLoading = true;
       
-      setTimeout(() => {
+      try {
+        await api.clients.delete(this.clienteToDelete.id_usuario);
+        this.toast.success("Cliente eliminado correctamente");
+        
+        // Eliminar de la lista local
         const index = this.clientes.findIndex(c => c.id_usuario === this.clienteToDelete.id_usuario);
         if (index !== -1) {
           this.clientes.splice(index, 1);
         }
         
-        alert("Cliente eliminado correctamente");
-        
-        this.isLoading = false;
         this.showConfirmModal = false;
         this.clienteToDelete = null;
-      }, 1000);
+      } catch (error) {
+        console.error("Error al eliminar cliente:", error);
+        let errorMsg = "Error al eliminar cliente";
+        
+        if (error.response && error.response.data && error.response.data.error) {
+          errorMsg = error.response.data.error;
+        }
+        
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
+      }
     },
     
     cancelDelete() {
@@ -750,22 +741,17 @@ export default {
     
     editCliente(cliente) {
       // Preparar el formulario para edición
-      const nombreCompleto = cliente.nombre_completo || `${cliente.nombre} ${cliente.apellido}`;
+      console.log("Editando cliente:", cliente);
       
-      // Separar el prefijo y número de teléfono
-      const telefonoCompleto = cliente.telefono || '';
-      const prefijos = ['+504', '+1', '+52', '+34'];
-      let prefijoEncontrado = prefijos.find(prefijo => telefonoCompleto.startsWith(prefijo));
-      
-      this.selectedCountryCode = prefijoEncontrado || '+504';
-      const numeroSinPrefijo = telefonoCompleto.replace(this.selectedCountryCode, '');
-      
-      // Clonar el cliente
       this.clienteForm = { 
-        ...cliente,
-        nombre_completo: nombreCompleto,
-        telefono: numeroSinPrefijo,
-        confirmPassword: '' 
+        id_usuario: cliente.id_usuario,
+        nombre_completo: cliente.nombre_completo || cliente.nombre || '',
+        correo: cliente.correo || cliente.email || '',
+        telefono: cliente.telefono || '',
+        direccion: cliente.direccion || '',
+        password: "",
+        confirmPassword: "",
+        id_rol: 2
       };
       
       this.isEditing = true;
@@ -775,12 +761,8 @@ export default {
   },
   
   mounted() {
-    // Simulación de carga de datos
-    this.isLoading = true;
-    
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 1000);
+    // Cargar datos de clientes
+    this.cargarClientes();
   }
 };
 </script>
