@@ -1,4 +1,3 @@
-// src/services/apiService.js
 import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/api';
@@ -60,6 +59,7 @@ const api = {
   },
   clients: {
     getAll: () => apiClient.get('/clients'),
+    getById: (id) => apiClient.get(`/clients/${id}`),
     create: (clientData) => apiClient.post('/clients/create', clientData),
     update: (id, clientData) => apiClient.put(`/clients/${id}`, clientData),
     delete: (id) => apiClient.delete(`/clients/${id}`)
@@ -70,7 +70,53 @@ const api = {
     create: (repartidorData) => apiClient.post('/repartidores', repartidorData),
     update: (id, repartidorData) => apiClient.put(`/repartidores/${id}`, repartidorData),
     delete: (id) => apiClient.delete(`/repartidores/${id}`)
-  }
+  },
+  equipos: {
+    getAll: () => apiClient.get('/equipos'),
+    getById: (id) => apiClient.get(`/equipos/${id}`),
+    create: (equipoData) => apiClient.post('/equipos', equipoData),
+    update: (id, equipoData) => apiClient.put(`/equipos/${id}`, equipoData),
+    delete: (id) => apiClient.delete(`/equipos/${id}`)
+  },
+
+  servicios: {
+    getAll: () => apiClient.get('/servicios'),
+    getById: (id) => apiClient.get(`/servicios/${id}`),
+    create: (servicioData) => apiClient.post('/servicios', servicioData),
+    update: (id, servicioData) => apiClient.put(`/servicios/${id}`, servicioData),
+    delete: (id) => apiClient.delete(`/servicios/${id}`)
+  },
+  mantenimientos: {
+    getAll: () => apiClient.get('/mantenimientos'),
+    getById: (id) => apiClient.get(`/mantenimientos/${id}`),
+    create: (mantenimientoData) => apiClient.post('/mantenimientos', mantenimientoData),
+    update: (id, mantenimientoData) => apiClient.put(`/mantenimientos/${id}`, mantenimientoData),
+    delete: (id) => apiClient.delete(`/mantenimientos/${id}`)
+  },
+  pedidos: {
+    getAll: (filtros = {}) => {
+      let queryParams = '';
+      if (filtros.fechaInicio && filtros.fechaFin) {
+        queryParams += `?fechaInicio=${filtros.fechaInicio.toISOString()}&fechaFin=${filtros.fechaFin.toISOString()}`;
+      }
+      if (filtros.estado) {
+        queryParams += queryParams ? `&estado=${filtros.estado}` : `?estado=${filtros.estado}`;
+      }
+      return apiClient.get(`/pedidos${queryParams}`);
+    },
+    getPendientes: () => apiClient.get('/pedidos/pendientes'),
+    asignarRepartidor: (id_pedido, id_repartidor) => 
+      apiClient.put(`/pedidos/${id_pedido}/asignar`, { id_repartidor }),
+    volverAEspera: (id_pedido) => apiClient.put(`/pedidos/${id_pedido}/espera`),
+    cambiarEstado: (id_pedido, id_estado) => 
+      apiClient.put(`/pedidos/${id_pedido}/estado`, { id_estado })
+  },
+  config: {
+    getProfile: () => apiClient.get('/config/profile'),
+    updateProfile: (profileData) => apiClient.put('/config/profile', profileData),
+    changePassword: (passwordData) => apiClient.put('/config/change-password', passwordData),
+    deactivateAccount: () => apiClient.post('/config/deactivate')
+  },
 };
 
 // Exportamos tanto la instancia de axios configurada como los servicios agrupados
