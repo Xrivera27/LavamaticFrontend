@@ -123,81 +123,188 @@
   
   <script>
   import Sidebarcliente from './SidebarRepartidor.vue'
-  
-  export default {
-    name: 'ConfiguracionUsuario',
-    components: {
-      Sidebarcliente
+  import api from '@/services/apiService';
+import { useToast } from "vue-toastification";
+
+export default {
+  name: 'ConfiguracionUsuario',
+  components: {
+    Sidebarcliente
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
+  data() {
+    return {
+      isSidebarExpanded: false,
+      isLoading: true,
+      isSaving: false,
+      isChangingPassword: false,
+      isDeactivating: false,
+      showDesactivarModal: false,
+      notificaciones: 0,
+      usuario: {
+        id_usuario: null,
+        nombre: '',
+        email: '',
+        telefono: '',
+        direccion: '',
+        id_rol: null
+      },
+      passwordForm: {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      },
+      passwordError: '',
+      formOriginal: null
+    }
+  },
+  computed: {
+    rolUsuario() {
+      const roles = {
+        1: 'Administrador',
+        2: 'Cliente',
+        3: 'Repartidor'
+      };
+      return roles[this.usuario.id_rol] || 'Usuario';
+    }
+  },
+  mounted() {
+    this.cargarDatosUsuario();
+  },
+  methods: {
+    handleSidebarToggle(expanded) {
+      this.isSidebarExpanded = expanded;
     },
-    data() {
-      return {
-        isSidebarExpanded: false,
-        usuario: {
-          nombre: 'Gerson Rivera',
-          email: 'gerson.rivera@ejemplo.com',
-          telefono: '9876-5432',
-          direccion: 'Colonia Las Brisas, Calle Principal, Casa #123, Tegucigalpa, Honduras'
-        },
-        passwordForm: {
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        },
-        passwordError: '',
-        formOriginal: null
+    
+    async cargarDatosUsuario() {
+      this.isLoading = true;
+      try {
+        const response = await api.config.getProfile();
+        if (response && response.data) {
+          this.usuario = response.data;
+          // Guardar una copia del estado original del formulario para posible cancelación
+          this.formOriginal = JSON.parse(JSON.stringify(this.usuario));
+        }
+      } catch (error) {
+        console.error('Error al cargar datos del usuario:', error);
+        this.toast.error('No se pudo cargar la información del usuario');
+      } finally {
+        this.isLoading = false;
       }
     },
-    mounted() {
-      // Guardar una copia del estado original del formulario para posible cancelación
-      this.formOriginal = JSON.parse(JSON.stringify(this.usuario));
+    
+    async guardarCambios() {
+      this.isSaving = true;
+      try {
+        const { nombre, email, telefono, direccion } = this.usuario;
+        const response = await api.config.updateProfile({ 
+          nombre, 
+          email, 
+          telefono, 
+          direccion 
+        });
+        
+        if (response && response.data) {
+          this.usuario = response.data.user;
+          this.formOriginal = JSON.parse(JSON.stringify(this.usuario));
+          this.toast.success('Perfil actualizado correctamente');
+        }
+      } catch (error) {
+        console.error('Error al guardar cambios:', error);
+        const errorMsg = error.response?.data?.error || 'Error al actualizar perfil';
+        this.toast.error(errorMsg);
+      } finally {
+        this.isSaving = false;
+      }
     },
-    methods: {
-      handleSidebarToggle(expanded) {
-        this.isSidebarExpanded = expanded;
-      },
-      guardarCambios() {
-        // Validar contraseñas si el usuario está intentando cambiarlas
-        if (this.passwordForm.newPassword || this.passwordForm.confirmPassword) {
-          if (!this.passwordForm.currentPassword) {
-            this.passwordError = 'Debes ingresar tu contraseña actual';
-            return;
-          }
-          if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
-            this.passwordError = 'Las contraseñas no coinciden';
-            return;
-          }
-          if (this.passwordForm.newPassword.length < 6) {
-            this.passwordError = 'La contraseña debe tener al menos 6 caracteres';
-            return;
+    
+    async cambiarPassword() {
+      // Validar contraseñas
+      if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
+        this.passwordError = 'Las contraseñas no coinciden';
+        return;
+      }
+      
+      if (this.passwordForm.newPassword.length < 6) {
+        this.passwordError = 'La contraseña debe tener al menos 6 caracteres';
+        return;
+      }
+      
+      this.isChangingPassword = true;
+      this.passwordError = '';
+      
+      try {
+        const response = await api.config.changePassword({
+          currentPassword: this.passwordForm.currentPassword,
+          newPassword: this.passwordForm.newPassword
+        });
+        
+        if (response) {
+          this.resetPasswordForm();
+          this.toast.success('Contraseña actualizada correctamente');
+        }
+      } catch (error) {
+        console.error('Error al cambiar contraseña:', error);
+        const errorMsg = error.response?.data?.error || 'Error al cambiar contraseña';
+        this.passwordError = errorMsg;
+        this.toast.error(errorMsg);
+      } finally {
+        this.isChangingPassword = false;
+      }
+    },
+    
+    resetForm() {
+      // Restaurar el formulario a su estado original
+      this.usuario = JSON.parse(JSON.stringify(this.formOriginal));
+    },
+    
+    resetPasswordForm() {
+      this.passwordForm = {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      };
+      this.passwordError = '';
+    },
+    
+    mostrarConfirmacionDesactivar() {
+      this.showDesactivarModal = true;
+    },
+    
+    async desactivarCuenta() {
+      this.isDeactivating = true;
+      try {
+        const response = await api.config.deactivateAccount();
+        
+        if (response && response.data) {
+          this.toast.success('Cuenta desactivada correctamente');
+          
+          // Si debe cerrar sesión, redirigir al login
+          if (response.data.shouldLogout) {
+            setTimeout(() => {
+              // Limpiar datos de sesión
+              sessionStorage.removeItem('token');
+              sessionStorage.removeItem('user');
+              sessionStorage.removeItem('userRole');
+              // Redirigir al login
+              this.$router.push('/login');
+            }, 1500);
           }
         }
-        
-        // Aquí iría la lógica para enviar los datos al backend
-        alert('Cambios guardados exitosamente');
-        
-        // Actualizar el estado original del formulario
-        this.formOriginal = JSON.parse(JSON.stringify(this.usuario));
-        
-        // Limpiar formulario de contraseña
-        this.passwordForm = {
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        };
-        this.passwordError = '';
-      },
-      resetForm() {
-        // Restaurar el formulario a su estado original
-        this.usuario = JSON.parse(JSON.stringify(this.formOriginal));
-        this.passwordForm = {
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        };
-        this.passwordError = '';
+      } catch (error) {
+        console.error('Error al desactivar cuenta:', error);
+        const errorMsg = error.response?.data?.error || 'Error al desactivar cuenta';
+        this.toast.error(errorMsg);
+        this.showDesactivarModal = false;
+      } finally {
+        this.isDeactivating = false;
       }
     }
-  };
-  </script>
+  }
+};
+</script>
   
   <style src="@/assets/css/ConfiguserRepartidor.css" scoped></style>

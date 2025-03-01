@@ -117,6 +117,19 @@ const api = {
     changePassword: (passwordData) => apiClient.put('/config/change-password', passwordData),
     deactivateAccount: () => apiClient.post('/config/deactivate')
   },
+  repartidor: {
+    // Obtener todos los pedidos asignados al repartidor
+    getPedidos: () => apiClient.get('/repartidor/pedidos'),
+    
+    // Obtener el detalle de un pedido específico
+    getPedidoDetalle: (id_pedido) => apiClient.get(`/repartidor/pedidos/${id_pedido}`),
+    
+    // Actualizar el estado de un pedido
+    actualizarEstado: (id_pedido, data) => apiClient.put(`/repartidor/pedidos/${id_pedido}/estado`, data),
+    
+    // Obtener el historial de entregas
+    getHistorial: () => apiClient.get('/repartidor/pedidos/entregas')
+  },
 };
 
 // Exportamos tanto la instancia de axios configurada como los servicios agrupados

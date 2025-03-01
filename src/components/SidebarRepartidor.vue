@@ -8,10 +8,6 @@
         <i class="fas fa-inbox"></i>
         <span class="nav-text">Pedidos</span>
       </router-link>
-      <router-link to="/repartidor/historial" class="nav-item" :class="{ active: currentRoute === 'repartidorHistorial' }">
-        <i class="fas fa-history"></i>
-        <span class="nav-text">Historial Entregas</span>
-      </router-link>
       <router-link to="/repartidor/configuracion" class="nav-item" :class="{ active: currentRoute === 'repartidorConfiguracion' }">
         <i class="fas fa-cog"></i>
         <span class="nav-text">Configuración</span>
