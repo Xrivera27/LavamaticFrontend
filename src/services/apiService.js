@@ -130,6 +130,28 @@ const api = {
     // Obtener el historial de entregas
     getHistorial: () => apiClient.get('/repartidor/pedidos/entregas')
   },
+  servicioCliente: {
+    // Obtener todos los servicios disponibles
+    getServicios: () => apiClient.get('/cliente/servicios'),
+    
+    // Obtener detalle de un servicio específico
+    getServicioDetalle: (id) => apiClient.get(`/cliente/servicios/${id}`),
+    
+    // Obtener horarios disponibles
+    getHorarios: () => apiClient.get('/cliente/horarios'),
+    
+    // Verificar disponibilidad
+    verificarDisponibilidad: (data) => apiClient.post('/cliente/disponibilidad', data),
+    
+    // Crear un nuevo pedido
+    crearPedido: (pedidoData) => apiClient.post('/cliente/pedidos', pedidoData),
+    
+    // Obtener historial de pedidos
+    getHistorialPedidos: (estado = '') => {
+      let queryParams = estado ? `?estado=${estado}` : '';
+      return apiClient.get(`/cliente/pedidos${queryParams}`);
+    }
+  },
 };
 
 // Exportamos tanto la instancia de axios configurada como los servicios agrupados

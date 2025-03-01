@@ -270,236 +270,236 @@
   </template>
   
   <script>
- import SidebarAdmin from './SidebarAdmin.vue';
-import api from '@/services/apiService';
-import { useToast } from "vue-toastification";
-
-export default {
-  name: "gestionServicios",
-  components: {
-    SidebarAdmin
-  },
-  setup() {
-    const toast = useToast();
-    return { toast };
-  },
-  data() {
-    return {
-      isSidebarExpanded: false,
-      showConfirmModal: false,
-      showDetailsModal: false,
-      servicioToDelete: null,
-      servicioDetalle: null,
-      isLoading: false,
-      searchQuery: "",
-      isModalOpen: false,
-      isEditing: false,
-      editIndex: null,
-      currentPage: 1,
-      pageSize: 4,
-      validationErrors: {},
-      servicioForm: {
-        id_servicio: 0,
-        nombre: "",
-        descripcion: "",
-        precio: 0,
-        tiempo_estimado: 0,
-        categoria: ""
-      },
-      servicios: []
-    };
-  },
-  computed: {
-    filteredServicios() {
-      return this.servicios.filter(
-        (servicio) => {
-          const searchTermLower = this.searchQuery.toLowerCase();
-          
-          return (
-            servicio.nombre.toLowerCase().includes(searchTermLower) ||
-            (servicio.descripcion && servicio.descripcion.toLowerCase().includes(searchTermLower)) ||
-            servicio.categoria.toLowerCase().includes(searchTermLower) ||
-            servicio.precio.toString().includes(searchTermLower) ||
-            servicio.tiempo_estimado.toString().includes(searchTermLower)
-          );
-        }
-      );
-    },
-    paginatedServicios() {
-      const startIndex = (this.currentPage - 1) * this.pageSize;
-      const endIndex = startIndex + this.pageSize;
-      return this.filteredServicios.slice(startIndex, endIndex);
-    },
-    totalPages() {
-      return Math.ceil(this.filteredServicios.length / this.pageSize) || 1;
-    },
-  },
-  methods: {
-    handleSidebarToggle(expanded) {
-      this.isSidebarExpanded = expanded;
-    },
-    async loadServicios() {
-      this.isLoading = true;
-      try {
-        const response = await api.servicios.getAll();
-        this.servicios = response.data;
-        
-        if (this.servicios.length > 0) {
-          this.toast.success("Servicios cargados correctamente");
-        } else {
-          this.toast.info("No hay servicios registrados");
-        }
-      } catch (error) {
-        console.error("Error al cargar servicios:", error);
-        this.toast.error("Error al cargar los servicios");
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    verDetalles(servicio) {
-      this.servicioDetalle = {...servicio};
-      this.showDetailsModal = true;
-    },
-    cerrarDetalles() {
-      this.showDetailsModal = false;
-      this.servicioDetalle = null;
-    },
-    openModal() {
-      this.isModalOpen = true;
-      this.validationErrors = {};
-      this.$nextTick(() => {
-        this.$refs.nombreInput?.focus();
-      });
-    },
-    closeModal() {
-      this.isModalOpen = false;
-      this.clearForm();
-    },
-    clearForm() {
-      this.servicioForm = {
-        id_servicio: 0,
-        nombre: "",
-        descripcion: "",
-        precio: 0,
-        tiempo_estimado: 0,
-        categoria: ""
-      };
-      this.isEditing = false;
-      this.editIndex = null;
-      this.validationErrors = {};
-    },
-    validarFormulario() {
-      let isValid = true;
-      this.validationErrors = {};
-
-      if (!this.servicioForm.nombre.trim()) {
-        this.validationErrors.nombre = "El nombre es obligatorio";
-        isValid = false;
-      }
-      
-      if (!this.servicioForm.categoria) {
-        this.validationErrors.categoria = "Debe seleccionar una categoría";
-        isValid = false;
-      }
-      
-      if (this.servicioForm.precio <= 0) {
-        this.validationErrors.precio = "El precio debe ser mayor que cero";
-        isValid = false;
-      }
-      
-      if (this.servicioForm.tiempo_estimado <= 0) {
-        this.validationErrors.tiempo_estimado = "El tiempo estimado debe ser mayor que cero";
-        isValid = false;
-      }
-
-      return isValid;
-    },
-    async guardarServicio() {
-      if (!this.validarFormulario()) {
-        const primerError = Object.values(this.validationErrors)[0];
-        this.toast.error(primerError);
-        return;
-      }
-      
-      this.isLoading = true;
-      
-      try {
-        if (this.isEditing) {
-          const response = await api.servicios.update(
-            this.servicioForm.id_servicio, 
-            this.servicioForm
-          );
-          
-          const index = this.servicios.findIndex(s => s.id_servicio === this.servicioForm.id_servicio);
-          if (index !== -1) {
-            this.servicios.splice(index, 1, response.data);
-          }
-          
-          this.toast.success("Servicio actualizado correctamente");
-        } else {
-          const response = await api.servicios.create(this.servicioForm);
-          this.servicios.push(response.data);
-          this.toast.success("Servicio agregado correctamente");
-        }
-        
-        this.closeModal();
-      } catch (error) {
-        console.error("Error al guardar servicio:", error);
-        this.toast.error("Error al guardar el servicio");
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    previousPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
-    },
-    deleteServicio(servicio) {
-      this.servicioToDelete = servicio;
-      this.showConfirmModal = true;
-    },
-    async confirmDelete() {
-      this.isLoading = true;
-      
-      try {
-        await api.servicios.delete(this.servicioToDelete.id_servicio);
-        
-        const index = this.servicios.findIndex(s => s.id_servicio === this.servicioToDelete.id_servicio);
-        if (index !== -1) {
-          this.servicios.splice(index, 1);
-        }
-        
-        this.toast.success("Servicio eliminado correctamente");
-        this.showConfirmModal = false;
-        this.servicioToDelete = null;
-      } catch (error) {
-        console.error("Error al eliminar servicio:", error);
-        this.toast.error("Error al eliminar el servicio");
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    cancelDelete() {
-      this.showConfirmModal = false;
-      this.servicioToDelete = null;
-    },
-    editServicio(servicio) {
-      this.servicioForm = { ...servicio };
-      this.isEditing = true;
-      this.openModal();
-    }
-  },
-  mounted() {
-    this.loadServicios();
-  }
-};
-
-</script>
+  import SidebarAdmin from './SidebarAdmin.vue';
+ import api from '@/services/apiService';
+ import { useToast } from "vue-toastification";
+ 
+ export default {
+   name: "gestionServicios",
+   components: {
+     SidebarAdmin
+   },
+   setup() {
+     const toast = useToast();
+     return { toast };
+   },
+   data() {
+     return {
+       isSidebarExpanded: false,
+       showConfirmModal: false,
+       showDetailsModal: false,
+       servicioToDelete: null,
+       servicioDetalle: null,
+       isLoading: false,
+       searchQuery: "",
+       isModalOpen: false,
+       isEditing: false,
+       editIndex: null,
+       currentPage: 1,
+       pageSize: 4,
+       validationErrors: {},
+       servicioForm: {
+         id_servicio: 0,
+         nombre: "",
+         descripcion: "",
+         precio: 0,
+         tiempo_estimado: 0,
+         categoria: ""
+       },
+       servicios: []
+     };
+   },
+   computed: {
+     filteredServicios() {
+       return this.servicios.filter(
+         (servicio) => {
+           const searchTermLower = this.searchQuery.toLowerCase();
+           
+           return (
+             servicio.nombre.toLowerCase().includes(searchTermLower) ||
+             (servicio.descripcion && servicio.descripcion.toLowerCase().includes(searchTermLower)) ||
+             servicio.categoria.toLowerCase().includes(searchTermLower) ||
+             servicio.precio.toString().includes(searchTermLower) ||
+             servicio.tiempo_estimado.toString().includes(searchTermLower)
+           );
+         }
+       );
+     },
+     paginatedServicios() {
+       const startIndex = (this.currentPage - 1) * this.pageSize;
+       const endIndex = startIndex + this.pageSize;
+       return this.filteredServicios.slice(startIndex, endIndex);
+     },
+     totalPages() {
+       return Math.ceil(this.filteredServicios.length / this.pageSize) || 1;
+     },
+   },
+   methods: {
+     handleSidebarToggle(expanded) {
+       this.isSidebarExpanded = expanded;
+     },
+     async loadServicios() {
+       this.isLoading = true;
+       try {
+         const response = await api.servicios.getAll();
+         this.servicios = response.data;
+         
+         if (this.servicios.length > 0) {
+           this.toast.success("Servicios cargados correctamente");
+         } else {
+           this.toast.info("No hay servicios registrados");
+         }
+       } catch (error) {
+         console.error("Error al cargar servicios:", error);
+         this.toast.error("Error al cargar los servicios");
+       } finally {
+         this.isLoading = false;
+       }
+     },
+     verDetalles(servicio) {
+       this.servicioDetalle = {...servicio};
+       this.showDetailsModal = true;
+     },
+     cerrarDetalles() {
+       this.showDetailsModal = false;
+       this.servicioDetalle = null;
+     },
+     openModal() {
+       this.isModalOpen = true;
+       this.validationErrors = {};
+       this.$nextTick(() => {
+         this.$refs.nombreInput?.focus();
+       });
+     },
+     closeModal() {
+       this.isModalOpen = false;
+       this.clearForm();
+     },
+     clearForm() {
+       this.servicioForm = {
+         id_servicio: 0,
+         nombre: "",
+         descripcion: "",
+         precio: 0,
+         tiempo_estimado: 0,
+         categoria: ""
+       };
+       this.isEditing = false;
+       this.editIndex = null;
+       this.validationErrors = {};
+     },
+     validarFormulario() {
+       let isValid = true;
+       this.validationErrors = {};
+ 
+       if (!this.servicioForm.nombre.trim()) {
+         this.validationErrors.nombre = "El nombre es obligatorio";
+         isValid = false;
+       }
+       
+       if (!this.servicioForm.categoria) {
+         this.validationErrors.categoria = "Debe seleccionar una categoría";
+         isValid = false;
+       }
+       
+       if (this.servicioForm.precio <= 0) {
+         this.validationErrors.precio = "El precio debe ser mayor que cero";
+         isValid = false;
+       }
+       
+       if (this.servicioForm.tiempo_estimado <= 0) {
+         this.validationErrors.tiempo_estimado = "El tiempo estimado debe ser mayor que cero";
+         isValid = false;
+       }
+ 
+       return isValid;
+     },
+     async guardarServicio() {
+       if (!this.validarFormulario()) {
+         const primerError = Object.values(this.validationErrors)[0];
+         this.toast.error(primerError);
+         return;
+       }
+       
+       this.isLoading = true;
+       
+       try {
+         if (this.isEditing) {
+           const response = await api.servicios.update(
+             this.servicioForm.id_servicio, 
+             this.servicioForm
+           );
+           
+           const index = this.servicios.findIndex(s => s.id_servicio === this.servicioForm.id_servicio);
+           if (index !== -1) {
+             this.servicios.splice(index, 1, response.data);
+           }
+           
+           this.toast.success("Servicio actualizado correctamente");
+         } else {
+           const response = await api.servicios.create(this.servicioForm);
+           this.servicios.push(response.data);
+           this.toast.success("Servicio agregado correctamente");
+         }
+         
+         this.closeModal();
+       } catch (error) {
+         console.error("Error al guardar servicio:", error);
+         this.toast.error("Error al guardar el servicio");
+       } finally {
+         this.isLoading = false;
+       }
+     },
+     previousPage() {
+       if (this.currentPage > 1) {
+         this.currentPage--;
+       }
+     },
+     nextPage() {
+       if (this.currentPage < this.totalPages) {
+         this.currentPage++;
+       }
+     },
+     deleteServicio(servicio) {
+       this.servicioToDelete = servicio;
+       this.showConfirmModal = true;
+     },
+     async confirmDelete() {
+       this.isLoading = true;
+       
+       try {
+         await api.servicios.delete(this.servicioToDelete.id_servicio);
+         
+         const index = this.servicios.findIndex(s => s.id_servicio === this.servicioToDelete.id_servicio);
+         if (index !== -1) {
+           this.servicios.splice(index, 1);
+         }
+         
+         this.toast.success("Servicio eliminado correctamente");
+         this.showConfirmModal = false;
+         this.servicioToDelete = null;
+       } catch (error) {
+         console.error("Error al eliminar servicio:", error);
+         this.toast.error("Error al eliminar el servicio");
+       } finally {
+         this.isLoading = false;
+       }
+     },
+     cancelDelete() {
+       this.showConfirmModal = false;
+       this.servicioToDelete = null;
+     },
+     editServicio(servicio) {
+       this.servicioForm = { ...servicio };
+       this.isEditing = true;
+       this.openModal();
+     }
+   },
+   mounted() {
+     this.loadServicios();
+   }
+ };
+ 
+ </script>
   
   <style src="@/assets/css/Crearservicios.css" scoped></style>

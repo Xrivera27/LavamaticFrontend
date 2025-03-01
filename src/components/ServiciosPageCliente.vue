@@ -10,10 +10,10 @@
           </div>
           <div class="notifications">
             <i class="fas fa-bell"></i>
-            <span class="notification-badge">3</span>
+            <span class="notification-badge" v-if="notificaciones > 0">{{ notificaciones }}</span>
           </div>
           <div class="user-info">
-            <span>Gerson Rivera</span>
+            <span>{{ userName }}</span>
             <span class="user-role">Cliente</span>
           </div>
         </div>
@@ -23,18 +23,22 @@
         
           <div class="contenedor-servicios">
             <h2>SERVICIOS DISPONIBLES</h2>
-            <div class="grid-servicios">
+            <div v-if="isLoading" class="loading-indicator">
+              <div class="spinner"></div>
+              <p>Cargando servicios...</p>
+            </div>
+            <div v-else class="grid-servicios">
               <div class="servicio-card" v-for="(servicio, index) in servicios" :key="index" @click="seleccionarServicio(servicio)">
                 <div class="texto-servicio">
-                  <span>{{ servicio.tipo.split(' ')[0] }}</span>
-                  <span>{{ servicio.tipo.split(' ')[1] }}</span>
+                  <span>{{ servicio.nombre.split(' ')[0] }}</span>
+                  <span>{{ servicio.nombre.split(' ').slice(1).join(' ') }}</span>
                 </div>
                 <div class="acciones-servicio">
                   <button class="btn-accion" @click.stop="verServicio(servicio)">
-                    <i class="icono-ojo"></i>
+                    <i class="fa-solid fa-eye"></i>
                   </button>
                   <button class="btn-accion" @click.stop="agregarServicio(servicio)">
-                    <i class="icono-agregar"></i>
+                    <i class="fa-solid fa-plus"></i>
                   </button>
                 </div>
               </div>
@@ -53,13 +57,13 @@
             </div>
             <div v-else class="lista-servicios">
               <div class="fila-servicio" v-for="(item, index) in serviciosSeleccionados" :key="index">
-                <span>{{ item.tipo }}</span>
+                <span>{{ item.nombre }}</span>
                 <div class="control-cantidad">
                   <button @click="decrementarCantidad(index)">-</button>
                   <span>{{ item.cantidad }}</span>
                   <button @click="incrementarCantidad(index)">+</button>
                 </div>
-                <span>L.{{ (item.precio * item.cantidad).toFixed(2) }}</span>
+                <span>L.{{ formatearPrecio(item.precio * item.cantidad) }}</span>
               </div>
             </div>
           </div>
@@ -68,19 +72,19 @@
             <h2>CARGOS</h2>
             <div class="fila-cargo">
               <span>Subtotal</span>
-              <span>L.{{ calcularSubtotal().toFixed(2) }}</span>
+              <span>L.{{ formatearPrecio(calcularSubtotal()) }}</span>
             </div>
             <div class="fila-cargo total">
               <span>Total</span>
-              <span>L.{{ calcularTotal().toFixed(2) }}</span>
+              <span>L.{{ formatearPrecio(calcularTotal()) }}</span>
             </div>
           </div>
 
           <div class="seccion domicilio">
-            <h2>SERVICIO A DOMICILIO Y ENTREGA</h2>
+            <h2>DETALLES DEL SERVICIO</h2>
 
-            <!-- Fecha única para el servicio -->
-            <div class="fila-completa">
+            <!-- Fecha y hora para el servicio -->
+            <div class="fila-doble">
               <div class="grupo-input">
                 <label>Fecha del servicio</label>
                 <input 
@@ -94,83 +98,66 @@
                   Debe seleccionar una fecha para el servicio
                 </span>
               </div>
-            </div>
-            
-            <!-- Recolección -->
-            <div class="fila-doble">
               <div class="grupo-input">
-                <label>Tipo de recolección</label>
-                <select v-model="tipoRecoleccion" @change="resetDireccionRecoleccion">
+                <label>Hora del servicio</label>
+                <select 
+                  v-model="horaServicio"
+                  :class="{ 'input-error': validacionErrores.horaServicio && !horaServicio }"
+                >
                   <option value="">Seleccionar</option>
-                  <option value="domicilio">A domicilio</option>
-                  <option value="sucursal">En sucursal</option>
-                </select>
-              </div>
-              <div class="grupo-input">
-                <label>Hora de recolección</label>
-                <select v-model="horaRecoleccion">
-                  <option value="">Seleccionar</option>
-                  <option v-for="hora in horasDisponibles" :key="hora" :value="hora">
-                    {{ hora }}
+                  <option v-for="horario in horarios" :key="horario.id_horario" :value="horario.id_horario">
+                    {{ horario.hora_inicio }} - {{ horario.hora_fin }}
                   </option>
                 </select>
-              </div>
-            </div>
-            
-            <div class="fila-completa" v-if="tipoRecoleccion === 'domicilio'">
-              <div class="grupo-input">
-                <label>Dirección de recolección</label>
-                <input 
-                  type="text" 
-                  v-model="direccionRecoleccion" 
-                  placeholder="Ingrese la dirección de recolección"
-                  :class="{ 'input-error': validacionErrores.direccionRecoleccion && !direccionRecoleccion }"
-                />
-                <span v-if="validacionErrores.direccionRecoleccion && !direccionRecoleccion" class="mensaje-error">
-                  La dirección de recolección es obligatoria
+                <span v-if="validacionErrores.horaServicio && !horaServicio" class="mensaje-error">
+                  Debe seleccionar una hora para el servicio
                 </span>
               </div>
             </div>
             
             <!-- Entrega -->
-            <div class="fila-doble">
+            <div class="fila-completa">
               <div class="grupo-input">
                 <label>Tipo de entrega</label>
-                <select v-model="tipoEntrega" @change="resetDireccionEntrega">
-                  <option value="">Seleccionar</option>
-                  <option value="domicilio">A domicilio</option>
+                <select v-model="tipoEntrega" @change="cambiarTipoEntrega">
                   <option value="sucursal">En sucursal</option>
-                </select>
-              </div>
-              <div class="grupo-input">
-                <label>Hora de entrega</label>
-                <select v-model="horaEntrega">
-                  <option value="">Seleccionar</option>
-                  <option v-for="hora in horasDisponibles" :key="hora" :value="hora">
-                    {{ hora }}
-                  </option>
+                  <option value="domicilio">A domicilio</option>
                 </select>
               </div>
             </div>
             
-            <div class="fila-completa" v-if="tipoEntrega === 'domicilio'">
+            <!-- Mostrar solo el campo de barrio/colonia si es entrega a domicilio -->
+            <div v-if="tipoEntrega === 'domicilio'" class="fila-completa">
               <div class="grupo-input">
-                <label>Dirección de entrega</label>
+                <label>Barrio/Colonia de entrega</label>
                 <input 
                   type="text" 
-                  v-model="direccionEntrega" 
-                  placeholder="Ingrese la dirección de entrega"
-                  :class="{ 'input-error': validacionErrores.direccionEntrega && !direccionEntrega }"
+                  v-model="barrioEntrega" 
+                  placeholder="Seleccione o escriba el barrio/colonia"
+                  list="barrios-list"
+                  :class="{ 'input-error': validacionErrores.barrioEntrega && !barrioEntrega }"
                 />
-                <span v-if="validacionErrores.direccionEntrega && !direccionEntrega" class="mensaje-error">
-                  La dirección de entrega es obligatoria
+                <datalist id="barrios-list">
+                  <option v-for="barrio in barriosColonias" :key="barrio" :value="barrio"></option>
+                </datalist>
+                <span v-if="validacionErrores.barrioEntrega && !barrioEntrega" class="mensaje-error">
+                  El barrio/colonia de entrega es obligatorio
                 </span>
               </div>
             </div>
 
             <div class="botones">
               <button class="btn-cancelar" @click="cancelarOrden">Cancelar</button>
-              <button class="btn-enviar" @click="enviarOrden" :disabled="!formularioValido">Enviar</button>
+              <button 
+                class="btn-enviar" 
+                @click="enviarOrden" 
+                :disabled="!formularioValido || isSubmitting"
+              >
+                <span v-if="isSubmitting">
+                  <i class="fas fa-spinner fa-spin"></i> Procesando...
+                </span>
+                <span v-else>Enviar Pedido</span>
+              </button>
             </div>
           </div>
         </div>
@@ -181,13 +168,13 @@
     <div class="modal" v-if="showModal" @click="cerrarModal">
       <div class="modal-contenido" @click.stop>
         <div class="modal-header">
-          <h3>{{ servicioSeleccionado.tipo }}</h3>
+          <h3>{{ servicioSeleccionado.nombre }}</h3>
           <button class="btn-cerrar" @click="cerrarModal">×</button>
         </div>
         <div class="modal-body">
           <div class="detalle-precio">
             <span>Precio:</span>
-            <span class="precio">L.{{ servicioSeleccionado.precio?.toFixed(2) }}</span>
+            <span class="precio">L.{{ formatearPrecio(servicioSeleccionado.precio) }}</span>
           </div>
           <div class="detalle-descripcion">
             <p>{{ servicioSeleccionado.descripcion }}</p>
@@ -195,11 +182,11 @@
           <div class="detalle-info">
             <div class="info-item">
               <i class="fa-regular fa-clock"></i>
-              <span>Tiempo estimado: 24 horas</span>
+              <span>Tiempo estimado: {{ servicioSeleccionado.tiempo_estimado || '24 horas' }}</span>
             </div>
             <div class="info-item">
               <i class="fa-solid fa-shirt"></i>
-              <span>Incluye: Lavado, secado y planchado</span>
+              <span>Categoría: {{ servicioSeleccionado.categoria || 'General' }}</span>
             </div>
           </div>
         </div>
@@ -210,46 +197,109 @@
         </div>
       </div>
     </div>
+    
+    <!-- Modal de Carga y Éxito -->
+    <div class="modal-overlay" v-if="showSuccessModal">
+      <div class="modal-success">
+        <div class="modal-success-content">
+          <div v-if="isRedirecting" class="success-loading">
+            <div class="spinner"></div>
+            <h3>Procesando...</h3>
+            <p>Estamos registrando tu pedido</p>
+          </div>
+          <div v-else class="success-message">
+            <i class="fas fa-check-circle"></i>
+            <h3>¡Pedido creado con éxito!</h3>
+            <p>Redirigiendo a la página de pedidos...</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import Sidebarcliente from './Sidebarcliente.vue'
+import Sidebarcliente from './Sidebarcliente.vue';
+import api from '@/services/apiService';
+import { useToast } from "vue-toastification";
 
 export default {
-  name: 'ServiciosPage',
+  name: 'ClienteNuevoPedido',
   components: {
     Sidebarcliente
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
   data() {
     return {
       isSidebarExpanded: false,
-      servicios: [
-        { tipo: 'LAVADO NORMAL', precio: 50.00, descripcion: 'Lavado estándar para ropa cotidiana. Ideal para prendas de uso diario que no requieren tratamientos especiales.' },
-        { tipo: 'LAVADO ESPECIAL', precio: 75.00, descripcion: 'Lavado para prendas que requieren cuidado adicional como ropa deportiva, jeans y prendas con manchas difíciles.' },
-        { tipo: 'LAVADO ETIQUETA', precio: 100.00, descripcion: 'Lavado profesional para prendas formales y delicadas como trajes, vestidos, sedas y lanas finas.' }
-      ],
+      isLoading: true,
+      isSubmitting: false,
+      userName: sessionStorage.getItem('userName') || 'Cliente',
+      notificaciones: 0,
+      
+      // Datos de servicios
+      servicios: [],
       serviciosSeleccionados: [],
+      
+      // Fecha y hora
       fechaServicio: '',
-      tipoRecoleccion: '',
-      tipoEntrega: '',
-      horaRecoleccion: '',
-      horaEntrega: '',
-      direccionRecoleccion: '',
-      direccionEntrega: '',
-      horasDisponibles: [
-        '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
-        '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM'
-      ],
+      horaServicio: '',
+      horarios: [],
+      
+      // Tipo de entrega
+      tipoEntrega: 'sucursal', // Por defecto en sucursal
+      
+      // Solo barrio/colonia para entrega a domicilio
+      barrioEntrega: '',
+      
       // Modal
       showModal: false,
-      servicioSeleccionado: {},
+      servicioSeleccionado: {
+        id_servicio: null,
+        nombre: '',
+        precio: 0,
+        descripcion: '',
+        tiempo_estimado: '',
+        categoria: ''
+      },
+      
+      // Modal de éxito
+      showSuccessModal: false,
+      isRedirecting: false,
+      
       // Validación
       validacionErrores: {
         fechaServicio: false,
-        direccionRecoleccion: false,
-        direccionEntrega: false
-      }
+        horaServicio: false,
+        barrioEntrega: false
+      },
+      
+      // Lista de barrios y colonias de La Ceiba
+      barriosColonias: [
+        "Barrio Alvarado",
+        "Barrio El Centro",
+        "Barrio Inglés",
+        "Barrio La Isla",
+        "Barrio Mejía",
+        "Barrio Solares Nuevos",
+        "Colonia El Naranjal",
+        "Colonia Luisiana",
+        "Colonia San José",
+        "Colonia Suyapa",
+        "Colonia Los Laureles",
+        "Colonia Miramar",
+        "Colonia Atlántida",
+        "Colonia Gracias a Dios",
+        "Colonia Los Fuertes",
+        "Colonia San Isidro",
+        "Colonia San Judas",
+        "Colonia Toronjal",
+        "Colonia Irías",
+        "Colonia Los Bomberos"
+      ]
     };
   },
   computed: {
@@ -266,60 +316,105 @@ export default {
       // Verificar que haya servicios seleccionados
       const hayServicios = this.serviciosSeleccionados.length > 0;
       
-      // Verificar fecha del servicio
-      const fechaValida = this.fechaServicio !== '';
+      // Verificar fecha y hora del servicio
+      const fechaHoraValida = this.fechaServicio !== '' && this.horaServicio !== '';
       
-      // Verificar campos de recolección
-      const recoleccionValida = this.tipoRecoleccion !== '' && this.horaRecoleccion !== '';
+      // Verificar barrio solo si es entrega a domicilio
+      let entregaValida = true;
+      if (this.tipoEntrega === 'domicilio') {
+        entregaValida = this.barrioEntrega.trim() !== '';
+      }
       
-      // Si es a domicilio, verificar dirección de recolección
-      const direccionRecoleccionValida = this.tipoRecoleccion !== 'domicilio' || 
-                                        (this.tipoRecoleccion === 'domicilio' && this.direccionRecoleccion.trim() !== '');
-      
-      // Verificar campos de entrega
-      const entregaValida = this.tipoEntrega !== '' && this.horaEntrega !== '';
-      
-      // Si es a domicilio, verificar dirección de entrega
-      const direccionEntregaValida = this.tipoEntrega !== 'domicilio' || 
-                                    (this.tipoEntrega === 'domicilio' && this.direccionEntrega.trim() !== '');
-      
-      return hayServicios && fechaValida && recoleccionValida && direccionRecoleccionValida && 
-             entregaValida && direccionEntregaValida;
+      return hayServicios && fechaHoraValida && entregaValida;
     }
   },
   methods: {
     handleSidebarToggle(expanded) {
       this.isSidebarExpanded = expanded;
     },
+    
+    async cargarServicios() {
+      try {
+        this.isLoading = true;
+        const response = await api.servicioCliente.getServicios();
+        this.servicios = response.data;
+      } catch (error) {
+        console.error('Error al cargar servicios:', error);
+        this.toast.error('No se pudieron cargar los servicios disponibles');
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    async cargarHorarios() {
+      try {
+        const response = await api.servicioCliente.getHorarios();
+        this.horarios = response.data;
+      } catch (error) {
+        console.error('Error al cargar horarios:', error);
+        this.toast.error('No se pudieron cargar los horarios disponibles');
+      }
+    },
+    
+    cambiarTipoEntrega() {
+      // Si cambia a sucursal, limpiar campo de barrio
+      if (this.tipoEntrega === 'sucursal') {
+        this.barrioEntrega = '';
+        // También resetear error de validación
+        this.validacionErrores.barrioEntrega = false;
+      }
+    },
+    
+    formatearPrecio(precio) {
+      // Verificar si el precio es un número válido
+      return precio !== undefined && precio !== null && !isNaN(precio) 
+        ? Number(precio).toFixed(2) 
+        : '0.00';
+    },
+    
     seleccionarServicio(servicio) {
-      const index = this.serviciosSeleccionados.findIndex(s => s.tipo === servicio.tipo);
+      const index = this.serviciosSeleccionados.findIndex(s => s.id_servicio === servicio.id_servicio);
       if (index === -1) {
         this.serviciosSeleccionados.push({
-          tipo: servicio.tipo,
-          precio: servicio.precio,
+          id_servicio: servicio.id_servicio,
+          nombre: servicio.nombre,
+          precio: Number(servicio.precio),
           cantidad: 1
         });
       } else {
         this.incrementarCantidad(index);
       }
     },
+    
     verServicio(servicio) {
-      this.servicioSeleccionado = servicio;
+      this.servicioSeleccionado = {
+        id_servicio: servicio.id_servicio,
+        nombre: servicio.nombre,
+        precio: Number(servicio.precio), // Asegurando que sea número
+        descripcion: servicio.descripcion || '',
+        tiempo_estimado: servicio.tiempo_estimado || '24 horas',
+        categoria: servicio.categoria || 'General'
+      };
       this.showModal = true;
     },
+    
     cerrarModal() {
       this.showModal = false;
     },
+    
     agregarServicioDesdeModal() {
       this.agregarServicio(this.servicioSeleccionado);
       this.cerrarModal();
     },
+    
     agregarServicio(servicio) {
       this.seleccionarServicio(servicio);
     },
+    
     incrementarCantidad(index) {
       this.serviciosSeleccionados[index].cantidad++;
     },
+    
     decrementarCantidad(index) {
       if (this.serviciosSeleccionados[index].cantidad > 1) {
         this.serviciosSeleccionados[index].cantidad--;
@@ -327,103 +422,136 @@ export default {
         this.serviciosSeleccionados.splice(index, 1);
       }
     },
+    
     calcularSubtotal() {
       return this.serviciosSeleccionados.reduce((total, item) => {
-        return total + (item.precio * item.cantidad);
+        return total + (Number(item.precio) * item.cantidad);
       }, 0);
     },
+    
     calcularTotal() {
       return this.calcularSubtotal();
     },
-    resetDireccionRecoleccion() {
-      if (this.tipoRecoleccion !== 'domicilio') {
-        this.direccionRecoleccion = '';
-        this.validacionErrores.direccionRecoleccion = false;
-      }
-    },
-    resetDireccionEntrega() {
-      if (this.tipoEntrega !== 'domicilio') {
-        this.direccionEntrega = '';
-        this.validacionErrores.direccionEntrega = false;
-      }
-    },
+    
     validarCampos() {
       // Resetear errores
       this.validacionErrores = {
         fechaServicio: false,
-        direccionRecoleccion: false,
-        direccionEntrega: false
+        horaServicio: false,
+        barrioEntrega: false
       };
       
-      // Validar fecha del servicio
+      // Validar fecha y hora del servicio
       if (!this.fechaServicio) {
         this.validacionErrores.fechaServicio = true;
       }
       
-      // Validar dirección de recolección si es a domicilio
-      if (this.tipoRecoleccion === 'domicilio' && !this.direccionRecoleccion.trim()) {
-        this.validacionErrores.direccionRecoleccion = true;
+      if (!this.horaServicio) {
+        this.validacionErrores.horaServicio = true;
       }
       
-      // Validar dirección de entrega si es a domicilio
-      if (this.tipoEntrega === 'domicilio' && !this.direccionEntrega.trim()) {
-        this.validacionErrores.direccionEntrega = true;
+      // Validar barrio solo si es entrega a domicilio
+      if (this.tipoEntrega === 'domicilio') {
+        if (!this.barrioEntrega.trim()) {
+          this.validacionErrores.barrioEntrega = true;
+        }
       }
       
       // Retornar si hay errores
       return !Object.values(this.validacionErrores).some(valor => valor);
     },
+    
     cancelarOrden() {
       if (confirm('¿Estás seguro de cancelar la orden? Se perderán los datos ingresados.')) {
         this.resetearFormulario();
       }
     },
+    
     resetearFormulario() {
       this.serviciosSeleccionados = [];
       this.fechaServicio = '';
-      this.tipoRecoleccion = '';
-      this.tipoEntrega = '';
-      this.horaRecoleccion = '';
-      this.horaEntrega = '';
-      this.direccionRecoleccion = '';
-      this.direccionEntrega = '';
+      this.horaServicio = '';
+      this.tipoEntrega = 'sucursal';
+      this.barrioEntrega = '';
       this.validacionErrores = {
         fechaServicio: false,
-        direccionRecoleccion: false,
-        direccionEntrega: false
+        horaServicio: false,
+        barrioEntrega: false
       };
     },
-    enviarOrden() {
+    
+    async enviarOrden() {
       if (!this.validarCampos()) {
-        alert('Por favor complete todos los campos requeridos');
+        this.toast.error('Por favor complete todos los campos requeridos');
         return;
       }
       
       if (this.formularioValido) {
-        const ordenData = {
-          servicios: this.serviciosSeleccionados,
-          subtotal: this.calcularSubtotal(),
-          total: this.calcularTotal(),
-          fecha: this.fechaServicio,
-          recoleccion: {
-            tipo: this.tipoRecoleccion,
-            hora: this.horaRecoleccion,
-            direccion: this.direccionRecoleccion || 'En sucursal'
-          },
-          entrega: {
-            tipo: this.tipoEntrega,
-            hora: this.horaEntrega,
-            direccion: this.direccionEntrega || 'En sucursal'
+        try {
+          this.isSubmitting = true;
+          
+          // Preparar servicios para la API
+          const serviciosFormateados = this.serviciosSeleccionados.map(servicio => ({
+            id_servicio: servicio.id_servicio,
+            cantidad: servicio.cantidad
+          }));
+          
+          // Preparar dirección de entrega según el tipo seleccionado
+          let direccionEntrega = '';
+          if (this.tipoEntrega === 'domicilio') {
+            // Si es a domicilio, incluir el barrio/colonia en la dirección de entrega
+            direccionEntrega = this.barrioEntrega;
+          } else {
+            // Si es en sucursal, guardar "En sucursal"
+            direccionEntrega = 'En sucursal';
           }
-        };
-        
-        console.log('Enviando orden:', ordenData);
-        alert('Orden enviada con éxito');
-        this.resetearFormulario();
+          
+          // Preparar objeto para enviar a la API
+          const ordenData = {
+            servicios: serviciosFormateados,
+            fecha: this.fechaServicio,
+            id_horario: this.horaServicio,
+            direccion_recogida: 'En sucursal', // Siempre en sucursal
+            direccion_entrega: direccionEntrega,
+            barrio: this.tipoEntrega === 'domicilio' ? this.barrioEntrega : ''
+          };
+          
+          // Mostrar modal de carga
+          this.isRedirecting = true;
+          this.showSuccessModal = true;
+          
+          // Enviar pedido a la API
+          await api.servicioCliente.crearPedido(ordenData);
+          
+          // Cambiar a mensaje de éxito
+          this.isRedirecting = false;
+          
+          // Resetear formulario
+          this.resetearFormulario();
+          
+          // Esperar 2 segundos antes de redireccionar
+          setTimeout(() => {
+            // Redirigir a la página de pedidos
+            window.location.reload();
+          }, 2000);
+          
+        } catch (error) {
+          // Ocultar modal en caso de error
+          this.showSuccessModal = false;
+          
+          console.error('Error al crear pedido:', error);
+          this.toast.error('Error al crear el pedido: ' + (error.response?.data?.error || 'Inténtelo de nuevo más tarde'));
+        } finally {
+          this.isSubmitting = false;
+        }
       } else {
-        alert('Por favor complete todos los campos requeridos');
+        this.toast.error('Por favor complete todos los campos requeridos');
       }
     }
+  },
+  created() {
+    this.cargarServicios();
+    this.cargarHorarios();
   }
 };
 </script>

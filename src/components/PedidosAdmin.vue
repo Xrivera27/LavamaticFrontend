@@ -27,7 +27,7 @@
             :class="{ active: estadoActual === 'asignados' }"
             @click="cambiarEstado('asignados')"
           >
-            Asignados
+            En camino
             <span class="badge" v-if="pedidosAsignados.length">{{ pedidosAsignados.length }}</span>
           </button>
           <button 
@@ -35,7 +35,7 @@
             :class="{ active: estadoActual === 'finalizados' }"
             @click="cambiarEstado('finalizados')"
           >
-            Finalizados
+            Entregados
             <span class="badge" v-if="pedidosFinalizados.length">{{ pedidosFinalizados.length }}</span>
           </button>
         </div>
@@ -84,10 +84,10 @@
                     {{ pedido.servicios }}
                   </div>
                 </td>
-                <td data-label="Total">${{ Number(pedido.total).toFixed(2) }}</td>
+                <td data-label="Total">LPS.{{ Number(pedido.total).toFixed(2) }}</td>
                 <td data-label="Fecha">{{ formatDate(pedido.fecha) }}</td>
                 <td v-if="estadoActual === 'asignados' || estadoActual === 'finalizados'" data-label="Repartidor">
-                  {{ pedido.repartidor }}
+                  {{ pedido.repartidor || 'Recogida en tienda' }}
                 </td>
                 <td data-label="Estado">
                   <span :class="'badge ' + getEstadoClass(pedido.estado)">
@@ -111,6 +111,26 @@
                     title="Asignar repartidor"
                   >
                     <i class="fa-solid fa-user-plus"></i>
+                  </button>
+
+                  <!-- Nuevo botón para marcar como entregado directo (solo en estado 'en espera') -->
+                  <button
+                    v-if="estadoActual === 'espera'"
+                    class="btn btn-success"
+                    @click="marcarComoEntregado(pedido)"
+                    title="Entregar directo"
+                  >
+                    <i class="fa-solid fa-store"></i>
+                  </button>
+
+                  <!-- Botón para marcar como entregado (solo en estado 'asignados') -->
+                  <button
+                    v-if="estadoActual === 'asignados'"
+                    class="btn btn-success"
+                    @click="marcarComoEntregado(pedido)"
+                    title="Marcar como entregado"
+                  >
+                    <i class="fa-solid fa-check"></i>
                   </button>
 
                   <!-- Botón para volver a poner en espera (solo en estado 'asignados') -->
@@ -181,7 +201,7 @@
                 </div>
                 <div class="detalle-servicios">
                   <strong>Total:</strong>
-                  <span>${{ Number(pedidoDetalle.total).toFixed(2) }}</span>
+                  <span>LPS.{{ Number(pedidoDetalle.total).toFixed(2) }}</span>
                 </div>
                 <div class="detalle-row">
                   <strong>Dirección de Recogida:</strong>
@@ -190,6 +210,16 @@
                 <div class="detalle-row">
                   <strong>Dirección de Entrega:</strong>
                   <span>{{ pedidoDetalle.direccion_entrega || 'No especificada' }}</span>
+                </div>
+                
+                <!-- Botones de acción en modal de detalles para pedidos en espera o en camino -->
+                <div class="detalle-acciones" v-if="pedidoDetalle.estado === 'En Espera' || pedidoDetalle.estado === 'En camino'">
+                  <button 
+                    class="btn btn-success" 
+                    @click="marcarComoEntregadoDesdeModal()"
+                  >
+                    Marcar como entregado
+                  </button>
                 </div>
               </div>
             </div>
@@ -254,6 +284,29 @@
             </div>
           </div>
         </div>
+
+        <!-- Modal de confirmación para marcar como entregado -->
+        <div class="modal" v-if="showEntregadoModal">
+          <div class="modal-confirm">
+            <div class="modal-header">
+              <h2>Confirmación de Entrega</h2>
+            </div>
+            <div class="modal-body-confirm">
+              <p>¿Estás seguro de que quieres marcar este pedido como entregado?</p>
+              <p v-if="pedidoSeleccionado && pedidoSeleccionado.estado === 'En Espera'">
+                Se marcará como entregado directamente sin asignar repartidor.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-success" @click="confirmarEntrega">
+                Sí, confirmar entrega
+              </button>
+              <button class="btn btn-secondary" @click="cancelarEntrega">
+                No, cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -279,6 +332,7 @@ export default {
       showDetailsModal: false,
       showAsignarModal: false,
       showConfirmModal: false,
+      showEntregadoModal: false,
       isLoading: false,
       searchQuery: "",
       currentPage: 1,
@@ -297,17 +351,15 @@ export default {
       return this.pedidos.filter(p => p.estado === 'En Espera' && p.id_repartidor === null);
     },
     pedidosAsignados() {
-      // Considerar como asignados SOLO los pedidos con id_repartidor que NO estén finalizados o entregados
+      // Considerar como asignados los pedidos con id_repartidor que estén en camino
       return this.pedidos.filter(p => 
         p.id_repartidor !== null && 
-        p.estado !== 'Finalizado' && 
-        p.estado !== 'Entregada'
+        p.estado === 'En camino'
       );
     },
     pedidosFinalizados() {
-      // Mostrar todos los pedidos finalizados o entregados
+      // Mostrar todos los pedidos entregados
       return this.pedidos.filter(p => 
-        p.estado === 'Finalizado' || 
         p.estado === 'Entregada'
       );
     },
@@ -320,14 +372,12 @@ export default {
             if (pedido.estado !== 'En Espera' || pedido.id_repartidor !== null) return false;
             break;
           case 'asignados':
-            // Mostrar los que tienen repartidor pero NO están finalizados o entregados
-            if (pedido.id_repartidor === null || 
-                pedido.estado === 'Finalizado' || 
-                pedido.estado === 'Entregada') return false;
+            // Mostrar los que tienen repartidor y están en camino
+            if (pedido.id_repartidor === null || pedido.estado !== 'En camino') return false;
             break;
           case 'finalizados':
-            // Mostrar los pedidos finalizados o entregados
-            if (pedido.estado !== 'Finalizado' && pedido.estado !== 'Entregada') return false;
+            // Mostrar los pedidos entregados
+            if (pedido.estado !== 'Entregada') return false;
             break;
         }
       
@@ -428,7 +478,7 @@ export default {
         // Log para depuración
         console.log("Pedidos procesados:", this.pedidos);
         console.log("Pedidos con repartidor:", this.pedidos.filter(p => p.id_repartidor));
-        console.log("Pedidos finalizados:", this.pedidosFinalizados);
+        console.log("Pedidos entregados:", this.pedidosFinalizados);
         
         this.toast.success("Datos cargados correctamente");
       } catch (error) {
@@ -475,10 +525,8 @@ export default {
     obtenerEstadoNombre(idEstado) {
       const estadosMap = {
         1: 'En Espera',
-        2: 'Asignado',
-        3: 'Finalizado',
-        4: 'Entregada'
-        // Añadir más estados según sea necesario
+        2: 'En camino',
+        3: 'Entregada'
       };
       return estadosMap[idEstado] || 'Desconocido';
     },
@@ -486,10 +534,8 @@ export default {
     obtenerEstadoId(nombreEstado) {
       const estadosMap = {
         'En Espera': 1,
-        'Asignado': 2,
-        'Finalizado': 3,
-        'Entregada': 4
-        // Añadir más estados según sea necesario
+        'En camino': 2,
+        'Entregada': 3
       };
       return estadosMap[nombreEstado] || 1;
     },
@@ -519,8 +565,7 @@ export default {
     getEstadoClass(estado) {
       switch(estado) {
         case 'En Espera': return 'badge-warning';
-        case 'Asignado': return 'badge-primary';
-        case 'Finalizado': return 'badge-success';
+        case 'En camino': return 'badge-primary';
         case 'Entregada': return 'badge-success';
         default: return 'badge-secondary';
       }
@@ -551,19 +596,21 @@ export default {
         console.log("Asignando repartidor:", this.repartidorSeleccionado);
         
         // Llamar a la API para asignar el repartidor
-        await api.pedidos.asignarRepartidor(
+        const response = await api.pedidos.asignarRepartidor(
           this.pedidoSeleccionado.id_pedido, 
           this.repartidorSeleccionado.id_repartidor
         );
+        
+        console.log("Respuesta asignación:", response.data);
         
         // Actualizar localmente
         const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
         if (index !== -1) {
           this.pedidos[index] = {
             ...this.pedidoSeleccionado,
-            estado: 'En Espera', // Mantenerlo en espera como mencionaste
-            id_estado: 1,
-            repartidor: this.repartidorSeleccionado.nombre, // Usar el nombre del objeto seleccionado
+            estado: 'En camino',
+            id_estado: 2,
+            repartidor: this.repartidorSeleccionado.nombre,
             id_repartidor: this.repartidorSeleccionado.id_repartidor
           };
         }
@@ -573,8 +620,6 @@ export default {
         this.pedidoSeleccionado = null;
         this.repartidorSeleccionado = null;
         
-        // Recargar datos para asegurar que todo esté actualizado
-        await this.cargarDatos();
       } catch (error) {
         console.error("Error al asignar repartidor:", error);
         const errorMsg = error.response?.data?.error || "Error al asignar repartidor";
@@ -584,9 +629,7 @@ export default {
       }
     },
     
-    // Método para cerrar el modal de asignación
     cancelarAsignacion() {
-      console.log("Cancelando asignación de repartidor");
       this.showAsignarModal = false;
       this.pedidoSeleccionado = null;
       this.repartidorSeleccionado = null;
@@ -602,7 +645,8 @@ export default {
       
       try {
         // Llamar a la API para volver el pedido a estado "En Espera"
-        await api.pedidos.volverAEspera(this.pedidoSeleccionado.id_pedido);
+        const response = await api.pedidos.volverAEspera(this.pedidoSeleccionado.id_pedido);
+        console.log("Respuesta volver a espera:", response.data);
         
         // Actualizar localmente
         const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
@@ -630,6 +674,57 @@ export default {
     
     cancelarVolverAEspera() {
       this.showConfirmModal = false;
+      this.pedidoSeleccionado = null;
+    },
+    
+    // Nuevos métodos para marcar como entregado
+    marcarComoEntregado(pedido) {
+      this.pedidoSeleccionado = pedido;
+      this.showEntregadoModal = true;
+    },
+    
+    marcarComoEntregadoDesdeModal() {
+      this.pedidoSeleccionado = this.pedidoDetalle;
+      this.showDetailsModal = false;
+      this.showEntregadoModal = true;
+    },
+    
+    async confirmarEntrega() {
+      this.isLoading = true;
+      
+      try {
+        // Cambiar estado a "Entregada" (id_estado 3)
+        const response = await api.pedidos.cambiarEstado(
+          this.pedidoSeleccionado.id_pedido, 
+          3
+        );
+        
+        console.log("Respuesta marcar como entregado:", response.data);
+        
+        // Actualizar localmente
+        const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
+        if (index !== -1) {
+          this.pedidos[index] = {
+            ...this.pedidoSeleccionado,
+            estado: 'Entregada',
+            id_estado: 3
+          };
+        }
+        
+        this.toast.success("Pedido marcado como entregado correctamente");
+        this.showEntregadoModal = false;
+        this.pedidoSeleccionado = null;
+      } catch (error) {
+        console.error("Error al marcar como entregado:", error);
+        const errorMsg = error.response?.data?.error || "Error al marcar el pedido como entregado";
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    cancelarEntrega() {
+      this.showEntregadoModal = false;
       this.pedidoSeleccionado = null;
     },
     
