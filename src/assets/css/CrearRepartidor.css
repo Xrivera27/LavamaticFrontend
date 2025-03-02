@@ -342,3 +342,53 @@ input, select, textarea {
     overflow-x: auto;
   }
 }
+
+.badge-info {
+  background-color: #17a2b8;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge-info::before {
+  content: "✓";
+  display: inline-block;
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+/* Mejoras para otros badges */
+.badge-warning, .badge-primary, .badge-success, .badge-secondary {
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge-warning::before {
+  content: "⌛";
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.badge-primary::before {
+  content: "🚚";
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.badge-success::before {
+  content: "✅";
+  display: inline-block;
+  margin-right: 5px;
+}

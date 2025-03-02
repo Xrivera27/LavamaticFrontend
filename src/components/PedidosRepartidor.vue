@@ -81,7 +81,7 @@
                 <td data-label="Cliente">{{ pedido.cliente }}</td>
                 <td data-label="Dirección">
                   <div class="direccion-cell">
-                    {{ pedido.direccion_entrega || pedido.direccion_recogida || 'No especificada' }}
+                    {{ pedido.direccion_entrega || 'No especificada' }}
                   </div>
                 </td>
                 <td data-label="Servicios">
@@ -171,10 +171,6 @@
                 <div class="detalle-row">
                   <strong>Dirección de Entrega:</strong>
                   <span>{{ pedidoDetalle.direccion_entrega || 'No especificada' }}</span>
-                </div>
-                <div class="detalle-row">
-                  <strong>Dirección de Recogida:</strong>
-                  <span>{{ pedidoDetalle.direccion_recogida || 'No especificada' }}</span>
                 </div>
                 <div class="detalle-row" v-if="pedidoDetalle.barrio">
                   <strong>Barrio/Colonia:</strong>
@@ -285,7 +281,7 @@
               <div class="mapa-placeholder">
                 <i class="fa-solid fa-map-location-dot"></i>
                 <p>Para este pedido, la dirección es:</p>
-                <p class="direccion-mapa">{{ pedidoSeleccionado?.direccion_entrega || pedidoSeleccionado?.direccion_recogida || 'No especificada' }}</p>
+                <p class="direccion-mapa">{{ pedidoSeleccionado?.direccion_entrega || 'No especificada' }}</p>
                 <p class="barrio-centro">{{ pedidoSeleccionado?.barrio }}</p>
               </div>
               
@@ -302,7 +298,7 @@
                 <p>Longitud: {{ ubicacionActual.lng }}</p>
                 
                 <a 
-                  :href="`https://www.google.com/maps/dir/?api=1&origin=${ubicacionActual.lat},${ubicacionActual.lng}&destination=${encodeURIComponent(pedidoSeleccionado?.direccion_entrega || pedidoSeleccionado?.direccion_recogida)}, ${pedidoSeleccionado?.barrio}, La Ceiba`" 
+                  :href="`https://www.google.com/maps/dir/?api=1&origin=${ubicacionActual.lat},${ubicacionActual.lng}&destination=${encodeURIComponent(pedidoSeleccionado?.direccion_entrega || 'La Ceiba')}, ${pedidoSeleccionado?.barrio}, La Ceiba`" 
                   target="_blank" 
                   class="btn btn-ver-ruta"
                 >

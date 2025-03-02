@@ -118,7 +118,10 @@
             <!-- Entrega -->
             <div class="fila-completa">
               <div class="grupo-input">
-                <label>Tipo de entrega</label>
+                <label>
+                  Tipo de entrega
+                  <i class="fa-solid fa-circle-info info-icon" @click="mostrarInfoEntrega"></i>
+                </label>
                 <select v-model="tipoEntrega" @change="cambiarTipoEntrega">
                   <option value="sucursal">En sucursal</option>
                   <option value="domicilio">A domicilio</option>
@@ -198,6 +201,36 @@
       </div>
     </div>
     
+    <!-- Modal de Información de Tipo de Entrega -->
+    <div class="modal" v-if="showInfoModal" @click="cerrarInfoModal">
+      <div class="modal-contenido modal-info" @click.stop>
+        <div class="modal-header">
+          <h3>Información sobre tipo de entrega</h3>
+          <button class="btn-cerrar" @click="cerrarInfoModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="info-content">
+            <p>Esta es la manera en la cual volveremos a dejar su producto una vez finalizado el servicio:</p>
+            
+            <div class="info-option">
+              <h4><i class="fa-solid fa-store"></i> En sucursal</h4>
+              <p>El producto estará disponible para recogerlo en nuestra tienda física. Usted debe visitar nuestra sucursal para retirar sus prendas.</p>
+            </div>
+            
+            <div class="info-option">
+              <h4><i class="fa-solid fa-truck"></i> A domicilio</h4>
+              <p>Nuestro repartidor llevará el producto directamente a la dirección que usted especifique. Es necesario indicar el barrio o colonia para la entrega.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-entendido" @click="cerrarInfoModal">
+            Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+    
     <!-- Modal de Carga y Éxito -->
     <div class="modal-overlay" v-if="showSuccessModal">
       <div class="modal-success">
@@ -257,6 +290,7 @@ export default {
       
       // Modal
       showModal: false,
+      showInfoModal: false,
       servicioSeleccionado: {
         id_servicio: null,
         nombre: '',
@@ -400,6 +434,14 @@ export default {
     
     cerrarModal() {
       this.showModal = false;
+    },
+    
+    mostrarInfoEntrega() {
+      this.showInfoModal = true;
+    },
+    
+    cerrarInfoModal() {
+      this.showInfoModal = false;
     },
     
     agregarServicioDesdeModal() {

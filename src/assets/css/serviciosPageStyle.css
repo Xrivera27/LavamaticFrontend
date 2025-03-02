@@ -639,3 +639,64 @@ select:focus {
   font-size: 1rem;
   color: #666;
 }
+
+.info-icon {
+  margin-left: 8px;
+  font-size: 18px;
+  color: #3498db;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.info-icon:hover {
+  color: #2980b9;
+}
+
+.modal-info {
+  max-width: 500px;
+}
+
+.info-content {
+  padding: 15px 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.info-option {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.info-option h4 {
+  color: #2c3e50;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.info-option h4 i {
+  margin-right: 8px;
+  color: #3498db;
+}
+
+.info-option p {
+  margin: 0;
+  color: #555;
+}
+
+.btn-entendido {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.btn-entendido:hover {
+  background-color: #2980b9;
+}
