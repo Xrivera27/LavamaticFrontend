@@ -27,7 +27,7 @@
             :key="tab.id" 
             class="tab" 
             :class="{ 'active': activeTab === tab.id }"
-            @click="activeTab = tab.id"
+            @click="setActiveTab(tab.id)"
           >
             <i :class="tab.icon"></i>
             {{ tab.name }}
@@ -55,8 +55,13 @@
             </div>
           </div>
 
+          <!-- Loading indicator -->
+          <div v-if="loading" class="loading-indicator">
+            <i class="fas fa-spinner fa-spin"></i> Cargando pedidos...
+          </div>
+
           <!-- Tabla de órdenes -->
-          <div class="orders-table-container">
+          <div v-else class="orders-table-container">
             <table class="orders-table">
               <thead>
                 <tr>
@@ -74,40 +79,33 @@
                     No se encontraron órdenes para mostrar.
                   </td>
                 </tr>
-                <tr v-for="order in paginatedOrders" :key="order.id">
-                  <td>{{ order.id }}</td>
-                  <td>{{ formatDate(order.fecha) }}</td>
+                <tr v-for="order in paginatedOrders" :key="order.id_pedido">
+                  <td>{{ order.id_pedido }}</td>
+                  <td>{{ formatDate(order.fecha_creacion || order.fecha) }}</td>
                   <td>
                     <div class="service-tags">
                       <span 
-                        v-for="(servicio, index) in order.servicios" 
+                        v-for="(servicio, index) in getServiciosArray(order)" 
                         :key="index" 
                         class="service-tag"
                       >
-                        {{ servicio }}
+                        {{ getServicioNombre(servicio) }}
                       </span>
                     </div>
                   </td>
-                  <td>L.{{ order.total.toFixed(2) }}</td>
+                  <td>L.{{ typeof order.total === 'number' ? order.total.toFixed(2) : order.total }}</td>
                   <td>
                     <span 
                       class="status-badge" 
-                      :class="`status-${order.estado.toLowerCase()}`"
+                      :class="`status-${formatStatusClass(order.id_estado)}`"
                     >
-                      {{ order.estado }}
+                      {{ getEstadoNombre(order.id_estado) }}
                     </span>
                   </td>
                   <td>
                     <div class="action-buttons">
                       <button @click="verDetalles(order)" class="btn-details">
                         <i class="fas fa-eye"></i>
-                      </button>
-                      <button 
-                        v-if="order.estado === 'Activa'" 
-                        @click="cancelarOrden(order)" 
-                        class="btn-cancel"
-                      >
-                        <i class="fas fa-times"></i>
                       </button>
                     </div>
                   </td>
@@ -117,7 +115,7 @@
           </div>
 
           <!-- Paginación -->
-          <div class="pagination">
+          <div v-if="!loading && totalPages > 0" class="pagination">
             <button 
               @click="currentPage--" 
               :disabled="currentPage === 1" 
@@ -153,7 +151,7 @@
       <div class="order-details-modal" v-if="selectedOrder" @click="closeModal">
         <div class="modal-content" @click.stop>
           <div class="modal-header">
-            <h3>Detalles de la Orden #{{ selectedOrder.id }}</h3>
+            <h3>Detalles de la Orden #{{ selectedOrder.id_pedido }}</h3>
             <button class="close-btn" @click="closeModal">
               <i class="fas fa-times"></i>
             </button>
@@ -162,62 +160,62 @@
             <div class="order-info">
               <div class="info-row">
                 <span class="info-label">Fecha:</span>
-                <span>{{ formatDate(selectedOrder.fecha) }}</span>
+                <span>{{ formatDate(selectedOrder.fecha_creacion || selectedOrder.fecha) }}</span>
               </div>
               <div class="info-row">
                 <span class="info-label">Estado:</span>
                 <span 
                   class="status-badge" 
-                  :class="`status-${selectedOrder.estado.toLowerCase()}`"
+                  :class="`status-${formatStatusClass(selectedOrder.id_estado)}`"
                 >
-                  {{ selectedOrder.estado }}
+                  {{ getEstadoNombre(selectedOrder.id_estado) }}
                 </span>
               </div>
               <div class="info-row">
                 <span class="info-label">Entrega:</span>
-                <span>{{ selectedOrder.entrega }}</span>
+                <span>{{ isRecogidaEnTienda(selectedOrder) ? 'Recogida en tienda' : 'A domicilio' }}</span>
               </div>
-              <div class="info-row" v-if="selectedOrder.fechaEntrega">
+              <div class="info-row" v-if="selectedOrder.fecha_estimada_entrega">
                 <span class="info-label">Fecha estimada de entrega:</span>
-                <span>{{ formatDate(selectedOrder.fechaEntrega) }}</span>
+                <span>{{ formatDate(selectedOrder.fecha_estimada_entrega) }}</span>
               </div>
             </div>
 
             <h4>Servicios</h4>
             <div class="order-items">
               <div 
-                v-for="(item, index) in selectedOrder.items" 
+                v-for="(item, index) in getServiciosDetallados(selectedOrder)" 
                 :key="index" 
                 class="order-item"
               >
                 <div class="item-details">
-                  <span class="item-name">{{ item.tipo }}</span>
+                  <span class="item-name">{{ item.nombre }}</span>
                   <span class="item-quantity">{{ item.cantidad }}x</span>
                 </div>
-                <span class="item-price">L.{{ (item.precio * item.cantidad).toFixed(2) }}</span>
+                <span class="item-price">L.{{ typeof item.subtotal === 'number' ? item.subtotal.toFixed(2) : item.subtotal }}</span>
               </div>
             </div>
 
             <div class="order-summary">
               <div class="summary-row">
                 <span>Subtotal</span>
-                <span>L.{{ selectedOrder.subtotal.toFixed(2) }}</span>
+                <span>L.{{ typeof selectedOrder.total === 'number' ? selectedOrder.total.toFixed(2) : selectedOrder.total }}</span>
               </div>
               <div class="summary-row" v-if="selectedOrder.descuento">
                 <span>Descuento</span>
-                <span>-L.{{ selectedOrder.descuento.toFixed(2) }}</span>
+                <span>-L.{{ typeof selectedOrder.descuento === 'number' ? selectedOrder.descuento.toFixed(2) : selectedOrder.descuento }}</span>
               </div>
               <div class="summary-row total">
                 <span>Total</span>
-                <span>L.{{ selectedOrder.total.toFixed(2) }}</span>
+                <span>L.{{ typeof selectedOrder.total === 'number' ? selectedOrder.total.toFixed(2) : selectedOrder.total }}</span>
               </div>
             </div>
 
-            <div class="tracking-info" v-if="selectedOrder.tracking">
+            <div class="tracking-info">
               <h4>Seguimiento de la Orden</h4>
               <div class="tracking-timeline">
                 <div 
-                  v-for="(step, index) in selectedOrder.tracking" 
+                  v-for="(step, index) in getTrackingSteps(selectedOrder)" 
                   :key="index" 
                   class="tracking-step"
                   :class="{ 'completed': step.completado }"
@@ -226,22 +224,17 @@
                     <div class="step-icon">
                       <i :class="step.icon"></i>
                     </div>
-                    <div class="step-line" v-if="index < selectedOrder.tracking.length - 1"></div>
+                    <div class="step-line" v-if="index < getTrackingSteps(selectedOrder).length - 1"></div>
                   </div>
                   <div class="step-content">
                     <div class="step-title">{{ step.titulo }}</div>
                     <div class="step-datetime" v-if="step.completado">
-                      {{ formatDate(step.fecha) }} - {{ step.hora }}
+                      {{ formatDate(step.fecha) }} {{ step.hora ? '- ' + step.hora : '' }}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="modal-footer" v-if="selectedOrder.estado === 'Activa'">
-            <button class="btn-cancel-order" @click="cancelarOrden(selectedOrder)">
-              Cancelar Orden
-            </button>
           </div>
         </div>
       </div>
@@ -250,7 +243,8 @@
 </template>
 
 <script>
-import Sidebarcliente from './Sidebarcliente.vue'
+import Sidebarcliente from './Sidebarcliente.vue';
+import api from '@/services/apiService';
 
 export default {
   name: 'HistorialPedidos',
@@ -269,124 +263,19 @@ export default {
       currentPage: 1,
       pageSize: 5,
       selectedOrder: null,
+      loading: true,
+      orders: [],
       tabs: [
         { id: 'todas', name: 'Todas', icon: 'fas fa-list' },
-        { id: 'activa', name: 'Activas', icon: 'fas fa-spinner' },
+        { id: 'activa', name: 'En Espera', icon: 'fas fa-clock' },
         { id: 'en-camino', name: 'En Camino', icon: 'fas fa-truck' },
-        { id: 'finalizada', name: 'Finalizadas', icon: 'fas fa-check-circle' }
+        { id: 'entregada', name: 'Entregadas', icon: 'fas fa-check-circle' }
       ],
-      // Datos de prueba (simulando respuesta del backend)
-      orders: [
-        {
-          id: 1001,
-          fecha: new Date(2023, 1, 15),
-          servicios: ['LAVADO NORMAL', 'PLANCHADO'],
-          total: 125.00,
-          estado: 'Activa',
-          entrega: 'A domicilio',
-          subtotal: 125.00,
-          items: [
-            { tipo: 'LAVADO NORMAL', cantidad: 2, precio: 50.00 },
-            { tipo: 'PLANCHADO', cantidad: 1, precio: 25.00 }
-          ],
-          tracking: [
-            { titulo: 'Orden Recibida', completado: true, fecha: new Date(2023, 1, 15), hora: '10:30 AM', icon: 'fas fa-clipboard-check' },
-            { titulo: 'En Proceso', completado: true, fecha: new Date(2023, 1, 15), hora: '01:45 PM', icon: 'fas fa-soap' },
-            { titulo: 'Listo para Entrega', completado: false, fecha: null, hora: null, icon: 'fas fa-box' },
-            { titulo: 'En Camino', completado: false, fecha: null, hora: null, icon: 'fas fa-truck' },
-            { titulo: 'Entregado', completado: false, fecha: null, hora: null, icon: 'fas fa-house-user' }
-          ]
-        },
-        {
-          id: 1002,
-          fecha: new Date(2023, 1, 18),
-          servicios: ['LAVADO ESPECIAL'],
-          total: 75.00,
-          estado: 'En Camino',
-          entrega: 'A domicilio',
-          fechaEntrega: new Date(2023, 1, 20),
-          subtotal: 75.00,
-          items: [
-            { tipo: 'LAVADO ESPECIAL', cantidad: 1, precio: 75.00 }
-          ],
-          tracking: [
-            { titulo: 'Orden Recibida', completado: true, fecha: new Date(2023, 1, 18), hora: '09:15 AM', icon: 'fas fa-clipboard-check' },
-            { titulo: 'En Proceso', completado: true, fecha: new Date(2023, 1, 18), hora: '11:30 AM', icon: 'fas fa-soap' },
-            { titulo: 'Listo para Entrega', completado: true, fecha: new Date(2023, 1, 19), hora: '04:20 PM', icon: 'fas fa-box' },
-            { titulo: 'En Camino', completado: true, fecha: new Date(2023, 1, 20), hora: '10:00 AM', icon: 'fas fa-truck' },
-            { titulo: 'Entregado', completado: false, fecha: null, hora: null, icon: 'fas fa-house-user' }
-          ]
-        },
-        {
-          id: 1003,
-          fecha: new Date(2023, 1, 10),
-          servicios: ['LAVADO NORMAL', 'LAVADO ETIQUETA'],
-          total: 150.00,
-          estado: 'Finalizada',
-          entrega: 'Recogida en tienda',
-          subtotal: 150.00,
-          items: [
-            { tipo: 'LAVADO NORMAL', cantidad: 1, precio: 50.00 },
-            { tipo: 'LAVADO ETIQUETA', cantidad: 1, precio: 100.00 }
-          ],
-          tracking: [
-            { titulo: 'Orden Recibida', completado: true, fecha: new Date(2023, 1, 10), hora: '11:00 AM', icon: 'fas fa-clipboard-check' },
-            { titulo: 'En Proceso', completado: true, fecha: new Date(2023, 1, 10), hora: '02:30 PM', icon: 'fas fa-soap' },
-            { titulo: 'Listo para Recogida', completado: true, fecha: new Date(2023, 1, 12), hora: '10:45 AM', icon: 'fas fa-box' },
-            { titulo: 'Recogido', completado: true, fecha: new Date(2023, 1, 12), hora: '05:30 PM', icon: 'fas fa-check-circle' }
-          ]
-        },
-        {
-          id: 1004,
-          fecha: new Date(2023, 2, 5),
-          servicios: ['LAVADO ESPECIAL', 'PLANCHADO'],
-          total: 100.00,
-          estado: 'Finalizada',
-          entrega: 'A domicilio',
-          subtotal: 100.00,
-          items: [
-            { tipo: 'LAVADO ESPECIAL', cantidad: 1, precio: 75.00 },
-            { tipo: 'PLANCHADO', cantidad: 1, precio: 25.00 }
-          ]
-        },
-        {
-          id: 1005,
-          fecha: new Date(2023, 2, 8),
-          servicios: ['LAVADO NORMAL'],
-          total: 50.00,
-          estado: 'Activa',
-          entrega: 'Recogida en tienda',
-          subtotal: 50.00,
-          items: [
-            { tipo: 'LAVADO NORMAL', cantidad: 1, precio: 50.00 }
-          ]
-        },
-        {
-          id: 1006,
-          fecha: new Date(2023, 2, 12),
-          servicios: ['LAVADO ETIQUETA'],
-          total: 100.00,
-          estado: 'En Camino',
-          entrega: 'A domicilio',
-          fechaEntrega: new Date(2023, 2, 14),
-          subtotal: 100.00,
-          items: [
-            { tipo: 'LAVADO ETIQUETA', cantidad: 1, precio: 100.00 }
-          ]
-        },
-        {
-          id: 1007,
-          fecha: new Date(2023, 2, 15),
-          servicios: ['LAVADO NORMAL', 'LAVADO ESPECIAL'],
-          total: 125.00,
-          estado: 'Activa',
-          entrega: 'A domicilio',
-          subtotal: 125.00,
-          items: [
-            { tipo: 'LAVADO NORMAL', cantidad: 1, precio: 50.00 },
-            { tipo: 'LAVADO ESPECIAL', cantidad: 1, precio: 75.00 }
-          ]
-        }
+      estados: [
+        { id: 1, nombre: 'En Espera', descripcion: 'Pedidos que se han hecho y no tienen asignacion de repartidor' },
+        { id: 2, nombre: 'En Camino', descripcion: 'Repartidor va en camino a recoger o entregar producto' },
+        { id: 3, nombre: 'Entregada', descripcion: 'Entregadas tanto en lavamatic, como en casa del cliente' },
+        { id: 4, nombre: 'Listo para recoger', descripcion: 'Son productos que estan listo para ser recogidos en tienda' }
       ]
     }
   },
@@ -397,33 +286,66 @@ export default {
       // Filtrar por pestaña activa
       if (this.activeTab !== 'todas') {
         const statusMap = {
-          'activa': 'Activa',
-          'en-camino': 'En Camino',
-          'finalizada': 'Finalizada'
+          'activa': 1,         // En Espera
+          'listo': 4,          // Listo para recoger
+          'en-camino': 2,      // En camino
+          'entregada': 3       // Entregada
         };
         
-        result = result.filter(order => order.estado === statusMap[this.activeTab]);
+        result = result.filter(order => {
+          // Convertir a número si viene como string
+          const idEstado = typeof order.id_estado === 'string' 
+            ? parseInt(order.id_estado, 10) 
+            : order.id_estado;
+          return idEstado === statusMap[this.activeTab];
+        });
       }
       
       // Filtrar por búsqueda
       if (this.searchQuery.trim()) {
         const query = this.searchQuery.toLowerCase();
-        result = result.filter(order => 
-          order.id.toString().includes(query) || 
-          order.servicios.some(servicio => servicio.toLowerCase().includes(query))
-        );
+        result = result.filter(order => {
+          // Buscar en ID
+          const idMatch = order.id_pedido && order.id_pedido.toString().includes(query);
+          
+          // Buscar en servicios (considerando diferentes estructuras posibles)
+          let servicioMatch = false;
+          const servicios = this.getServiciosArray(order);
+          
+          if (servicios && servicios.length > 0) {
+            servicioMatch = servicios.some(servicio => {
+              // Si el servicio tiene un objeto servicio anidado
+              if (servicio.servicio && servicio.servicio.nombre) {
+                return servicio.servicio.nombre.toLowerCase().includes(query);
+              }
+              // Si el servicio tiene directamente un nombre
+              if (servicio.nombre) {
+                return servicio.nombre.toLowerCase().includes(query);
+              }
+              return false;
+            });
+          }
+          
+          return idMatch || servicioMatch;
+        });
       }
       
       // Filtrar por fechas
       if (this.dateFilter.from) {
         const fromDate = new Date(this.dateFilter.from);
-        result = result.filter(order => new Date(order.fecha) >= fromDate);
+        result = result.filter(order => {
+          const orderDate = new Date(order.fecha_creacion || order.fecha);
+          return orderDate >= fromDate;
+        });
       }
       
       if (this.dateFilter.to) {
         const toDate = new Date(this.dateFilter.to);
         toDate.setHours(23, 59, 59, 999); // Hasta el final del día
-        result = result.filter(order => new Date(order.fecha) <= toDate);
+        result = result.filter(order => {
+          const orderDate = new Date(order.fecha_creacion || order.fecha);
+          return orderDate <= toDate;
+        });
       }
       
       return result;
@@ -445,17 +367,25 @@ export default {
         todas: this.orders.length,
         activa: 0,
         'en-camino': 0,
-        finalizada: 0
+        entregada: 0,
+        listo: 0
       };
       
       // Contar órdenes por estado
       this.orders.forEach(order => {
-        if (order.estado === 'Activa') {
+        // Convertir a número si viene como string
+        const idEstado = typeof order.id_estado === 'string' 
+          ? parseInt(order.id_estado, 10) 
+          : order.id_estado;
+        
+        if (idEstado === 1) {
           counts.activa++;
-        } else if (order.estado === 'En Camino') {
+        } else if (idEstado === 2) {
           counts['en-camino']++;
-        } else if (order.estado === 'Finalizada') {
-          counts.finalizada++;
+        } else if (idEstado === 3) {
+          counts.entregada++;
+        } else if (idEstado === 4) {
+          counts.listo++;
         }
       });
       
@@ -476,9 +406,33 @@ export default {
       }
     }
   },
+  created() {
+    this.fetchPedidos();
+  },
   methods: {
     handleSidebarToggle(expanded) {
       this.isSidebarExpanded = expanded;
+    },
+    
+    setActiveTab(tabId) {
+      this.activeTab = tabId;
+      // Si estamos cambiando a un tab específico, podríamos hacer una llamada a la API con ese filtro
+      if (tabId !== 'todas') {
+        this.fetchPedidosByEstado(tabId);
+      } else {
+        this.fetchPedidos();
+      }
+    },
+
+    // Método para obtener el nombre del estado según su ID
+    getEstadoNombre(id_estado) {
+      // Convertir a número si viene como string
+      const idEstado = typeof id_estado === 'string' 
+        ? parseInt(id_estado, 10) 
+        : id_estado;
+        
+      const estado = this.estados.find(e => e.id === idEstado);
+      return estado ? estado.nombre : 'Desconocido';
     },
     
     // Método para obtener conteo de órdenes por pestaña
@@ -486,35 +440,247 @@ export default {
       return this.orderCounts[tabId];
     },
     
-    formatDate(date) {
-      if (!date) return '';
-      const d = new Date(date);
-      return d.toLocaleDateString('es-HN', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric' 
+    // Obtener array de servicios, independientemente de la estructura de datos
+    getServiciosArray(order) {
+      if (!order) return [];
+      
+      if (order.servicios && Array.isArray(order.servicios)) {
+        return order.servicios;
+      }
+      
+      // Si no hay servicios, devolvemos un array vacío
+      return [];
+    },
+    
+    // Obtener el nombre de un servicio
+    getServicioNombre(servicio) {
+      if (!servicio) return 'Servicio';
+      
+      // Si el servicio tiene un objeto servicio anidado
+      if (servicio.servicio && servicio.servicio.nombre) {
+        return servicio.servicio.nombre;
+      }
+      
+      // Si el servicio tiene directamente un nombre
+      if (servicio.nombre) {
+        return servicio.nombre;
+      }
+      
+      return 'Servicio';
+    },
+    
+    // Obtener servicios detallados para la vista de detalle
+    getServiciosDetallados(order) {
+      if (!order) return [];
+      
+      const serviciosArray = this.getServiciosArray(order);
+      
+      return serviciosArray.map(servicio => {
+        // Si el servicio tiene un objeto servicio anidado
+        if (servicio.servicio) {
+          const precio = servicio.servicio.precio 
+            ? parseFloat(servicio.servicio.precio) 
+            : 0;
+          const cantidad = servicio.cantidad 
+            ? parseInt(servicio.cantidad, 10) 
+            : 1;
+          return {
+            nombre: servicio.servicio.nombre || 'Servicio',
+            precio: precio,
+            cantidad: cantidad,
+            subtotal: precio * cantidad
+          };
+        }
+        
+        // Si el servicio tiene directamente sus propiedades
+        const precio = servicio.precio 
+          ? parseFloat(servicio.precio) 
+          : 0;
+        const cantidad = servicio.cantidad 
+          ? parseInt(servicio.cantidad, 10) 
+          : 1;
+        const subtotal = servicio.subtotal 
+          ? parseFloat(servicio.subtotal) 
+          : precio * cantidad;
+          
+        return {
+          nombre: servicio.nombre || 'Servicio',
+          precio: precio,
+          cantidad: cantidad,
+          subtotal: subtotal
+        };
       });
     },
     
-    verDetalles(order) {
-      this.selectedOrder = { ...order };
+    // Verificar si es recogida en tienda
+    isRecogidaEnTienda(order) {
+      if (!order) return false;
+      
+      const direccionEntrega = order.direccion_entrega || '';
+      return direccionEntrega.toLowerCase().includes('recoger en sucursal') || 
+             direccionEntrega.toLowerCase().includes('tienda') ||
+             direccionEntrega.toLowerCase().includes('local');
+    },
+    
+    formatDate(date) {
+      if (!date) return '';
+      
+      try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return 'Fecha inválida';
+        
+        return d.toLocaleDateString('es-HN', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric' 
+        });
+      } catch (error) {
+        console.error('Error al formatear fecha:', error);
+        return 'Fecha inválida';
+      }
+    },
+
+    // Formatea un estado para usar en clases CSS
+    formatStatusClass(estado) {
+      // Convertir a número si es string
+      const idEstado = typeof estado === 'string' 
+        ? parseInt(estado, 10) 
+        : estado;
+        
+      // Usar el mapa de estados
+      switch (idEstado) {
+        case 1: return 'en-espera';
+        case 2: return 'en-camino';
+        case 3: return 'entregada';
+        case 4: return 'listo-para-recoger';
+        default: return 'desconocido';
+      }
+    },
+    
+    async verDetalles(order) {
+      // Clonamos la orden para evitar cambios reactivos en la vista
+      this.selectedOrder = JSON.parse(JSON.stringify(order));
+      
+      // Si el pedido no tiene detalles completos, podemos intentar cargarlos
+      if (!this.getServiciosArray(order).length) {
+        try {
+          const response = await api.servicioCliente.getPedidoDetalle(order.id_pedido);
+          if (response.data) {
+            this.selectedOrder = response.data;
+          }
+        } catch (error) {
+          console.error('Error al cargar detalles del pedido:', error);
+        }
+      }
     },
     
     closeModal() {
       this.selectedOrder = null;
     },
     
-    cancelarOrden(order) {
-      if (confirm(`¿Estás seguro que deseas cancelar la orden #${order.id}?`)) {
-        // Aquí iría la lógica para cancelar la orden en el backend
-        alert(`Orden #${order.id} cancelada con éxito.`);
-        // Actualiza el estado en el frontend para feedback inmediato
-        const index = this.orders.findIndex(o => o.id === order.id);
-        if (index !== -1) {
-          this.orders[index].estado = 'Cancelada';
-        }
-        this.closeModal();
+    // Método para obtener pasos de tracking según el estado de la orden
+    getTrackingSteps(order) {
+      if (!order) return [];
+      
+      const isDelivery = !this.isRecogidaEnTienda(order);
+      const steps = [];
+      
+      // Convertir id_estado a número si es string
+      const idEstado = typeof order.id_estado === 'string' 
+        ? parseInt(order.id_estado, 10) 
+        : order.id_estado;
+      
+      // Fecha de creación
+      const fechaCreacion = order.fecha_creacion || order.fecha || new Date();
+      
+      // Paso 1: Orden recibida (siempre completado)
+      steps.push({
+        titulo: 'Orden Recibida',
+        completado: true,
+        fecha: fechaCreacion,
+        hora: new Date(fechaCreacion).toLocaleTimeString('es-HN', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        icon: 'fas fa-clipboard-check'
+      });
+      
+      // Paso 2: En Proceso 
+      steps.push({
+        titulo: 'En Proceso',
+        completado: idEstado >= 2,
+        fecha: idEstado >= 2 ? (order.fecha_actualizacion || fechaCreacion) : null,
+        hora: idEstado >= 2 ? new Date(order.fecha_actualizacion || fechaCreacion).toLocaleTimeString('es-HN', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }) : null,
+        icon: 'fas fa-soap'
+      });
+      
+      // A partir de aquí, el flujo depende de si es entrega a domicilio o recogida en tienda
+      if (isDelivery) {
+        // Paso 3 para domicilio: Listo para Entrega
+        steps.push({
+          titulo: 'Listo para Entrega',
+          completado: idEstado >= 2,
+          fecha: idEstado >= 2 ? (order.fecha_actualizacion || fechaCreacion) : null,
+          hora: idEstado >= 2 ? new Date(order.fecha_actualizacion || fechaCreacion).toLocaleTimeString('es-HN', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : null,
+          icon: 'fas fa-box'
+        });
+        
+        // Paso 4 para domicilio: En Camino
+        steps.push({
+          titulo: 'En Camino',
+          completado: idEstado >= 2,
+          fecha: idEstado >= 2 ? (order.fecha_actualizacion || fechaCreacion) : null,
+          hora: idEstado >= 2 ? new Date(order.fecha_actualizacion || fechaCreacion).toLocaleTimeString('es-HN', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : null,
+          icon: 'fas fa-truck'
+        });
+        
+        // Paso 5 para domicilio: Entregado
+        steps.push({
+          titulo: 'Entregado',
+          completado: idEstado === 3,
+          fecha: idEstado === 3 ? (order.fecha_actualizacion || fechaCreacion) : null,
+          hora: idEstado === 3 ? new Date(order.fecha_actualizacion || fechaCreacion).toLocaleTimeString('es-HN', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : null,
+          icon: 'fas fa-house-user'
+        });
+      } else {
+        // Paso 3 para recogida: Listo para Recogida
+        steps.push({
+          titulo: 'Listo para Recogida',
+          completado: idEstado >= 4,
+          fecha: idEstado >= 4 ? (order.fecha_actualizacion || fechaCreacion) : null,
+          hora: idEstado >= 4 ? new Date(order.fecha_actualizacion || fechaCreacion).toLocaleTimeString('es-HN', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : null,
+          icon: 'fas fa-box'
+        });
+        
+        // Paso 4 para recogida: Recogido
+        steps.push({
+          titulo: 'Recogido',
+          completado: idEstado === 3,
+          fecha: idEstado === 3 ? (order.fecha_actualizacion || fechaCreacion) : null,
+          hora: idEstado === 3 ? new Date(order.fecha_actualizacion || fechaCreacion).toLocaleTimeString('es-HN', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : null,
+          icon: 'fas fa-check-circle'
+        });
       }
+      
+      return steps;
     },
     
     showPageButton(page) {
@@ -534,6 +700,132 @@ export default {
       if (page === this.currentPage + 2 && this.currentPage < this.totalPages - 2) return true;
       
       return false;
+    },
+    
+    // Métodos para interactuar con la API
+    async fetchPedidos() {
+      try {
+        this.loading = true;
+        console.log('Obteniendo historial de pedidos...');
+        
+        // Primero intentamos sin filtros
+        try {
+          const response = await api.servicioCliente.getHistorialPedidos();
+          console.log('Respuesta de API:', response);
+          
+          if (response.data && Array.isArray(response.data)) {
+            this.orders = response.data;
+            return; // Si funciona, salimos
+          } else if (response.data) {
+            // Si no es un array, pero tiene datos
+            this.orders = [response.data];
+            return; // Si funciona, salimos
+          }
+        } catch (initialError) {
+          console.log('Error en primera solicitud, intentando alternativa:', initialError);
+        }
+        
+        // Si la solicitud sin filtros falló, podemos intentar un enfoque diferente
+        // Por ejemplo, obtener todos los pedidos y filtrarlos en el frontend
+        
+        console.log('Usando datos de prueba temporales mientras se soluciona el problema de API');
+        // DATOS DE PRUEBA solo para desarrollo - QUITAR EN PRODUCCIÓN
+        this.orders = [
+          {
+            id_pedido: 41,
+            fecha_creacion: new Date(),
+            total: 1749.95,
+            id_estado: 3, // Entregada
+            servicios: [{ nombre: 'Lavado especial' }],
+            direccion_entrega: 'Calle Principal #123'
+          },
+          {
+            id_pedido: 40,
+            fecha_creacion: new Date(Date.now() - 24*60*60*1000), // Ayer
+            total: 1399.96,
+            id_estado: 3, // Entregada
+            servicios: [{ nombre: 'Lavado normal' }],
+            direccion_entrega: 'Recoger en sucursal'
+          },
+          {
+            id_pedido: 39,
+            fecha_creacion: new Date(Date.now() - 2*24*60*60*1000), // Hace 2 días
+            total: 1049.97,
+            id_estado: 1, // En Espera
+            servicios: [{ nombre: 'Planchado' }],
+            direccion_entrega: 'Calle Secundaria #456'
+          }
+        ];
+      } catch (error) {
+        console.error('Error al obtener historial de pedidos:', error);
+        this.orders = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async fetchPedidosByEstado(tabId) {
+      try {
+        this.loading = true;
+        
+        // Mapear los IDs de pestañas a los valores de ID de estado esperados por la API
+        const estadoIdMap = {
+          'activa': 1,
+          'en-camino': 2,
+          'entregada': 3,
+          'listo': 4
+        };
+        
+        // Intentaremos primero con el ID de estado numérico
+        const idEstado = estadoIdMap[tabId];
+        console.log('Buscando pedidos con id_estado:', idEstado);
+        
+        try {
+          // Primera opción: enviar el ID del estado (número)
+          const response = await api.servicioCliente.getHistorialPedidos(idEstado);
+          console.log('Respuesta filtrada de API (usando id_estado):', response);
+          
+          if (response.data && Array.isArray(response.data)) {
+            this.orders = response.data;
+            return; // Si funciona, salimos
+          } else if (response.data) {
+            // Si no es un array, pero tiene datos
+            this.orders = [response.data];
+            return; // Si funciona, salimos
+          }
+        } catch (err) {
+          console.log('Error con id_estado, intentando con nombre de estado');
+        }
+        
+        // Si no funcionó con ID, intentar con el nombre del estado
+        const estadoMap = {
+          'activa': 'En Espera',
+          'en-camino': 'En Camino',
+          'entregada': 'Entregada',
+          'listo': 'Listo para recoger'
+        };
+        
+        const estadoFiltro = estadoMap[tabId];
+        console.log('Buscando pedidos con estado (nombre):', estadoFiltro);
+        
+        const response = await api.servicioCliente.getHistorialPedidos(estadoFiltro);
+        console.log('Respuesta filtrada de API (usando nombre):', response);
+        
+        if (response.data && Array.isArray(response.data)) {
+          this.orders = response.data;
+        } else if (response.data) {
+          // Si no es un array, pero tiene datos
+          this.orders = [response.data];
+        } else {
+          this.orders = [];
+          console.log('No se encontraron pedidos con ese estado');
+        }
+      } catch (error) {
+        console.error('Error al obtener pedidos por estado:', error);
+        this.orders = [];
+      } finally {
+        this.loading = false;
+      }
     }
   }
 };

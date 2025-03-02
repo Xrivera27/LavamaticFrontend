@@ -849,36 +849,46 @@ export default {
     },
     
     async confirmarVolverAEspera() {
-      this.isLoading = true;
-      
-      try {
-        // Llamar a la API para volver el pedido a estado "En Espera"
-        const response = await api.pedidos.volverAEspera(this.pedidoSeleccionado.id_pedido);
-        console.log("Respuesta volver a espera:", response.data);
-        
-        // Actualizar localmente
-        const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
-        if (index !== -1) {
-          this.pedidos[index] = {
-            ...this.pedidoSeleccionado,
-            estado: 'En Espera',
-            id_estado: 1,
-            repartidor: null,
-            id_repartidor: null
-          };
-        }
-        
-        this.toast.success("Pedido vuelto a estado 'En Espera' correctamente");
-        this.showConfirmModal = false;
-        this.pedidoSeleccionado = null;
-      } catch (error) {
-        console.error("Error al volver a espera:", error);
-        const errorMsg = error.response?.data?.error || "Error al volver el pedido a espera";
-        this.toast.error(errorMsg);
-      } finally {
-        this.isLoading = false;
-      }
-    },
+  this.isLoading = true;
+  
+  try {
+    // Guardar el estado actual para mostrar el mensaje adecuado
+    const estadoAnterior = this.pedidoSeleccionado.estado;
+    const teniaRepartidor = this.pedidoSeleccionado.id_repartidor !== null;
+    
+    // Llamar a la API para volver el pedido a estado "En Espera"
+    const response = await api.pedidos.volverAEspera(this.pedidoSeleccionado.id_pedido);
+    console.log("Respuesta volver a espera:", response.data);
+    
+    // Actualizar localmente
+    const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
+    if (index !== -1) {
+      this.pedidos[index] = {
+        ...this.pedidoSeleccionado,
+        estado: 'En Espera',
+        id_estado: 1,
+        repartidor: null,
+        id_repartidor: null
+      };
+    }
+    
+    // Mostrar mensaje personalizado según el estado anterior
+    if (estadoAnterior === 'Listo para recoger' || estadoAnterior === 'En camino' || teniaRepartidor) {
+      this.toast.success("Pedido vuelto a estado 'En Espera' correctamente. Se ha enviado una notificación al cliente.");
+    } else {
+      this.toast.success("Pedido vuelto a estado 'En Espera' correctamente");
+    }
+    
+    this.showConfirmModal = false;
+    this.pedidoSeleccionado = null;
+  } catch (error) {
+    console.error("Error al volver a espera:", error);
+    const errorMsg = error.response?.data?.error || "Error al volver el pedido a espera";
+    this.toast.error(errorMsg);
+  } finally {
+    this.isLoading = false;
+  }
+},
     
     cancelarVolverAEspera() {
       this.showConfirmModal = false;
@@ -898,38 +908,38 @@ export default {
     },
     
     async confirmarEntrega() {
-      this.isLoading = true;
-      
-      try {
-        // Cambiar estado a "Entregada" (id_estado 3)
-        const response = await api.pedidos.cambiarEstado(
-          this.pedidoSeleccionado.id_pedido, 
-          3
-        );
-        
-        console.log("Respuesta marcar como entregado:", response.data);
-        
-        // Actualizar localmente
-        const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
-        if (index !== -1) {
-          this.pedidos[index] = {
-            ...this.pedidoSeleccionado,
-            estado: 'Entregada',
-            id_estado: 3
-          };
-        }
-        
-        this.toast.success("Pedido marcado como entregado correctamente");
-        this.showEntregadoModal = false;
-        this.pedidoSeleccionado = null;
-      } catch (error) {
-        console.error("Error al marcar como entregado:", error);
-        const errorMsg = error.response?.data?.error || "Error al marcar el pedido como entregado";
-        this.toast.error(errorMsg);
-      } finally {
-        this.isLoading = false;
-      }
-    },
+  this.isLoading = true;
+  
+  try {
+    // Cambiar estado a "Entregada" (id_estado 3)
+    const response = await api.pedidos.cambiarEstado(
+      this.pedidoSeleccionado.id_pedido, 
+      3
+    );
+    
+    console.log("Respuesta marcar como entregado:", response.data);
+    
+    // Actualizar localmente
+    const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
+    if (index !== -1) {
+      this.pedidos[index] = {
+        ...this.pedidoSeleccionado,
+        estado: 'Entregada',
+        id_estado: 3
+      };
+    }
+    
+    this.toast.success("Pedido marcado como entregado. Se ha enviado un email de agradecimiento al cliente.");
+    this.showEntregadoModal = false;
+    this.pedidoSeleccionado = null;
+  } catch (error) {
+    console.error("Error al marcar como entregado:", error);
+    const errorMsg = error.response?.data?.error || "Error al marcar el pedido como entregado";
+    this.toast.error(errorMsg);
+  } finally {
+    this.isLoading = false;
+  }
+},
     
     cancelarEntrega() {
       this.showEntregadoModal = false;

@@ -693,67 +693,78 @@ export default {
     },
     
     finalizarEntrega(pedido) {
-      this.pedidoSeleccionado = pedido;
-      this.tituloConfirmacion = 'Confirmar Entrega';
-      this.mensajeConfirmacion = '¿Confirmas que has realizado la entrega de este pedido?';
-      this.submensajeConfirmacion = 'El pedido será marcado como completado.';
-      this.botonConfirmacion = 'Sí, confirmar entrega';
-      this.accionPendiente = 'finalizar';
-      this.showConfirmModal = true;
-      
-      if (this.showDetailsModal) {
-        this.cerrarDetalles();
-      }
-    },
+  this.pedidoSeleccionado = pedido;
+  this.tituloConfirmacion = 'Confirmar Entrega';
+  this.mensajeConfirmacion = '¿Confirmas que has realizado la entrega de este pedido?';
+  this.submensajeConfirmacion = 'El pedido será marcado como completado y se enviará una notificación automática al cliente.';
+  this.botonConfirmacion = 'Sí, confirmar entrega';
+  this.accionPendiente = 'finalizar';
+  this.showConfirmModal = true;
+  
+  if (this.showDetailsModal) {
+    this.cerrarDetalles();
+  }
+},
     
-    async confirmarAccion() {
-      this.isProcessing = true;
+async confirmarAccion() {
+  this.isProcessing = true;
+  
+  try {
+    if (this.accionPendiente === 'aceptar') {
+      // Actualizar a estado "En Camino" (id_estado 2)
+      await api.repartidor.actualizarEstado(
+        this.pedidoSeleccionado.id_pedido, 
+        { nuevo_estado: 2 }
+      );
       
-      try {
-        if (this.accionPendiente === 'aceptar') {
-          // Actualizar a estado "En Camino" (id_estado 2)
-          await api.repartidor.actualizarEstado(
-            this.pedidoSeleccionado.id_pedido, 
-            { nuevo_estado: 2 }
-          );
-          
-          // Mover de asignados a en camino localmente
-          const index = this.pedidosAsignados.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
-          if (index !== -1) {
-            const pedido = {...this.pedidosAsignados[index], estado: 'En Camino'};
-            this.pedidosAsignados.splice(index, 1);
-            this.pedidosEnCamino.push(pedido);
-          }
-          
-          this.toast.success("Pedido aceptado correctamente");
-        } else if (this.accionPendiente === 'finalizar') {
-          // Actualizar a estado "Finalizado" (id_estado 3)
-          await api.repartidor.actualizarEstado(
-            this.pedidoSeleccionado.id_pedido, 
-            { nuevo_estado: 3 }
-          );
-          
-          // Mover de en camino a historial localmente
-          const index = this.pedidosEnCamino.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
-          if (index !== -1) {
-            const pedido = {...this.pedidosEnCamino[index], estado: 'Finalizado'};
-            this.pedidosEnCamino.splice(index, 1);
-            this.pedidosHistorial.unshift(pedido); // Agregar al inicio del historial
-          }
-          
-          this.toast.success("Entrega finalizada correctamente");
-        }
-      } catch (error) {
-        console.error("Error al procesar acción:", error);
-        const errorMsg = error.response?.data?.error || `Error al ${this.accionPendiente} el pedido`;
-        this.toast.error(errorMsg);
-      } finally {
-        this.showConfirmModal = false;
-        this.pedidoSeleccionado = null;
-        this.accionPendiente = null;
-        this.isProcessing = false;
+      // Mover de asignados a en camino localmente
+      const index = this.pedidosAsignados.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
+      if (index !== -1) {
+        const pedido = {...this.pedidosAsignados[index], estado: 'En Camino'};
+        this.pedidosAsignados.splice(index, 1);
+        this.pedidosEnCamino.push(pedido);
       }
-    },
+      
+      this.toast.success("Pedido aceptado correctamente");
+    } else if (this.accionPendiente === 'finalizar') {
+      // Actualizar a estado "Finalizado" (id_estado 3)
+      const response = await api.repartidor.actualizarEstado(
+        this.pedidoSeleccionado.id_pedido, 
+        { nuevo_estado: 3 }
+      );
+      
+      // Verificar el resultado del envío de email
+      const emailInfo = response.data.email;
+      
+      // Mover de en camino a historial localmente
+      const index = this.pedidosEnCamino.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
+      if (index !== -1) {
+        const pedido = {...this.pedidosEnCamino[index], estado: 'Finalizado'};
+        this.pedidosEnCamino.splice(index, 1);
+        this.pedidosHistorial.unshift(pedido); // Agregar al inicio del historial
+      }
+      
+      // Mostrar mensaje con información sobre el correo
+      if (emailInfo && emailInfo.enviado) {
+        this.toast.success("Entrega finalizada. Se ha enviado un correo de confirmación al cliente.");
+      } else {
+        this.toast.success("Entrega finalizada correctamente.");
+        if (emailInfo && emailInfo.error) {
+          this.toast.info(`No se pudo enviar correo al cliente: ${emailInfo.error}`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error al procesar acción:", error);
+    const errorMsg = error.response?.data?.error || `Error al ${this.accionPendiente} el pedido`;
+    this.toast.error(errorMsg);
+  } finally {
+    this.showConfirmModal = false;
+    this.pedidoSeleccionado = null;
+    this.accionPendiente = null;
+    this.isProcessing = false;
+  }
+},
     
     cancelarAccion() {
       this.showConfirmModal = false;

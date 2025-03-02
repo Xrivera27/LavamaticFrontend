@@ -148,10 +148,21 @@ const api = {
     
     // Obtener historial de pedidos
     getHistorialPedidos: (estado = '') => {
-      let queryParams = estado ? `?estado=${estado}` : '';
+      let queryParams = '';
+      
+      // Si el estado es un número, lo tratamos como id_estado
+      if (typeof estado === 'number' || (typeof estado === 'string' && !isNaN(parseInt(estado)))) {
+        queryParams = `?id_estado=${estado}`;
+      } 
+      // Si es una cadena, lo tratamos como el nombre del estado
+      else if (estado && typeof estado === 'string') {
+        queryParams = `?estado=${encodeURIComponent(estado)}`;
+      }
+      
+      console.log(`Llamando a API: /cliente/pedidos${queryParams}`);
       return apiClient.get(`/cliente/pedidos${queryParams}`);
     }
-  },
+  }
 };
 
 // Exportamos tanto la instancia de axios configurada como los servicios agrupados
