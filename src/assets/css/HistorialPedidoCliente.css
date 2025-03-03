@@ -617,3 +617,47 @@
     align-items: stretch;
   }
 }
+
+.btn-cancel {
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  margin-left: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-cancel:hover {
+  background-color: #ff1744;
+}
+
+.btn-cancel-order {
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  margin-top: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.btn-cancel-order i {
+  margin-right: 8px;
+}
+
+.btn-cancel-order:hover {
+  background-color: #ff1744;
+}
+
+.footer-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}

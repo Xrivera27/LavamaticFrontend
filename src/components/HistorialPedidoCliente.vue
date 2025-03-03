@@ -235,9 +235,13 @@
                 </div>
               </div>
             </div>
+            
+           
           </div>
         </div>
       </div>
+
+   
     </div>
   </div>
 </template>
@@ -245,11 +249,16 @@
 <script>
 import Sidebarcliente from './Sidebarcliente.vue';
 import api from '@/services/apiService';
+import { useToast } from "vue-toastification";
 
 export default {
   name: 'HistorialPedidos',
   components: {
     Sidebarcliente
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
   data() {
     return {
@@ -265,6 +274,8 @@ export default {
       selectedOrder: null,
       loading: true,
       orders: [],
+      showCancelConfirmation: false,
+      pedidoACancelar: null,
       tabs: [
         { id: 'todas', name: 'Todas', icon: 'fas fa-list' },
         { id: 'activa', name: 'En Espera', icon: 'fas fa-clock' },
@@ -564,12 +575,18 @@ export default {
       // Si el pedido no tiene detalles completos, podemos intentar cargarlos
       if (!this.getServiciosArray(order).length) {
         try {
+          this.toast.info("Cargando detalles del pedido...", {
+            timeout: 2000
+          });
+          
           const response = await api.servicioCliente.getPedidoDetalle(order.id_pedido);
           if (response.data) {
             this.selectedOrder = response.data;
+            this.toast.success("Detalles cargados exitosamente");
           }
         } catch (error) {
           console.error('Error al cargar detalles del pedido:', error);
+          this.toast.warning("No se pudieron cargar todos los detalles del pedido");
         }
       }
     },
@@ -708,57 +725,28 @@ export default {
         this.loading = true;
         console.log('Obteniendo historial de pedidos...');
         
-        // Primero intentamos sin filtros
-        try {
-          const response = await api.servicioCliente.getHistorialPedidos();
-          console.log('Respuesta de API:', response);
-          
-          if (response.data && Array.isArray(response.data)) {
-            this.orders = response.data;
-            return; // Si funciona, salimos
-          } else if (response.data) {
-            // Si no es un array, pero tiene datos
-            this.orders = [response.data];
-            return; // Si funciona, salimos
+        const response = await api.servicioCliente.getHistorialPedidos();
+        console.log('Respuesta de API:', response);
+        
+        if (response.data && Array.isArray(response.data)) {
+          this.orders = response.data;
+          if (this.orders.length > 0) {
+            this.toast.success(`Se cargaron ${this.orders.length} pedidos`);
+          } else {
+            this.toast.info("No se encontraron pedidos");
           }
-        } catch (initialError) {
-          console.log('Error en primera solicitud, intentando alternativa:', initialError);
+        } else if (response.data) {
+          // Si no es un array, pero tiene datos
+          this.orders = [response.data];
+          this.toast.success("Se cargó 1 pedido");
+        } else {
+          this.orders = [];
+          this.toast.info("No se encontraron pedidos");
         }
-        
-        // Si la solicitud sin filtros falló, podemos intentar un enfoque diferente
-        // Por ejemplo, obtener todos los pedidos y filtrarlos en el frontend
-        
-        console.log('Usando datos de prueba temporales mientras se soluciona el problema de API');
-        // DATOS DE PRUEBA solo para desarrollo - QUITAR EN PRODUCCIÓN
-        this.orders = [
-          {
-            id_pedido: 41,
-            fecha_creacion: new Date(),
-            total: 1749.95,
-            id_estado: 3, // Entregada
-            servicios: [{ nombre: 'Lavado especial' }],
-            direccion_entrega: 'Calle Principal #123'
-          },
-          {
-            id_pedido: 40,
-            fecha_creacion: new Date(Date.now() - 24*60*60*1000), // Ayer
-            total: 1399.96,
-            id_estado: 3, // Entregada
-            servicios: [{ nombre: 'Lavado normal' }],
-            direccion_entrega: 'Recoger en sucursal'
-          },
-          {
-            id_pedido: 39,
-            fecha_creacion: new Date(Date.now() - 2*24*60*60*1000), // Hace 2 días
-            total: 1049.97,
-            id_estado: 1, // En Espera
-            servicios: [{ nombre: 'Planchado' }],
-            direccion_entrega: 'Calle Secundaria #456'
-          }
-        ];
       } catch (error) {
         console.error('Error al obtener historial de pedidos:', error);
         this.orders = [];
+        this.toast.error("Error al cargar los pedidos");
       } finally {
         this.loading = false;
       }
@@ -780,6 +768,8 @@ export default {
         const idEstado = estadoIdMap[tabId];
         console.log('Buscando pedidos con id_estado:', idEstado);
         
+        const estadoNombre = this.getEstadoNombre(idEstado);
+        
         try {
           // Primera opción: enviar el ID del estado (número)
           const response = await api.servicioCliente.getHistorialPedidos(idEstado);
@@ -787,10 +777,16 @@ export default {
           
           if (response.data && Array.isArray(response.data)) {
             this.orders = response.data;
+            if (this.orders.length > 0) {
+              this.toast.success(`Se encontraron ${this.orders.length} pedidos en estado "${estadoNombre}"`);
+            } else {
+              this.toast.info(`No se encontraron pedidos en estado "${estadoNombre}"`);
+            }
             return; // Si funciona, salimos
           } else if (response.data) {
             // Si no es un array, pero tiene datos
             this.orders = [response.data];
+            this.toast.success(`Se encontró 1 pedido en estado "${estadoNombre}"`);
             return; // Si funciona, salimos
           }
         } catch (err) {
@@ -813,22 +809,83 @@ export default {
         
         if (response.data && Array.isArray(response.data)) {
           this.orders = response.data;
+          if (this.orders.length > 0) {
+            this.toast.success(`Se encontraron ${this.orders.length} pedidos en estado "${estadoFiltro}"`);
+          } else {
+            this.toast.info(`No se encontraron pedidos en estado "${estadoFiltro}"`);
+          }
         } else if (response.data) {
           // Si no es un array, pero tiene datos
           this.orders = [response.data];
+          this.toast.success(`Se encontró 1 pedido en estado "${estadoFiltro}"`);
         } else {
           this.orders = [];
-          console.log('No se encontraron pedidos con ese estado');
+          this.toast.info(`No se encontraron pedidos en estado "${estadoFiltro}"`);
         }
       } catch (error) {
         console.error('Error al obtener pedidos por estado:', error);
         this.orders = [];
+        this.toast.error("Error al filtrar los pedidos");
       } finally {
         this.loading = false;
+      }
+    },
+
+    // Mostrar modal de confirmación para cancelar pedido
+    cancelarPedido(order) {
+      this.pedidoACancelar = order;
+      this.showCancelConfirmation = true;
+    },
+    
+    // Cancelar la operación de cancelación
+    cancelCancellation() {
+      this.showCancelConfirmation = false;
+      this.pedidoACancelar = null;
+    },
+    
+    // Confirmar la cancelación y proceder
+    async confirmCancellation() {
+      if (!this.pedidoACancelar) return;
+      
+      try {
+        this.showCancelConfirmation = false;
+        this.toast.info("Procesando cancelación...");
+        
+        // Llamar al API para cancelar el pedido
+        await api.servicioCliente.cancelarPedido(this.pedidoACancelar.id_pedido);
+        
+        // Actualizar la lista de pedidos (eliminando el cancelado)
+        const index = this.orders.findIndex(p => p.id_pedido === this.pedidoACancelar.id_pedido);
+        if (index !== -1) {
+          this.orders.splice(index, 1);
+        }
+        
+        // Cerrar el modal si estaba abierto
+        if (this.selectedOrder && this.selectedOrder.id_pedido === this.pedidoACancelar.id_pedido) {
+          this.closeModal();
+        }
+        
+        this.toast.success(`Pedido #${this.pedidoACancelar.id_pedido} cancelado exitosamente`);
+        
+        // Limpiar referencia
+        this.pedidoACancelar = null;
+        
+        // Recargar los pedidos para mantener la lista actualizada
+        this.fetchPedidos();
+      } catch (error) {
+        console.error('Error al cancelar pedido:', error);
+        
+        // Mostrar mensaje específico según el error
+        if (error.response && error.response.status === 400) {
+          this.toast.error("No se puede cancelar este pedido. Ya está en proceso.");
+        } else if (error.response && error.response.status === 404) {
+          this.toast.error("Pedido no encontrado.");
+        } else {
+          this.toast.error("Error al cancelar el pedido. Intente nuevamente.");
+        }
       }
     }
   }
 };
 </script>
-
 <style src="@/assets/css/HistorialPedidoCliente.css" scoped></style>

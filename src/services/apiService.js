@@ -146,6 +146,8 @@ const api = {
     // Crear un nuevo pedido
     crearPedido: (pedidoData) => apiClient.post('/cliente/pedidos', pedidoData),
     
+    cancelarPedido: (id_pedido) => apiClient.put(`/cliente/pedidos/${id_pedido}/cancelar`),
+    
     // Obtener historial de pedidos
     getHistorialPedidos: (estado = '') => {
       let queryParams = '';
@@ -162,7 +164,11 @@ const api = {
       console.log(`Llamando a API: /cliente/pedidos${queryParams}`);
       return apiClient.get(`/cliente/pedidos${queryParams}`);
     }
+
+    
   }
+
+  
 };
 
 // Exportamos tanto la instancia de axios configurada como los servicios agrupados
