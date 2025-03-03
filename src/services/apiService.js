@@ -76,7 +76,14 @@ const api = {
     getById: (id) => apiClient.get(`/equipos/${id}`),
     create: (equipoData) => apiClient.post('/equipos', equipoData),
     update: (id, equipoData) => apiClient.put(`/equipos/${id}`, equipoData),
-    delete: (id) => apiClient.delete(`/equipos/${id}`)
+    delete: (id, options = {}) => {
+      // Si se proporciona una cantidad, la enviamos como parámetro de consulta
+      if (options && options.cantidad) {
+        return apiClient.delete(`/equipos/${id}?cantidad=${options.cantidad}`);
+      }
+      // Si no hay cantidad, se comporta como antes
+      return apiClient.delete(`/equipos/${id}`);
+    }
   },
 
   servicios: {

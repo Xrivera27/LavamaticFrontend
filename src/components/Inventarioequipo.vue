@@ -162,16 +162,35 @@
               <h2>Confirmación</h2>
             </div>
             <div class="modal-body-confirm">
-              <p>¿Estás seguro de que quieres eliminar este equipo?</p>
-              <p>Esta acción no se puede deshacer.</p>
+              <p>¿Cuántos equipos deseas eliminar?</p>
+              <p>Actualmente hay <strong>{{ equipoToDelete ? equipoToDelete.cantidad_total : 0 }}</strong> unidades disponibles.</p>
+              
+              <div class="form-group" style="margin-top: 20px;">
+                <label>Cantidad a eliminar:</label>
+                <input 
+                  type="number" 
+                  v-model.number="cantidadEliminar"
+                  min="1"
+                  :max="equipoToDelete ? equipoToDelete.cantidad_total : 0"
+                  required
+                  placeholder="Ingrese la cantidad"
+                  class="input-cantidad"
+                />
+                <p v-if="errorCantidad" class="error-message" style="color: red; margin-top: 5px;">
+                  {{ errorCantidad }}
+                </p>
+              </div>
             </div>
             <div class="modal-footer">
               <div class="action-buttons">
-                <button class="btn btn-danger" @click="confirmDelete">
-                  Sí, eliminar
+                <button class="btn btn-danger" @click="confirmDelete" :disabled="!cantidadValidaParaEliminar">
+                  Eliminar cantidad específica
                 </button>
-                <button class="btn btn-secondary" @click="cancelDelete">
-                  No, regresar
+                <button class="btn btn-danger" @click="deleteAll" style="margin-left: 5px;">
+                  Eliminar todas las unidades
+                </button>
+                <button class="btn btn-secondary" @click="cancelDelete" style="margin-left: 5px;">
+                  Cancelar
                 </button>
               </div>
             </div>
@@ -258,285 +277,349 @@
   </div>
 </template>
   
-  <script>
-  import SidebarAdmin from './SidebarAdmin.vue';
-  import api from '@/services/apiService';
-  import { useToast } from "vue-toastification";
-  
-  export default {
-    name: "gestionInventario",
-    components: {
-      SidebarAdmin
-    },
-    setup() {
-      const toast = useToast();
-      return { toast };
-    },
-    data() {
-      return {
-        isSidebarExpanded: false,
-        showConfirmModal: false,
-        showDetailsModal: false,
-        equipoToDelete: null,
-        equipoDetalle: null,
-        isLoading: false,
-        searchQuery: "",
-        isModalOpen: false,
-        isEditing: false,
-        editIndex: null,
-        currentPage: 1,
-        pageSize: 4, // Cambiado a 4 como solicitado
-        validationErrors: {},
-        equipoForm: {
-          id_equipo: 0,
-          nombre: "",
-          descripcion: "",
-          cantidad_total: 0,
-          cantidad_mantenimiento: 0
-        },
-        equipos: []
-      };
-    },
-    computed: {
-      filteredEquipos() {
-        return this.equipos.filter(
-          (equipo) => {
-            const searchTermLower = this.searchQuery.toLowerCase();
-            
-            return (
-              equipo.nombre.toLowerCase().includes(searchTermLower) ||
-              (equipo.descripcion && equipo.descripcion.toLowerCase().includes(searchTermLower)) ||
-              equipo.cantidad_total.toString().includes(searchTermLower) ||
-              equipo.cantidad_mantenimiento.toString().includes(searchTermLower)
-            );
-          }
-        );
+<script>
+import SidebarAdmin from './SidebarAdmin.vue';
+import api from '@/services/apiService';
+import { useToast } from "vue-toastification";
+
+export default {
+  name: "gestionInventario",
+  components: {
+    SidebarAdmin
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
+  },
+  data() {
+    return {
+      isSidebarExpanded: false,
+      showConfirmModal: false,
+      showDetailsModal: false,
+      equipoToDelete: null,
+      equipoDetalle: null,
+      isLoading: false,
+      searchQuery: "",
+      isModalOpen: false,
+      isEditing: false,
+      editIndex: null,
+      currentPage: 1,
+      pageSize: 4, // Cambiado a 4 como solicitado
+      validationErrors: {},
+      cantidadEliminar: 1,
+      errorCantidad: "",
+      equipoForm: {
+        id_equipo: 0,
+        nombre: "",
+        descripcion: "",
+        cantidad_total: 0,
+        cantidad_mantenimiento: 0
       },
-      paginatedEquipos() {
-        const startIndex = (this.currentPage - 1) * this.pageSize;
-        const endIndex = startIndex + this.pageSize;
-        return this.filteredEquipos.slice(startIndex, endIndex);
-      },
-      totalPages() {
-        return Math.ceil(this.filteredEquipos.length / this.pageSize) || 1;
-      },
-    },
-    methods: {
-      handleSidebarToggle(expanded) {
-        this.isSidebarExpanded = expanded;
-      },
-      
-      // Cargar equipos desde el backend
-      async cargarEquipos() {
-        this.isLoading = true;
-        try {
-          const response = await api.equipos.getAll();
-          console.log("Datos de equipos recibidos:", response.data);
+      equipos: []
+    };
+  },
+  computed: {
+    filteredEquipos() {
+      return this.equipos.filter(
+        (equipo) => {
+          const searchTermLower = this.searchQuery.toLowerCase();
           
-          // Procesar los datos del servidor
-          this.equipos = response.data.map(equipo => {
-            return {
-              id_equipo: equipo.id_equipo,
-              nombre: equipo.nombre || '',
-              descripcion: equipo.descripcion || '',
-              cantidad_total: equipo.cantidad_total || 0,
-              cantidad_mantenimiento: equipo.cantidad_mantenimiento || 0
-            };
-          });
-          
-          if (this.equipos.length > 0) {
-            this.toast.success("Equipos cargados correctamente");
-          } else {
-            this.toast.info("No hay equipos registrados");
-          }
-        } catch (error) {
-          console.error("Error al cargar equipos:", error);
-          this.toast.error("Error al cargar equipos");
-        } finally {
-          this.isLoading = false;
+          return (
+            equipo.nombre.toLowerCase().includes(searchTermLower) ||
+            (equipo.descripcion && equipo.descripcion.toLowerCase().includes(searchTermLower)) ||
+            equipo.cantidad_total.toString().includes(searchTermLower) ||
+            equipo.cantidad_mantenimiento.toString().includes(searchTermLower)
+          );
         }
-      },
-      
-      verDetalles(equipo) {
-        this.equipoDetalle = {...equipo};
-        this.showDetailsModal = true;
-      },
-      
-      cerrarDetalles() {
-        this.showDetailsModal = false;
-        this.equipoDetalle = null;
-      },
-      
-      openModal() {
-        this.isModalOpen = true;
-        this.validationErrors = {};
-        this.$nextTick(() => {
-          this.$refs.nombreInput?.focus();
-        });
-      },
-      
-      closeModal() {
-        this.isModalOpen = false;
-        this.clearForm();
-      },
-      
-      clearForm() {
-        this.equipoForm = {
-          id_equipo: 0,
-          nombre: "",
-          descripcion: "",
-          cantidad_total: 0,
-          cantidad_mantenimiento: 0
-        };
-        this.isEditing = false;
-        this.editIndex = null;
-        this.validationErrors = {};
-      },
-      
-      validarFormulario() {
-        let isValid = true;
-        this.validationErrors = {};
-  
-        // Validar nombre
-        if (!this.equipoForm.nombre.trim()) {
-          this.validationErrors.nombre = "El nombre es obligatorio";
-          isValid = false;
-        }
+      );
+    },
+    paginatedEquipos() {
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredEquipos.slice(startIndex, endIndex);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredEquipos.length / this.pageSize) || 1;
+    },
+    cantidadValidaParaEliminar() {
+      return this.cantidadEliminar > 0 && 
+             this.equipoToDelete && 
+             this.cantidadEliminar <= this.equipoToDelete.cantidad_total;
+    }
+  },
+  methods: {
+    handleSidebarToggle(expanded) {
+      this.isSidebarExpanded = expanded;
+    },
+    
+    // Cargar equipos desde el backend
+    async cargarEquipos() {
+      this.isLoading = true;
+      try {
+        const response = await api.equipos.getAll();
+        console.log("Datos de equipos recibidos:", response.data);
         
-        // Validar cantidades
-        if (this.equipoForm.cantidad_total < 0) {
-          this.validationErrors.cantidad_total = "La cantidad total no puede ser negativa";
-          isValid = false;
-        }
-        
-        if (this.equipoForm.cantidad_mantenimiento < 0) {
-          this.validationErrors.cantidad_mantenimiento = "La cantidad en mantenimiento no puede ser negativa";
-          isValid = false;
-        }
-        
-        // Validar que las cantidades sean coherentes
-        if (this.equipoForm.cantidad_mantenimiento > this.equipoForm.cantidad_total) {
-          this.validationErrors.cantidad_mantenimiento = "La cantidad en mantenimiento no puede superar la cantidad total";
-          isValid = false;
-        }
-  
-        return isValid;
-      },
-      
-      async guardarEquipo() {
-        // Validar formulario
-        if (!this.validarFormulario()) {
-          // Mostrar primer error como toast
-          const primerError = Object.values(this.validationErrors)[0];
-          this.toast.error(primerError);
-          return;
-        }
-        
-        this.isLoading = true;
-        
-        try {
-          // Preparar los datos a enviar
-          const datosEquipo = {
-            nombre: this.equipoForm.nombre,
-            descripcion: this.equipoForm.descripcion,
-            cantidad_total: this.equipoForm.cantidad_total,
-            cantidad_mantenimiento: this.equipoForm.cantidad_mantenimiento
+        // Procesar los datos del servidor
+        this.equipos = response.data.map(equipo => {
+          return {
+            id_equipo: equipo.id_equipo,
+            nombre: equipo.nombre || '',
+            descripcion: equipo.descripcion || '',
+            cantidad_total: equipo.cantidad_total || 0,
+            cantidad_mantenimiento: equipo.cantidad_mantenimiento || 0
           };
-          
-          if (this.isEditing) {
-            // Actualizar equipo existente
-            await api.equipos.update(this.equipoForm.id_equipo, datosEquipo);
-            this.toast.success("Equipo actualizado correctamente");
-          } else {
-            // Crear nuevo equipo
-            await api.equipos.create(datosEquipo);
-            this.toast.success("Equipo agregado correctamente");
-          }
-          
-          // Recargar la lista de equipos
-          await this.cargarEquipos();
-          
-          // Cerrar el modal
-          this.closeModal();
-        } catch (error) {
-          console.error("Error al guardar equipo:", error);
-          let errorMsg = "Error al guardar equipo";
-          
-          if (error.response && error.response.data && error.response.data.error) {
-            errorMsg = error.response.data.error;
-          }
-          
-          this.toast.error(errorMsg);
-        } finally {
-          this.isLoading = false;
-        }
-      },
-      
-      previousPage() {
-        if (this.currentPage > 1) {
-          this.currentPage--;
-        }
-      },
-      
-      nextPage() {
-        if (this.currentPage < this.totalPages) {
-          this.currentPage++;
-        }
-      },
-      
-      deleteEquipo(equipo) {
-        this.equipoToDelete = equipo;
-        this.showConfirmModal = true;
-      },
-      
-      async confirmDelete() {
-        this.isLoading = true;
+        });
         
-        try {
-          await api.equipos.delete(this.equipoToDelete.id_equipo);
-          this.toast.success("Equipo eliminado correctamente");
-          
-          // Eliminar de la lista local
-          const index = this.equipos.findIndex(e => e.id_equipo === this.equipoToDelete.id_equipo);
-          if (index !== -1) {
-            this.equipos.splice(index, 1);
-          }
-          
-          this.showConfirmModal = false;
-          this.equipoToDelete = null;
-        } catch (error) {
-          console.error("Error al eliminar equipo:", error);
-          let errorMsg = "Error al eliminar equipo";
-          
-          if (error.response && error.response.data && error.response.data.error) {
-            errorMsg = error.response.data.error;
-          }
-          
-          this.toast.error(errorMsg);
-        } finally {
-          this.isLoading = false;
+        if (this.equipos.length > 0) {
+          this.toast.success("Equipos cargados correctamente");
+        } else {
+          this.toast.info("No hay equipos registrados");
         }
-      },
-      
-      cancelDelete() {
-        this.showConfirmModal = false;
-        this.equipoToDelete = null;
-      },
-      
-      editEquipo(equipo) {
-        // Clonar el equipo
-        this.equipoForm = { ...equipo };
-        
-        this.isEditing = true;
-        this.openModal();
+      } catch (error) {
+        console.error("Error al cargar equipos:", error);
+        this.toast.error("Error al cargar equipos");
+      } finally {
+        this.isLoading = false;
       }
     },
     
-    mounted() {
-      // Cargar datos de equipos al montar el componente
-      this.cargarEquipos();
+    verDetalles(equipo) {
+      this.equipoDetalle = {...equipo};
+      this.showDetailsModal = true;
+    },
+    
+    cerrarDetalles() {
+      this.showDetailsModal = false;
+      this.equipoDetalle = null;
+    },
+    
+    openModal() {
+      this.isModalOpen = true;
+      this.validationErrors = {};
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
+    },
+    
+    closeModal() {
+      this.isModalOpen = false;
+      this.clearForm();
+    },
+    
+    clearForm() {
+      this.equipoForm = {
+        id_equipo: 0,
+        nombre: "",
+        descripcion: "",
+        cantidad_total: 0,
+        cantidad_mantenimiento: 0
+      };
+      this.isEditing = false;
+      this.editIndex = null;
+      this.validationErrors = {};
+    },
+    
+    validarFormulario() {
+      let isValid = true;
+      this.validationErrors = {};
+
+      // Validar nombre
+      if (!this.equipoForm.nombre.trim()) {
+        this.validationErrors.nombre = "El nombre es obligatorio";
+        isValid = false;
+      }
+      
+      // Validar cantidades
+      if (this.equipoForm.cantidad_total < 0) {
+        this.validationErrors.cantidad_total = "La cantidad total no puede ser negativa";
+        isValid = false;
+      }
+      
+      if (this.equipoForm.cantidad_mantenimiento < 0) {
+        this.validationErrors.cantidad_mantenimiento = "La cantidad en mantenimiento no puede ser negativa";
+        isValid = false;
+      }
+      
+      // Validar que las cantidades sean coherentes
+      if (this.equipoForm.cantidad_mantenimiento > this.equipoForm.cantidad_total) {
+        this.validationErrors.cantidad_mantenimiento = "La cantidad en mantenimiento no puede superar la cantidad total";
+        isValid = false;
+      }
+
+      return isValid;
+    },
+    
+    async guardarEquipo() {
+      // Validar formulario
+      if (!this.validarFormulario()) {
+        // Mostrar primer error como toast
+        const primerError = Object.values(this.validationErrors)[0];
+        this.toast.error(primerError);
+        return;
+      }
+      
+      this.isLoading = true;
+      
+      try {
+        // Preparar los datos a enviar
+        const datosEquipo = {
+          nombre: this.equipoForm.nombre,
+          descripcion: this.equipoForm.descripcion,
+          cantidad_total: this.equipoForm.cantidad_total,
+          cantidad_mantenimiento: this.equipoForm.cantidad_mantenimiento
+        };
+        
+        if (this.isEditing) {
+          // Actualizar equipo existente
+          await api.equipos.update(this.equipoForm.id_equipo, datosEquipo);
+          this.toast.success("Equipo actualizado correctamente");
+        } else {
+          // Crear nuevo equipo
+          await api.equipos.create(datosEquipo);
+          this.toast.success("Equipo agregado correctamente");
+        }
+        
+        // Recargar la lista de equipos
+        await this.cargarEquipos();
+        
+        // Cerrar el modal
+        this.closeModal();
+      } catch (error) {
+        console.error("Error al guardar equipo:", error);
+        let errorMsg = "Error al guardar equipo";
+        
+        if (error.response && error.response.data && error.response.data.error) {
+          errorMsg = error.response.data.error;
+        }
+        
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    
+    deleteEquipo(equipo) {
+      this.equipoToDelete = equipo;
+      this.cantidadEliminar = 1; // Reiniciar la cantidad a 1 por defecto
+      this.errorCantidad = ""; // Limpiar cualquier error previo
+      this.showConfirmModal = true;
+    },
+    
+    async confirmDelete() {
+      // Validar la cantidad a eliminar
+      if (!this.cantidadValidaParaEliminar) {
+        this.errorCantidad = "Por favor ingrese una cantidad válida";
+        return;
+      }
+      
+      this.isLoading = true;
+      
+      try {
+        // Enviar la cantidad como parámetro de consulta
+        await api.equipos.delete(this.equipoToDelete.id_equipo, {
+          cantidad: this.cantidadEliminar
+        });
+        
+        // Actualizar la interfaz de usuario después de la eliminación
+        const index = this.equipos.findIndex(e => e.id_equipo === this.equipoToDelete.id_equipo);
+        if (index !== -1) {
+          // Si eliminamos todos los equipos
+          if (this.cantidadEliminar >= this.equipoToDelete.cantidad_total) {
+            this.equipos.splice(index, 1);
+            this.toast.success("Equipo eliminado completamente");
+          } else {
+            // Actualizar el conteo total
+            this.equipos[index].cantidad_total -= this.cantidadEliminar;
+            this.toast.success(`Se eliminaron ${this.cantidadEliminar} unidades del equipo`);
+          }
+        }
+        
+        this.showConfirmModal = false;
+        this.equipoToDelete = null;
+      } catch (error) {
+        console.error("Error al eliminar equipo:", error);
+        let errorMsg = "Error al eliminar equipo";
+        
+        if (error.response && error.response.data && error.response.data.error) {
+          errorMsg = error.response.data.error;
+        }
+        
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    // Método para eliminar todas las unidades de un equipo
+    async deleteAll() {
+      this.isLoading = true;
+      
+      try {
+        // Establecer la cantidad a eliminar al total disponible
+        const cantidadTotal = this.equipoToDelete.cantidad_total;
+        
+        // Realizar la llamada a la API para eliminar todas las unidades
+        await api.equipos.delete(this.equipoToDelete.id_equipo, {
+          cantidad: cantidadTotal
+        });
+        
+        // Actualizar la interfaz de usuario (eliminar el equipo de la lista)
+        const index = this.equipos.findIndex(e => e.id_equipo === this.equipoToDelete.id_equipo);
+        if (index !== -1) {
+          this.equipos.splice(index, 1);
+        }
+        
+        this.toast.success("Se han eliminado todas las unidades del equipo");
+        this.showConfirmModal = false;
+        this.equipoToDelete = null;
+        
+      } catch (error) {
+        console.error("Error al eliminar equipo:", error);
+        let errorMsg = "Error al eliminar equipo";
+        
+        if (error.response && error.response.data && error.response.data.error) {
+          errorMsg = error.response.data.error;
+        }
+        
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    cancelDelete() {
+      this.showConfirmModal = false;
+      this.equipoToDelete = null;
+      this.cantidadEliminar = 1;
+      this.errorCantidad = "";
+    },
+    
+    editEquipo(equipo) {
+      // Clonar el equipo
+      this.equipoForm = { ...equipo };
+      
+      this.isEditing = true;
+      this.openModal();
     }
-  };
-  </script>
+  },
+  
+  mounted() {
+    // Cargar datos de equipos al montar el componente
+    this.cargarEquipos();
+  }
+};
+</script>
   
   <style src="@/assets/css/Crearinventario.css" scoped></style>
