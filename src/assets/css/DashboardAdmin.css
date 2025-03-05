@@ -37,6 +37,7 @@
   
   /* Layout principal */
   .admin-layout {
+    margin-top: 2.5%;
     display: flex;
     min-height: auto;
     border-radius: 15px;
