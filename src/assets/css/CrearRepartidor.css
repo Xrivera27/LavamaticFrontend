@@ -136,6 +136,16 @@
   color: white;
 }
 
+/* Grupo de botones horizontales */
+.btn-group {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-group .btn {
+  margin-bottom: 0 !important;
+}
+
 /* Paginación */
 .pagination-wrapper {
   display: flex;
@@ -356,6 +366,10 @@ input, select, textarea {
   .table {
     display: block;
     overflow-x: auto;
+  }
+  
+  .btn-group {
+    justify-content: flex-start;
   }
 }
 

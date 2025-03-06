@@ -90,44 +90,46 @@
                 <td data-label="Total">LPS.{{ Number(pedido.total).toFixed(2) }}</td>
                 <td data-label="Fecha">{{ formatDate(pedido.fecha) }}</td>
                 <td data-label="Acciones">
-                  <button
-                    class="btn btn-info btn-action"
-                    @click="verDetalles(pedido)"
-                    title="Ver detalles"
-                  >
-                    <i class="fa-solid fa-eye"></i>
-                  </button>
-                  
-                  <!-- Botón para aceptar pedido (solo en estado 'asignados') -->
-                  <button
-                    v-if="estadoActual === 'asignados'"
-                    class="btn btn-success btn-action"
-                    @click="aceptarPedido(pedido)"
-                    title="Aceptar pedido"
-                  >
-                    <i class="fa-solid fa-check"></i>
-                  </button>
+  <div class="btn-group" role="group">
+    <button
+      class="btn btn-info"
+      @click="verDetalles(pedido)"
+      title="Ver detalles"
+    >
+      <i class="fa-solid fa-eye"></i>
+    </button>
+    
+    <!-- Botón para aceptar pedido (solo en estado 'asignados') -->
+    <button
+      v-if="estadoActual === 'asignados'"
+      class="btn btn-success"
+      @click="aceptarPedido(pedido)"
+      title="Aceptar pedido"
+    >
+      <i class="fa-solid fa-check"></i>
+    </button>
 
-                  <!-- Botón para finalizar entrega (solo en estado 'encamino') -->
-                  <button
-                    v-if="estadoActual === 'encamino'"
-                    class="btn btn-success btn-action"
-                    @click="finalizarEntrega(pedido)"
-                    title="Finalizar entrega"
-                  >
-                    <i class="fa-solid fa-flag-checkered"></i>
-                  </button>
-                  
-                  <!-- Botón para ver ubicación -->
-                  <button
-                    v-if="estadoActual !== 'historial'"
-                    class="btn btn-primary btn-action"
-                    @click="verMapa(pedido)"
-                    title="Ver ubicación"
-                  >
-                    <i class="fa-solid fa-map-marker-alt"></i>
-                  </button>
-                </td>
+    <!-- Botón para finalizar entrega (solo en estado 'encamino') -->
+    <button
+      v-if="estadoActual === 'encamino'"
+      class="btn btn-success"
+      @click="finalizarEntrega(pedido)"
+      title="Finalizar entrega"
+    >
+      <i class="fa-solid fa-flag-checkered"></i>
+    </button>
+    
+    <!-- Botón para ver ubicación -->
+    <button
+      v-if="estadoActual !== 'historial'"
+      class="btn btn-primary"
+      @click="verMapa(pedido)"
+      title="Ver ubicación"
+    >
+      <i class="fa-solid fa-map-marker-alt"></i>
+    </button>
+  </div>
+</td>
               </tr>
             </tbody>
           </table>

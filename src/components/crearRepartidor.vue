@@ -62,22 +62,23 @@
                 <td data-label="Código Mochila">{{ empleado.codigo_mochila }}</td>
                 <td data-label="GPS Asignado">{{ empleado.gps_asignado }}</td>
                 <td data-label="Acciones">
-                  <button
-                    style="margin-bottom: 1rem;"
-                    id="btnEditar"
-                    class="btn btn-warning"
-                    @click="editEmpleado(empleado)"
-                  >
-                    <i class="fa-solid fa-pencil" style="color: white;"></i>
-                  </button>
-                  <button
-                    id="btnEliminar"
-                    class="btn btn-danger"
-                    @click="deleteUsuariol(empleado)"
-                  >
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
+  <div class="btn-group" role="group">
+    <button
+      id="btnEditar"
+      class="btn btn-warning"
+      @click="editEmpleado(empleado)"
+    >
+      <i class="fa-solid fa-pencil" style="color: white;"></i>
+    </button>
+    <button
+      id="btnEliminar"
+      class="btn btn-danger"
+      @click="deleteUsuariol(empleado)"
+    >
+      <i class="fa-solid fa-trash"></i>
+    </button>
+  </div>
+</td>
               </tr>
             </tbody>
           </table>

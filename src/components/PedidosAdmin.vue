@@ -111,65 +111,67 @@
                   </span>
                 </td>
                 <td data-label="Acciones">
-                  <button
-                    class="btn btn-info"
-                    @click="verDetalles(pedido)"
-                    title="Ver detalles"
-                  >
-                    <i class="fa-solid fa-eye"></i>
-                  </button>
-                  
-                  <!-- Botón para asignar repartidor (solo en estado 'en espera') -->
-                  <button
-                    v-if="estadoActual === 'espera'"
-                    class="btn btn-primary"
-                    @click="asignarRepartidor(pedido)"
-                    title="Asignar repartidor"
-                  >
-                    <i class="fa-solid fa-user-plus"></i>
-                  </button>
+  <div class="btn-group" role="group">
+    <button
+      class="btn btn-info"
+      @click="verDetalles(pedido)"
+      title="Ver detalles"
+    >
+      <i class="fa-solid fa-eye"></i>
+    </button>
+    
+    <!-- Botón para asignar repartidor (solo en estado 'en espera') -->
+    <button
+      v-if="estadoActual === 'espera'"
+      class="btn btn-primary"
+      @click="asignarRepartidor(pedido)"
+      title="Asignar repartidor"
+    >
+      <i class="fa-solid fa-user-plus"></i>
+    </button>
 
-                  <!-- Botón para marcar como listo para recoger (solo en estado 'en espera') -->
-                  <button
-                    v-if="estadoActual === 'espera'"
-                    class="btn btn-success"
-                    @click="marcarComoListo(pedido)"
-                    title="Marcar como listo para recoger"
-                  >
-                    <i class="fa-solid fa-check-circle"></i>
-                  </button>
+    <!-- Botón para marcar como listo para recoger (solo en estado 'en espera') -->
+    <button
+      v-if="estadoActual === 'espera'"
+      class="btn btn-success"
+      @click="marcarComoListo(pedido)"
+      title="Marcar como listo para recoger"
+    >
+      <i class="fa-solid fa-check-circle"></i>
+    </button>
 
-                  <!-- Botón para marcar como entregado (desde listos para recoger) -->
-                  <button
-                    v-if="estadoActual === 'listos'"
-                    class="btn btn-success"
-                    @click="marcarComoEntregado(pedido)"
-                    title="Marcar como entregado"
-                  >
-                    <i class="fa-solid fa-flag-checkered"></i>
-                  </button>
+    <!-- Botón para marcar como entregado (desde listos para recoger) -->
+    <button
+      v-if="estadoActual === 'listos'"
+      class="btn btn-success"
+      @click="marcarComoEntregado(pedido)"
+      title="Marcar como entregado"
+    >
+      <i class="fa-solid fa-flag-checkered"></i>
+    </button>
 
-                  <!-- Botón para marcar como entregado (solo en estado 'asignados') -->
-                  <button
-                    v-if="estadoActual === 'asignados'"
-                    class="btn btn-success"
-                    @click="marcarComoEntregado(pedido)"
-                    title="Marcar como entregado"
-                  >
-                    <i class="fa-solid fa-check"></i>
-                  </button>
+    <!-- Botón para marcar como entregado (solo en estado 'asignados') -->
+    <button
+      v-if="estadoActual === 'asignados'"
+      class="btn btn-success"
+      @click="marcarComoEntregado(pedido)"
+      title="Marcar como entregado"
+    >
+      <i class="fa-solid fa-check"></i>
+    </button>
 
-                  <!-- Botón para volver a poner en espera -->
-                  <button
-                    v-if="estadoActual === 'asignados' || estadoActual === 'soloAsignados' || estadoActual === 'listos'"
-                    class="btn btn-warning"
-                    style="color: white;"
-                    @click="volverAEspera(pedido)"
-                    title="Volver a espera"
-                  >
-                    <i class="fa-solid fa-rotate-left"></i>
-                  </button>
-                </td>
+    <!-- Botón para volver a poner en espera -->
+    <button
+      v-if="estadoActual === 'asignados' || estadoActual === 'soloAsignados' || estadoActual === 'listos'"
+      class="btn btn-warning"
+      style="color: white;"
+      @click="volverAEspera(pedido)"
+      title="Volver a espera"
+    >
+      <i class="fa-solid fa-rotate-left"></i>
+    </button>
+  </div>
+</td>
               </tr>
             </tbody>
           </table>

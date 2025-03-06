@@ -147,100 +147,87 @@
         </div>
       </div>
 
-      <!-- Modal para detalles de la orden -->
-      <div class="order-details-modal" v-if="selectedOrder" @click="closeModal">
-        <div class="modal-content" @click.stop>
-          <div class="modal-header">
-            <h3>Detalles de la Orden #{{ selectedOrder.id_pedido }}</h3>
-            <button class="close-btn" @click="closeModal">
-              <i class="fas fa-times"></i>
-            </button>
+     <!-- Modal para detalles de la orden con estructura consistente -->
+<div class="order-details-modal" v-if="selectedOrder" @click="closeModal">
+  <div class="modal-content" @click.stop>
+    <div class="modal-header">
+      <h3>Detalles de la Orden #{{ selectedOrder.id_pedido }}</h3>
+      <button class="close-btn" @click="closeModal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Layout principal con estructura de dos columnas -->
+      <div class="order-main-layout">
+        <!-- Columna izquierda con total e info básica -->
+        <div class="order-left-column">
+          <!-- Total destacado -->
+          <div class="order-total-highlight">
+            <span>Total:</span>
+            <span class="total-price">L.{{ typeof selectedOrder.total === 'number' ? selectedOrder.total.toFixed(2) : selectedOrder.total }}</span>
           </div>
-          <div class="modal-body">
-            <div class="order-info">
-              <div class="info-row">
-                <span class="info-label">Fecha:</span>
-                <span>{{ formatDate(selectedOrder.fecha_creacion || selectedOrder.fecha) }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Estado:</span>
-                <span 
-                  class="status-badge" 
-                  :class="`status-${formatStatusClass(selectedOrder.id_estado)}`"
-                >
-                  {{ getEstadoNombre(selectedOrder.id_estado) }}
-                </span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Entrega:</span>
-                <span>{{ isRecogidaEnTienda(selectedOrder) ? 'Recogida en tienda' : 'A domicilio' }}</span>
-              </div>
-              <div class="info-row" v-if="selectedOrder.fecha_estimada_entrega">
-                <span class="info-label">Fecha estimada de entrega:</span>
-                <span>{{ formatDate(selectedOrder.fecha_estimada_entrega) }}</span>
-              </div>
+          
+          <!-- Info básica -->
+          <div class="order-basic-info">
+            <div class="info-row">
+              <span class="info-label">Fecha:</span>
+              <span>{{ formatDate(selectedOrder.fecha_creacion || selectedOrder.fecha) }}</span>
             </div>
-
-            <h4>Servicios</h4>
-            <div class="order-items">
-              <div 
-                v-for="(item, index) in getServiciosDetallados(selectedOrder)" 
-                :key="index" 
-                class="order-item"
+            <div class="info-row">
+              <span class="info-label">Estado:</span>
+              <span 
+                class="status-badge" 
+                :class="`status-${formatStatusClass(selectedOrder.id_estado)}`"
               >
-                <div class="item-details">
-                  <span class="item-name">{{ item.nombre }}</span>
-                  <span class="item-quantity">{{ item.cantidad }}x</span>
-                </div>
-                <span class="item-price">L.{{ typeof item.subtotal === 'number' ? item.subtotal.toFixed(2) : item.subtotal }}</span>
-              </div>
+                {{ getEstadoNombre(selectedOrder.id_estado) }}
+              </span>
             </div>
-
-            <div class="order-summary">
-              <div class="summary-row">
-                <span>Subtotal</span>
-                <span>L.{{ typeof selectedOrder.total === 'number' ? selectedOrder.total.toFixed(2) : selectedOrder.total }}</span>
-              </div>
-              <div class="summary-row" v-if="selectedOrder.descuento">
-                <span>Descuento</span>
-                <span>-L.{{ typeof selectedOrder.descuento === 'number' ? selectedOrder.descuento.toFixed(2) : selectedOrder.descuento }}</span>
-              </div>
-              <div class="summary-row total">
-                <span>Total</span>
-                <span>L.{{ typeof selectedOrder.total === 'number' ? selectedOrder.total.toFixed(2) : selectedOrder.total }}</span>
-              </div>
+            <div class="info-row">
+              <span class="info-label">Entrega:</span>
+              <span>{{ isRecogidaEnTienda(selectedOrder) ? 'En tienda' : 'A domicilio' }}</span>
             </div>
-
-            <div class="tracking-info">
-              <h4>Seguimiento de la Orden</h4>
-              <div class="tracking-timeline">
-                <div 
-                  v-for="(step, index) in getTrackingSteps(selectedOrder)" 
-                  :key="index" 
-                  class="tracking-step"
-                  :class="{ 'completed': step.completado }"
-                >
-                  <div class="step-indicator">
-                    <div class="step-icon">
-                      <i :class="step.icon"></i>
-                    </div>
-                    <div class="step-line" v-if="index < getTrackingSteps(selectedOrder).length - 1"></div>
-                  </div>
-                  <div class="step-content">
-                    <div class="step-title">{{ step.titulo }}</div>
-                    <div class="step-datetime" v-if="step.completado">
-                      {{ formatDate(step.fecha) }} {{ step.hora ? '- ' + step.hora : '' }}
-                    </div>
-                  </div>
-                </div>
-              </div>
+          </div>
+        </div>
+        
+        <!-- Columna derecha con servicios -->
+        <div class="order-right-column">
+          <h4>Servicios</h4>
+          <div v-for="(item, index) in getServiciosDetallados(selectedOrder)" :key="index" class="service-item">
+            <div class="service-name">{{ item.nombre }}</div>
+            <div class="service-details">
+              <span class="service-quantity">{{ item.cantidad }}x</span>
+              <span class="service-price">L.{{ typeof item.subtotal === 'number' ? item.subtotal.toFixed(2) : item.subtotal }}</span>
             </div>
-            
-           
           </div>
         </div>
       </div>
-
+      
+      <!-- Sección de seguimiento horizontal -->
+      <div class="tracking-section">
+        <h4>Seguimiento de la Orden</h4>
+        <div class="tracking-timeline-horizontal">
+          <div 
+            v-for="(step, index) in getTrackingSteps(selectedOrder)" 
+            :key="index" 
+            class="tracking-step"
+            :class="{ 'completed': step.completado }"
+          >
+            <div class="step-icon">
+              <i :class="step.icon"></i>
+            </div>
+            <div class="step-line" v-if="index < getTrackingSteps(selectedOrder).length - 1"></div>
+            <div class="step-content">
+              <div class="step-title">{{ step.titulo }}</div>
+              <div class="step-datetime" v-if="step.completado">
+                {{ formatDate(step.fecha) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
    
     </div>
   </div>

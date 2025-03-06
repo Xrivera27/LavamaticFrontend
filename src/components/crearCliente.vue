@@ -62,21 +62,23 @@
                 <td data-label="Teléfono">{{ cliente.telefono }}</td>
                 <td data-label="Dirección">{{ cliente.direccion }}</td>
                 <td data-label="Acciones">
-                  <button style="margin-bottom: 1rem; color: white;"
-                    id="btnEditar"
-                    class="btn btn-warning"
-                    @click="editCliente(cliente)"
-                  >
-                    <i class="fa-solid fa-pencil"></i>
-                  </button>
-                  <button
-                    id="btnEliminar"
-                    class="btn btn-danger"
-                    @click="deleteCliente(cliente)"
-                  >
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
+  <div class="btn-group" role="group">
+    <button
+      id="btnEditar"
+      class="btn btn-warning"
+      @click="editCliente(cliente)"
+    >
+      <i class="fa-solid fa-pencil" style="color: white;"></i>
+    </button>
+    <button
+      id="btnEliminar"
+      class="btn btn-danger"
+      @click="deleteCliente(cliente)"
+    >
+      <i class="fa-solid fa-trash"></i>
+    </button>
+  </div>
+</td>
               </tr>
             </tbody>
           </table>
