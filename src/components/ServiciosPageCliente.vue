@@ -3,20 +3,6 @@
     <Sidebarcliente @sidebar-toggle="handleSidebarToggle" />
     <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
       <div class="contenedor-principal">
-        <div class="header">
-          <div class="logo">
-            <i class="fa-solid fa-shirt"></i>
-            <span>Lavamatic</span>
-          </div>
-          <div class="notifications">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge" v-if="notificaciones > 0">{{ notificaciones }}</span>
-          </div>
-          <div class="user-info">
-            <span>{{ userName }}</span>
-            <span class="user-role">Cliente</span>
-          </div>
-        </div>
 
         <div class="tarjeta-contenido">
           <h1 class="titulo-bienvenida">Bienvenido, a continuación podrás ver los servicios que brindamos</h1>
