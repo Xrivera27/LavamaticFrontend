@@ -24,13 +24,7 @@
 
 .main-content {
   flex: 1;
-  margin-left: var(--sidebar-width, 60px);
   padding: 20px;
-  transition: margin-left 0.3s ease;
-}
-
-.main-content.content-expanded {
-  margin-left: var(--sidebar-width-expanded, 200px);
 }
 
 /* Estilos para la página */

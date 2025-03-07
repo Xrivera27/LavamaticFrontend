@@ -173,7 +173,16 @@ const api = {
     }
 
     
-  }
+  },
+  dashboard: {
+    // Obtener todos los datos del dashboard
+    getData: () => apiClient.get('/dashboard'),
+    
+    // Obtener datos específicos
+    getEstados: () => apiClient.get('/dashboard/estados'),
+    getRepartidores: () => apiClient.get('/dashboard/repartidores'),
+    getServicios: () => apiClient.get('/dashboard/servicios')
+  },
 
   
 };

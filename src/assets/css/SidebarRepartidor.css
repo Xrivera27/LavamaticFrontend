@@ -7,7 +7,7 @@
   --sidebar-hover: #3a5269;
   --primary-color: #3498db;
   --danger-color: #e74c3c;
-  --tooltip-bg: rgba(0, 0, 0, 0.75);
+  --tooltip-bg: rgba(40, 44, 52, 0.75); /* Fondo semitransparente para el efecto blur */
 }
 
 ::-webkit-scrollbar{
@@ -116,12 +116,8 @@
   background-color: var(--primary-color);
 }
 
-/* Tooltip styles */
-.tooltip {
-  position: relative;
-}
-
-.tooltip:not(.sidebar.expanded .tooltip)::after {
+/* Tooltip modernos con blur */
+.tooltip::after {
   content: attr(data-tooltip);
   position: absolute;
   left: 100%;
@@ -129,21 +125,51 @@
   transform: translateY(-50%);
   background-color: var(--tooltip-bg);
   color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 10px 15px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 400;
   white-space: nowrap;
-  z-index: 200;
+  z-index: 9999;
+  margin-left: 15px;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s ease;
-  pointer-events: none;
-  margin-left: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.5px;
 }
 
-.tooltip:not(.sidebar.expanded .tooltip):hover::after {
+/* Flecha para el tooltip */
+.tooltip::before {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent var(--tooltip-bg) transparent transparent;
+  z-index: 10000;
+  margin-left: 3px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+}
+
+/* Mostrar tooltip solo cuando el sidebar NO está expandido */
+.sidebar:not(.expanded) .tooltip:hover::after,
+.sidebar:not(.expanded) .tooltip:hover::before {
   opacity: 1;
   visibility: visible;
+}
+
+/* Ocultar tooltips cuando el sidebar está expandido */
+.sidebar.expanded .tooltip::after,
+.sidebar.expanded .tooltip::before {
+  display: none;
 }
 
 .sidebar-footer {

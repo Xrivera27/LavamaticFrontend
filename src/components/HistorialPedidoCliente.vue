@@ -3,18 +3,7 @@
     <Sidebarcliente @sidebar-toggle="handleSidebarToggle" />
     <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
       <div class="header">
-        <div class="logo">
-          <i class="fa-solid fa-shirt"></i>
-          <span>Lavamatic</span>
-        </div>
-        <div class="notifications">
-          <i class="fas fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info">
-          <span>Gerson Rivera</span>
-          <span class="user-role">Cliente</span>
-        </div>
+      
       </div>
 
       <div class="historial-container">

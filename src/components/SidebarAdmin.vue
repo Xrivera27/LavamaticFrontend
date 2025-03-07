@@ -1,45 +1,63 @@
 <template>
   <div class="sidebar" :class="{ 'expanded': isExpanded }">
     <div class="nav-links">
-      <div class="menu-toggle" @click="toggleSidebar">
+      <div class="menu-toggle" @click="toggleSidebar" :title="isExpanded ? null : 'Menú'">
         <i class="fas" :class="isExpanded ? 'fa-chevron-left' : 'fa-bars'"></i>
         <span class="nav-text">Menú</span>
       </div>
-      <router-link to="/admin/dashboard" class="nav-item tooltip" :class="{ active: currentRoute === 'adminDashboard' }" data-tooltip="Dashboard">
+      <router-link to="/admin/dashboard" class="nav-item" 
+                   :class="{ active: currentRoute === 'adminDashboard' }" 
+                   :title="isExpanded ? null : 'Dashboard'">
         <i class="fas fa-tachometer-alt"></i>
         <span class="nav-text">Dashboard</span>
       </router-link>
-      <router-link to="/admin/repartidores/crear" class="nav-item tooltip" :class="{ active: currentRoute === 'adminCrearRepartidor' }" data-tooltip="Crear Repartidor">
+      <router-link to="/admin/repartidores/crear" class="nav-item" 
+                   :class="{ active: currentRoute === 'adminCrearRepartidor' }"
+                   :title="isExpanded ? null : 'Repartidores'">
         <i class="fas fa-user-plus"></i>
         <span class="nav-text">Crear Repartidor</span>
       </router-link>
-      <router-link to="/admin/clientes" class="nav-item tooltip" :class="{ active: currentRoute === 'adminClientes' }" data-tooltip="Clientes">
+      <router-link to="/admin/clientes" class="nav-item" 
+                   :class="{ active: currentRoute === 'adminClientes' }"
+                   :title="isExpanded ? null : 'Clientes'">
         <i class="fas fa-users"></i>
         <span class="nav-text">Clientes</span>
       </router-link>
-      <router-link to="/admin/inventario" class="nav-item tooltip" :class="{ active: currentRoute === 'adminInventario' }" data-tooltip="Inventario">
+      <router-link to="/admin/inventario" class="nav-item" 
+                   :class="{ active: currentRoute === 'adminInventario' }"
+                   :title="isExpanded ? null : 'Inventario'">
         <i class="fas fa-boxes"></i>
         <span class="nav-text">Inventario</span>
       </router-link>
-      <router-link to="/admin/servicios" class="nav-item tooltip" :class="{ active: currentRoute === 'adminServicios' }" data-tooltip="Servicios">
+      <router-link to="/admin/servicios" class="nav-item" 
+                   :class="{ active: currentRoute === 'adminServicios' }"
+                   :title="isExpanded ? null : 'Servicios'">
         <i class="fas fa-concierge-bell"></i>
         <span class="nav-text">Servicios</span>
       </router-link>
-      <router-link to="/admin/mantenimiento" class="nav-item tooltip" :class="{ active: currentRoute === 'adminMantenimiento' }" data-tooltip="Mantenimiento">
+      <router-link to="/admin/mantenimiento" class="nav-item" 
+                   :class="{ active: currentRoute === 'adminMantenimiento' }"
+                   :title="isExpanded ? null : 'Mantenimiento'">
         <i class="fas fa-tools"></i>
         <span class="nav-text">Mantenimiento</span>
       </router-link>
-      <router-link to="/admin/pedidos" class="nav-item tooltip" :class="{ active: currentRoute === 'adminPedidos' }" data-tooltip="Pedidos">
+      <router-link to="/admin/pedidos" class="nav-item" 
+                   :class="{ active: currentRoute === 'adminPedidos' }"
+                   :title="isExpanded ? null : 'Pedidos'">
         <i class="fas fa-clipboard-list"></i>
         <span class="nav-text">Pedidos</span>
       </router-link>
-      <router-link to="/admin/configuser" class="nav-item tooltip" :class="{ active: currentRoute === 'adminConfiguraciones' }" data-tooltip="Configuración">
+      <router-link to="/admin/configuser" class="nav-item" 
+                   :class="{ active: currentRoute === 'adminConfiguraciones' }"
+                   :title="isExpanded ? null : 'Configuración'">
         <i class="fas fa-cog"></i>
         <span class="nav-text">Configuración</span>
       </router-link>
     </div>
     <div class="sidebar-footer">
-      <router-link to="/login" class="nav-item logout tooltip" @click="logout" data-tooltip="Cerrar Sesión">
+      <router-link to="/login" class="nav-item logout" 
+                   @click="logout"
+                   :title="isExpanded ? null : 'Cerrar Sesión'">
         <i class="fas fa-sign-out-alt"></i>
         <span class="nav-text">Cerrar Sesión</span>
       </router-link>
