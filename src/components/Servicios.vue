@@ -90,29 +90,29 @@
             </tbody>
           </table>
     
-          <div class="pagination-wrapper">
-            <div class="pagination-info" id="paginacion">
-              Mostrando {{ paginatedServicios.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
-              {{ Math.min(currentPage * pageSize, filteredServicios.length) }} de
-              {{ filteredServicios.length }} registros
-            </div>
-            <div class="pagination-container">
-              <button style="margin-bottom: 1rem;"
-                class="pagination-button"
-                :disabled="currentPage === 1"
-                @click="previousPage"
-              >
-                Anterior
-              </button>
-              <button
-                class="pagination-button"
-                :disabled="currentPage === totalPages"
-                @click="nextPage"
-              >
-                Siguiente
-              </button>
-            </div>
-          </div>
+          <div class="pagination-wrapper" v-if="totalPages > 0">
+  <div class="pagination-info" id="paginacion">
+    Mostrando {{ paginatedServicios.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
+    {{ Math.min(currentPage * pageSize, filteredServicios.length) }} de
+    {{ filteredServicios.length }} registros
+  </div>
+  <div class="pagination-container">
+    <button
+      class="pagination-button"
+      :disabled="currentPage === 1"
+      @click="previousPage"
+    >
+      Anterior
+    </button>
+    <button
+      class="pagination-button"
+      :disabled="currentPage === totalPages"
+      @click="nextPage"
+    >
+      Siguiente
+    </button>
+  </div>
+</div>
         </div>
     
         <!-- Modal de detalles -->

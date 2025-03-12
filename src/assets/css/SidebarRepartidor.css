@@ -85,6 +85,7 @@
   min-width: 30px;
   display: flex;
   justify-content: center;
+  transition: color 0.3s, filter 0.3s, transform 0.3s;
 }
 
 .nav-text {
@@ -104,6 +105,12 @@
 .nav-item.active {
   background-color: var(--sidebar-active);
   color: var(--primary-color);
+}
+
+.nav-item.active i {
+  color: var(--primary-color);
+  filter: drop-shadow(0 0 3px rgba(52, 152, 219, 0.6));
+  transform: scale(1.1);
 }
 
 .nav-item.active::before {
@@ -183,6 +190,12 @@
 
 .nav-item.logout:hover {
   background-color: rgba(231, 76, 60, 0.2);
+}
+
+.nav-item.logout.active i {
+  color: var(--danger-color);
+  filter: drop-shadow(0 0 3px rgba(231, 76, 60, 0.6));
+  transform: scale(1.1);
 }
 
 @media (max-width: 768px) {

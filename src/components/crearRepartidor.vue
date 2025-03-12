@@ -83,30 +83,29 @@
             </tbody>
           </table>
     
-          <div class="pagination-wrapper">
-            <div class="pagination-info">
-              Mostrando {{ paginatedEmpleados.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
-              {{ Math.min(currentPage * pageSize, filteredEmpleados.length) }} de
-              {{ filteredEmpleados.length }} registros
-            </div>
-            <div class="pagination-container">
-              <button
-                style="margin-bottom: 1rem;"
-                class="pagination-button"
-                :disabled="currentPage === 1"
-                @click="previousPage"
-              >
-                Anterior
-              </button>
-              <button
-                class="pagination-button"
-                :disabled="currentPage === totalPages"
-                @click="nextPage"
-              >
-                Siguiente
-              </button>
-            </div>
-          </div>
+          <div class="pagination-wrapper" v-if="totalPages > 0">
+  <div class="pagination-info">
+    Mostrando {{ paginatedEmpleados.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
+    {{ Math.min(currentPage * pageSize, filteredEmpleados.length) }} de
+    {{ filteredEmpleados.length }} registros
+  </div>
+  <div class="pagination-container">
+    <button
+      class="pagination-button"
+      :disabled="currentPage === 1"
+      @click="previousPage"
+    >
+      Anterior
+    </button>
+    <button
+      class="pagination-button"
+      :disabled="currentPage === totalPages"
+      @click="nextPage"
+    >
+      Siguiente
+    </button>
+  </div>
+</div>
         </div>
     
         <div class="modal" v-if="showConfirmModal">
@@ -613,60 +612,59 @@ export default {
     },
 
     // Validar que los códigos de mochila y GPS sean únicos
-// Reemplaza este método en tu componente
-validarCodigosMochilasGPS() {
-  let isValid = true;
-  
-  // Validar que el código de mochila no esté vacío
-  if (!this.usuarioForm.codigo_mochila) {
-    this.validationErrors.codigo_mochila = "El código de mochila es obligatorio";
-    isValid = false;
-  } else {
-    // Si NO estamos en modo edición, o si cambiamos el código en modo edición
-    if (!this.isEditing) {
-      // Verificar solo en modo creación (no edición)
-      const existeMochila = this.empleados.some(e => 
-        e.codigo_mochila.toLowerCase() === this.usuarioForm.codigo_mochila.toLowerCase()
-      );
+    validarCodigosMochilasGPS() {
+      let isValid = true;
       
-      if (existeMochila) {
-        this.validationErrors.codigo_mochila = "Este código de mochila ya está en uso";
+      // Validar que el código de mochila no esté vacío
+      if (!this.usuarioForm.codigo_mochila) {
+        this.validationErrors.codigo_mochila = "El código de mochila es obligatorio";
         isValid = false;
       } else {
-        this.validationErrors.codigo_mochila = "";
+        // Si NO estamos en modo edición, o si cambiamos el código en modo edición
+        if (!this.isEditing) {
+          // Verificar solo en modo creación (no edición)
+          const existeMochila = this.empleados.some(e => 
+            e.codigo_mochila.toLowerCase() === this.usuarioForm.codigo_mochila.toLowerCase()
+          );
+          
+          if (existeMochila) {
+            this.validationErrors.codigo_mochila = "Este código de mochila ya está en uso";
+            isValid = false;
+          } else {
+            this.validationErrors.codigo_mochila = "";
+          }
+        } else {
+          // En modo edición, no mostrar error
+          this.validationErrors.codigo_mochila = "";
+        }
       }
-    } else {
-      // En modo edición, no mostrar error
-      this.validationErrors.codigo_mochila = "";
-    }
-  }
 
-  // Validar que el código GPS no esté vacío
-  if (!this.usuarioForm.gps_asignado) {
-    this.validationErrors.gps_asignado = "El código GPS es obligatorio";
-    isValid = false;
-  } else {
-    // Si NO estamos en modo edición, o si cambiamos el código en modo edición
-    if (!this.isEditing) {
-      // Verificar solo en modo creación (no edición)
-      const existeGPS = this.empleados.some(e => 
-        e.gps_asignado.toLowerCase() === this.usuarioForm.gps_asignado.toLowerCase()
-      );
-      
-      if (existeGPS) {
-        this.validationErrors.gps_asignado = "Este código GPS ya está en uso";
+      // Validar que el código GPS no esté vacío
+      if (!this.usuarioForm.gps_asignado) {
+        this.validationErrors.gps_asignado = "El código GPS es obligatorio";
         isValid = false;
       } else {
-        this.validationErrors.gps_asignado = "";
+        // Si NO estamos en modo edición, o si cambiamos el código en modo edición
+        if (!this.isEditing) {
+          // Verificar solo en modo creación (no edición)
+          const existeGPS = this.empleados.some(e => 
+            e.gps_asignado.toLowerCase() === this.usuarioForm.gps_asignado.toLowerCase()
+          );
+          
+          if (existeGPS) {
+            this.validationErrors.gps_asignado = "Este código GPS ya está en uso";
+            isValid = false;
+          } else {
+            this.validationErrors.gps_asignado = "";
+          }
+        } else {
+          // En modo edición, no mostrar error
+          this.validationErrors.gps_asignado = "";
+        }
       }
-    } else {
-      // En modo edición, no mostrar error
-      this.validationErrors.gps_asignado = "";
-    }
-  }
 
-  return isValid;
-},
+      return isValid;
+    },
     
     // Método que ejecuta todas las validaciones
     validarFormulario() {
@@ -738,96 +736,96 @@ validarCodigosMochilasGPS() {
     },
     
     async guardarUsuario() {
-  // Ejecutar todas las validaciones
-  if (!this.validarFormulario()) {
-    return;
-  }
+      // Ejecutar todas las validaciones
+      if (!this.validarFormulario()) {
+        return;
+      }
 
-  this.isLoading = true;
+      this.isLoading = true;
 
-  try {
-    if (this.isEditing) {
-      // Actualizar repartidor existente
-      console.log("Actualizando repartidor ID:", this.usuarioForm.id_repartidor);
-      
-      // Verificar que el ID del repartidor esté disponible
-      if (!this.usuarioForm.id_repartidor) {
-        throw new Error("ID del repartidor no disponible para actualización");
+      try {
+        if (this.isEditing) {
+          // Actualizar repartidor existente
+          console.log("Actualizando repartidor ID:", this.usuarioForm.id_repartidor);
+          
+          // Verificar que el ID del repartidor esté disponible
+          if (!this.usuarioForm.id_repartidor) {
+            throw new Error("ID del repartidor no disponible para actualización");
+          }
+          
+          // Solo enviamos los campos que pueden haber cambiado
+          const datosActualizacion = {};
+          
+          // Agregar solo los campos que queremos actualizar
+          if (this.usuarioForm.nombre_completo) {
+            datosActualizacion.nombre = this.usuarioForm.nombre_completo;
+          }
+          
+          if (this.usuarioForm.correo) {
+            datosActualizacion.email = this.usuarioForm.correo;
+          }
+          
+          if (this.usuarioForm.telefono) {
+            datosActualizacion.telefono = this.usuarioForm.telefono;
+          }
+          
+          if (this.usuarioForm.direccion) {
+            datosActualizacion.direccion = this.usuarioForm.direccion;
+          }
+          
+          if (this.usuarioForm.codigo_mochila) {
+            datosActualizacion.codigo_mochila = this.usuarioForm.codigo_mochila;
+          }
+          
+          if (this.usuarioForm.gps_asignado) {
+            datosActualizacion.gps_asignado = this.usuarioForm.gps_asignado;
+          }
+          
+          // Si se está editando la contraseña, incluirla
+          if (this.isPassEdit && this.usuarioForm.password) {
+            datosActualizacion.password = this.usuarioForm.password;
+          }
+          
+          console.log("Datos de actualización:", datosActualizacion);
+          
+          // Llamar a la API con el ID del repartidor
+          await api.repartidores.update(this.usuarioForm.id_repartidor, datosActualizacion);
+          this.toast.success("Repartidor actualizado correctamente");
+        } else {
+          // Crear nuevo repartidor
+          const datosCreacion = {
+            nombre: this.usuarioForm.nombre_completo,
+            email: this.usuarioForm.correo,
+            password: this.usuarioForm.password,
+            telefono: this.usuarioForm.telefono,
+            direccion: this.usuarioForm.direccion,
+            codigo_mochila: this.usuarioForm.codigo_mochila,
+            gps_asignado: this.usuarioForm.gps_asignado
+          };
+          
+          console.log("Datos para crear repartidor:", datosCreacion);
+          await api.repartidores.create(datosCreacion);
+          this.toast.success("Repartidor agregado correctamente");
+        }
+        
+        // Recargar la lista de repartidores
+        await this.cargarRepartidores();
+        
+        // Cerrar el modal y limpiar el formulario
+        this.closeModal();
+      } catch (error) {
+        console.error("Error al guardar repartidor:", error);
+        let errorMsg = "Error al guardar repartidor";
+        
+        if (error.response && error.response.data && error.response.data.error) {
+          errorMsg = error.response.data.error;
+        }
+        
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
       }
-      
-      // Solo enviamos los campos que pueden haber cambiado
-      const datosActualizacion = {};
-      
-      // Agregar solo los campos que queremos actualizar
-      if (this.usuarioForm.nombre_completo) {
-        datosActualizacion.nombre = this.usuarioForm.nombre_completo;
-      }
-      
-      if (this.usuarioForm.correo) {
-        datosActualizacion.email = this.usuarioForm.correo;
-      }
-      
-      if (this.usuarioForm.telefono) {
-        datosActualizacion.telefono = this.usuarioForm.telefono;
-      }
-      
-      if (this.usuarioForm.direccion) {
-        datosActualizacion.direccion = this.usuarioForm.direccion;
-      }
-      
-      if (this.usuarioForm.codigo_mochila) {
-        datosActualizacion.codigo_mochila = this.usuarioForm.codigo_mochila;
-      }
-      
-      if (this.usuarioForm.gps_asignado) {
-        datosActualizacion.gps_asignado = this.usuarioForm.gps_asignado;
-      }
-      
-      // Si se está editando la contraseña, incluirla
-      if (this.isPassEdit && this.usuarioForm.password) {
-        datosActualizacion.password = this.usuarioForm.password;
-      }
-      
-      console.log("Datos de actualización:", datosActualizacion);
-      
-      // Llamar a la API con el ID del repartidor
-      await api.repartidores.update(this.usuarioForm.id_repartidor, datosActualizacion);
-      this.toast.success("Repartidor actualizado correctamente");
-    } else {
-      // Crear nuevo repartidor
-      const datosCreacion = {
-        nombre: this.usuarioForm.nombre_completo,
-        email: this.usuarioForm.correo,
-        password: this.usuarioForm.password,
-        telefono: this.usuarioForm.telefono,
-        direccion: this.usuarioForm.direccion,
-        codigo_mochila: this.usuarioForm.codigo_mochila,
-        gps_asignado: this.usuarioForm.gps_asignado
-      };
-      
-      console.log("Datos para crear repartidor:", datosCreacion);
-      await api.repartidores.create(datosCreacion);
-      this.toast.success("Repartidor agregado correctamente");
-    }
-    
-    // Recargar la lista de repartidores
-    await this.cargarRepartidores();
-    
-    // Cerrar el modal y limpiar el formulario
-    this.closeModal();
-  } catch (error) {
-    console.error("Error al guardar repartidor:", error);
-    let errorMsg = "Error al guardar repartidor";
-    
-    if (error.response && error.response.data && error.response.data.error) {
-      errorMsg = error.response.data.error;
-    }
-    
-    this.toast.error(errorMsg);
-  } finally {
-    this.isLoading = false;
-  }
-},
+    },
     
     previousPage() {
       if (this.currentPage > 1) {

@@ -1,5 +1,13 @@
 <template>
   <div class="admin-layout">
+    <!-- Modal de carga -->
+    <div v-if="cargando" class="loading-modal">
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Cargando dashboard...</p>
+      </div>
+    </div>
+
     <SidebarAdmin />
     <div class="main-content">
       
@@ -102,6 +110,9 @@ export default {
         this.cargando = true;
         this.error = null;
         
+        // Retardo simulado para asegurar que el modal sea visible (puedes quitar esto en producción)
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
         // Llamada a la API para obtener los datos del dashboard
         const response = await api.dashboard.getData();
         const data = response.data;
@@ -157,110 +168,110 @@ export default {
     },
     
     initRepartidoresLineChart() {
-  const ctx = document.getElementById('repartidoresLineChart');
-  if (!ctx) {
-    console.error('No se encontró el elemento canvas para el gráfico de repartidores');
-    return;
-  }
-  
-  const context = ctx.getContext('2d');
-  
-  // Destruir el gráfico anterior si existe
-  if (this.repartidoresLineChart) {
-    this.repartidoresLineChart.destroy();
-  }
-  
-  // Verificar si hay datos para mostrar
-  if (!this.datosRepartidores || this.datosRepartidores.length === 0) {
-    console.warn('No hay datos de repartidores para mostrar');
-    return;
-  }
-  
-  // Preparar los datos para el gráfico de barras
-  const labels = this.datosRepartidores.map(item => {
-    // Crear etiquetas más cortas para el gráfico
-    if (item.name === 'Sin asignar') return 'Sin asignar';
-    
-    // Obtener solo el primer nombre para mostrar en el gráfico
-    const nombres = item.name.split(' ');
-    if (nombres.length >= 2) {
-      return `${nombres[0]} ${nombres[1].charAt(0)}.`; // Primer nombre + inicial de apellido
-    }
-    return item.name;
-  });
-  
-  const datos = this.datosRepartidores.map(item => item.pedidos);
-  
-  // Guardar los nombres completos para usar en tooltips
-  const nombresCompletos = this.datosRepartidores.map(item => item.name);
-  
-  this.repartidoresLineChart = new Chart(context, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Pedidos Asignados',
-          data: datos,
-          backgroundColor: '#3498db',
-          borderWidth: 0,
-          borderRadius: 4
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            title: function(tooltipItems) {
-              // Mostrar el nombre completo en el tooltip
-              const index = tooltipItems[0].dataIndex;
-              return nombresCompletos[index];
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(200, 200, 200, 0.1)'
-          },
-          ticks: {
-            color: '#999',
-            precision: 0 // Solo números enteros
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: '#999',
-            maxRotation: 45,
-            minRotation: 45,
-            autoSkip: false,
-            font: {
-              size: 11
-            }
-          }
-        }
-      },
-      layout: {
-        padding: {
-          bottom: 20
-        }
+      const ctx = document.getElementById('repartidoresLineChart');
+      if (!ctx) {
+        console.error('No se encontró el elemento canvas para el gráfico de repartidores');
+        return;
       }
-    }
-  });
-},
+      
+      const context = ctx.getContext('2d');
+      
+      // Destruir el gráfico anterior si existe
+      if (this.repartidoresLineChart) {
+        this.repartidoresLineChart.destroy();
+      }
+      
+      // Verificar si hay datos para mostrar
+      if (!this.datosRepartidores || this.datosRepartidores.length === 0) {
+        console.warn('No hay datos de repartidores para mostrar');
+        return;
+      }
+      
+      // Preparar los datos para el gráfico de barras
+      const labels = this.datosRepartidores.map(item => {
+        // Crear etiquetas más cortas para el gráfico
+        if (item.name === 'Sin asignar') return 'Sin asignar';
+        
+        // Obtener solo el primer nombre para mostrar en el gráfico
+        const nombres = item.name.split(' ');
+        if (nombres.length >= 2) {
+          return `${nombres[0]} ${nombres[1].charAt(0)}.`; // Primer nombre + inicial de apellido
+        }
+        return item.name;
+      });
+      
+      const datos = this.datosRepartidores.map(item => item.pedidos);
+      
+      // Guardar los nombres completos para usar en tooltips
+      const nombresCompletos = this.datosRepartidores.map(item => item.name);
+      
+      this.repartidoresLineChart = new Chart(context, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Pedidos Asignados',
+              data: datos,
+              backgroundColor: '#3498db',
+              borderWidth: 0,
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                title: function(tooltipItems) {
+                  // Mostrar el nombre completo en el tooltip
+                  const index = tooltipItems[0].dataIndex;
+                  return nombresCompletos[index];
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(200, 200, 200, 0.1)'
+              },
+              ticks: {
+                color: '#999',
+                precision: 0 // Solo números enteros
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#999',
+                maxRotation: 45,
+                minRotation: 45,
+                autoSkip: false,
+                font: {
+                  size: 11
+                }
+              }
+            }
+          },
+          layout: {
+            padding: {
+              bottom: 20
+            }
+          }
+        }
+      });
+    },
     
     initServiciosChart() {
       const ctx = document.getElementById('serviciosChart');

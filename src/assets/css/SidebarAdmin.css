@@ -85,6 +85,7 @@
   min-width: 30px;
   display: flex;
   justify-content: center;
+  transition: color 0.3s, filter 0.3s, transform 0.3s;
 }
 
 .nav-text {
@@ -106,6 +107,12 @@
   color: var(--primary-color);
 }
 
+.nav-item.active i {
+  color: var(--primary-color);
+  filter: drop-shadow(0 0 3px rgba(52, 152, 219, 0.6));
+  transform: scale(1.1);
+}
+
 .nav-item.active::before {
   content: '';
   position: absolute;
@@ -118,7 +125,7 @@
 
 /* Tooltip modernos con blur */
 .tooltip::after {
-  content: attr(data-tooltip);
+  content: attr(title);
   position: absolute;
   left: 100%;
   top: 50%;
@@ -183,6 +190,13 @@
 
 .nav-item.logout:hover {
   background-color: rgba(231, 76, 60, 0.2);
+}
+
+/* Estilo especial para el botón de cierre de sesión activo */
+.nav-item.logout.active i {
+  color: var(--danger-color);
+  filter: drop-shadow(0 0 3px rgba(231, 76, 60, 0.6));
+  transform: scale(1.1);
 }
 
 @media (max-width: 768px) {
