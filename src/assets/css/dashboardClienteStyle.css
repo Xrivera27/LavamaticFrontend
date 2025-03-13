@@ -4,12 +4,13 @@
 }
 
 .dashboard-layout {
-  margin-top: 35%;
+  margin-top: 8%;
   margin-bottom: 5%;
   display: flex;
   min-height: 100vh;
   background-color: #ffffff;
   border-radius: 15px;
+  
 }
 
 .main-content {
@@ -26,7 +27,7 @@
 .dashboard-container {
   font-family: 'Roboto', sans-serif;
   background-color: #ffffff;
-  margin-top: 35%;
+  margin-top: 8%;
   margin-bottom: 5%;
   border-radius: 25px;
   max-width: 1024px;

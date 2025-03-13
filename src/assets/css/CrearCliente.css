@@ -1,6 +1,6 @@
 /* Estilos básicos para el layout */
 #gestc{
-  margin-top: 15%;
+  margin-top: 0;
 }
 
 .admin-layout {
@@ -8,6 +8,7 @@
   min-height: auto;
   background-color: #f8f9fa;
   height: auto;
+  
 }
 
 .main-content {

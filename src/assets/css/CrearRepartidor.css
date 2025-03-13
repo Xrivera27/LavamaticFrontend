@@ -2,7 +2,7 @@
 .admin-layout {
   display: flex;
   min-height: auto;
-  margin-top: 20%;
+  margin-top: 0;
   margin-bottom: 5%;
   background-color: #f8f9fa;
   border-radius: 15px;

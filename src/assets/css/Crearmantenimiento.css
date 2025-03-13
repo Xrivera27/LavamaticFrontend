@@ -3,11 +3,17 @@
   display: flex;
   min-height: auto;
   background-color: #f8f9fa;
+  
 }
 
 #paginacion{
   color: black;
 }
+
+.main-content {
+  margin-top: 0;
+}
+
 
 #desc{
   width: 100%;
