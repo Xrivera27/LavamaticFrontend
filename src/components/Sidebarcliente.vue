@@ -45,7 +45,7 @@ export default {
   name: 'SidebarCliente',
   data() {
     return {
-      isExpanded: localStorage.getItem('sidebarExpanded') === 'true' || false
+      isExpanded: localStorage.getItem('sidebarExpanded') === 'true' || true
     }
   },
   computed: {

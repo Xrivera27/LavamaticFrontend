@@ -34,7 +34,7 @@ export default {
   name: 'SidebarRepartidor',
   data() {
     return {
-      isExpanded: localStorage.getItem('sidebarExpanded') === 'true' || false
+      isExpanded: localStorage.getItem('sidebarExpanded') === 'true' || true
     }
   },
   computed: {
