@@ -1,114 +1,140 @@
 <template>
-    <div class="page-layout">
-      <Sidebarcliente @sidebar-toggle="handleSidebarToggle" />
-      <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
-      
-  
-        <div class="configuracion-container">
-          <h1 class="page-title">Configuración de Usuario</h1>
-          
-          <div class="profile-section">
-            <div class="profile-header">
-              <div class="profile-avatar">
-                <i class="fa-solid fa-user"></i>
-              </div>
-              <div class="profile-name">
-                <h2>{{ usuario.nombre }}</h2>
-                <p>{{ usuario.email }}</p>
-              </div>
+  <div class="page-layout">
+    <Sidebarcliente @sidebar-toggle="handleSidebarToggle" />
+    <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
+    
+      <div class="configuracion-container">
+        <h1 class="page-title">Configuración de Usuario</h1>
+        
+        <div class="profile-section">
+          <div class="profile-header">
+            <div class="profile-avatar">
+              <i class="fa-solid fa-user"></i>
             </div>
-  
-            <div class="form-container">
-              <h3>Información Personal</h3>
-              <form @submit.prevent="guardarCambios">
-                <div class="form-group">
-                  <label for="nombre">Nombre</label>
+            <div class="profile-name">
+              <h2>{{ usuario.nombre }}</h2>
+              <p>{{ usuario.email }}</p>
+            </div>
+          </div>
+
+          <div class="form-container">
+            <h3>Información Personal</h3>
+            <form @submit.prevent="guardarCambios">
+              <div class="form-group">
+                <label for="nombre">Nombre</label>
+                <input 
+                  type="text" 
+                  id="nombre" 
+                  v-model="usuario.nombre" 
+                  placeholder="Tu nombre completo"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  v-model="usuario.email" 
+                  placeholder="tu@email.com"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input 
+                  type="tel" 
+                  id="telefono" 
+                  v-model="usuario.telefono" 
+                  placeholder="Tu número de teléfono"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="direccion">Dirección</label>
+                <textarea 
+                  id="direccion" 
+                  v-model="usuario.direccion" 
+                  placeholder="Tu dirección completa"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <h3>Cambiar Contraseña</h3>
+              
+              <div class="form-group">
+                <label for="currentPassword">Contraseña actual</label>
+                <div class="password-input-container">
                   <input 
-                    type="text" 
-                    id="nombre" 
-                    v-model="usuario.nombre" 
-                    placeholder="Tu nombre completo"
-                    required
-                  />
-                </div>
-  
-                <div class="form-group">
-                  <label for="email">Correo electrónico</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    v-model="usuario.email" 
-                    placeholder="tu@email.com"
-                    required
-                  />
-                </div>
-  
-                <div class="form-group">
-                  <label for="telefono">Teléfono</label>
-                  <input 
-                    type="tel" 
-                    id="telefono" 
-                    v-model="usuario.telefono" 
-                    placeholder="Tu número de teléfono"
-                  />
-                </div>
-  
-                <div class="form-group">
-                  <label for="direccion">Dirección</label>
-                  <textarea 
-                    id="direccion" 
-                    v-model="usuario.direccion" 
-                    placeholder="Tu dirección completa"
-                    rows="3"
-                  ></textarea>
-                </div>
-  
-                <h3>Cambiar Contraseña</h3>
-                
-                <div class="form-group">
-                  <label for="currentPassword">Contraseña actual</label>
-                  <input 
-                    type="password" 
+                    :type="showCurrentPassword ? 'text' : 'password'" 
                     id="currentPassword" 
                     v-model="passwordForm.currentPassword" 
                     placeholder="Ingresa tu contraseña actual"
                   />
+                  <button 
+                    type="button" 
+                    class="toggle-password" 
+                    @click="showCurrentPassword = !showCurrentPassword"
+                  >
+                    <i class="fa-solid" :class="showCurrentPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
                 </div>
-  
-                <div class="form-group">
-                  <label for="newPassword">Nueva contraseña</label>
+              </div>
+
+              <div class="form-group">
+                <label for="newPassword">Nueva contraseña</label>
+                <div class="password-input-container">
                   <input 
-                    type="password" 
+                    :type="showNewPassword ? 'text' : 'password'" 
                     id="newPassword" 
                     v-model="passwordForm.newPassword" 
                     placeholder="Ingresa tu nueva contraseña"
                   />
+                  <button 
+                    type="button" 
+                    class="toggle-password" 
+                    @click="showNewPassword = !showNewPassword"
+                  >
+                    <i class="fa-solid" :class="showNewPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
                 </div>
-  
-                <div class="form-group">
-                  <label for="confirmPassword">Confirmar contraseña</label>
+              </div>
+
+              <div class="form-group">
+                <label for="confirmPassword">Confirmar contraseña</label>
+                <div class="password-input-container">
                   <input 
-                    type="password" 
+                    :type="showConfirmPassword ? 'text' : 'password'" 
                     id="confirmPassword" 
                     v-model="passwordForm.confirmPassword" 
                     placeholder="Confirma tu nueva contraseña"
                   />
-                  <span class="error-message" v-if="passwordError">{{ passwordError }}</span>
+                  <button 
+                    type="button" 
+                    class="toggle-password" 
+                    @click="showConfirmPassword = !showConfirmPassword"
+                  >
+                    <i class="fa-solid" :class="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
                 </div>
-  
-                <div class="form-actions">
-                  <button type="button" class="btn-cancelar" @click="resetForm">Cancelar</button>
-                  <button type="submit" class="btn-guardar">Guardar Cambios</button>
-                </div>
-              </form>
-            </div>
+                <span class="error-message" v-if="passwordError">{{ passwordError }}</span>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-cancelar" @click="resetForm">Cancelar</button>
+                <button type="submit" class="btn-guardar">Guardar Cambios</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script>
+  </div>
+</template>
+
+<script>
 import Sidebarcliente from './SidebarAdmin.vue';
 import api from '@/services/apiService';
 import { useToast } from "vue-toastification";
@@ -130,6 +156,9 @@ export default {
       isChangingPassword: false,
       isDeactivating: false,
       showDesactivarModal: false,
+      showCurrentPassword: false,
+      showNewPassword: false,
+      showConfirmPassword: false,
       notificaciones: 0,
       usuario: {
         id_usuario: null,
@@ -199,6 +228,11 @@ export default {
           this.formOriginal = JSON.parse(JSON.stringify(this.usuario));
           this.toast.success('Perfil actualizado correctamente');
         }
+        
+        // Si se ingresaron datos de contraseña, intentar cambiarla también
+        if (this.passwordForm.currentPassword && this.passwordForm.newPassword) {
+          await this.cambiarPassword();
+        }
       } catch (error) {
         console.error('Error al guardar cambios:', error);
         const errorMsg = error.response?.data?.error || 'Error al actualizar perfil';
@@ -210,6 +244,16 @@ export default {
     
     async cambiarPassword() {
       // Validar contraseñas
+      if (!this.passwordForm.currentPassword) {
+        this.passwordError = 'Debes ingresar tu contraseña actual';
+        return;
+      }
+      
+      if (!this.passwordForm.newPassword) {
+        this.passwordError = 'Debes ingresar una nueva contraseña';
+        return;
+      }
+      
       if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
         this.passwordError = 'Las contraseñas no coinciden';
         return;
@@ -246,6 +290,7 @@ export default {
     resetForm() {
       // Restaurar el formulario a su estado original
       this.usuario = JSON.parse(JSON.stringify(this.formOriginal));
+      this.resetPasswordForm();
     },
     
     resetPasswordForm() {
@@ -255,6 +300,9 @@ export default {
         confirmPassword: ''
       };
       this.passwordError = '';
+      this.showCurrentPassword = false;
+      this.showNewPassword = false;
+      this.showConfirmPassword = false;
     },
     
     mostrarConfirmacionDesactivar() {

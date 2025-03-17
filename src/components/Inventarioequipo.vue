@@ -168,14 +168,15 @@
               <div class="form-group" style="margin-top: 20px;">
                 <label>Cantidad a eliminar:</label>
                 <input 
-                  type="number" 
-                  v-model.number="cantidadEliminar"
-                  min="1"
-                  :max="equipoToDelete ? equipoToDelete.cantidad_total : 0"
-                  required
-                  placeholder="Ingrese la cantidad"
-                  class="input-cantidad"
-                />
+  type="number" 
+  v-model.number="cantidadEliminar"
+  min="1"
+  :max="equipoToDelete ? equipoToDelete.cantidad_total : 0"
+  required
+  placeholder="Ingrese la cantidad"
+  class="input-cantidad"
+  @input="validarCantidadEliminar"
+/>
                 <p v-if="errorCantidad" class="error-message" style="color: red; margin-top: 5px;">
                   {{ errorCantidad }}
                 </p>
@@ -232,17 +233,6 @@
               </div>
     
               <div class="contenedor contenedor-derecho">
-                <div class="form-group">
-                  <label>Cantidad en Mantenimiento:</label>
-                  <input 
-                    type="number" 
-                    v-model.number="equipoForm.cantidad_mantenimiento" 
-                    min="0"
-                    required
-                    placeholder="Unidades en mantenimiento"
-                    :max="equipoForm.cantidad_total" 
-                  />
-                </div>
 
                 <div class="form-group">
                   <label>Descripción:</label>
@@ -382,6 +372,26 @@ export default {
         this.isLoading = false;
       }
     },
+
+    validarCantidadEliminar() {
+  // Asegurarse que sea un número
+  this.cantidadEliminar = Number(this.cantidadEliminar);
+  
+  // Validar que no sea menor o igual a cero
+  if (this.cantidadEliminar <= 0) {
+    this.errorCantidad = "La cantidad debe ser mayor a 0";
+    return;
+  }
+  
+  // Validar que no exceda la cantidad disponible
+  if (this.cantidadEliminar > this.equipoToDelete.cantidad_total) {
+    this.errorCantidad = `No puede eliminar más de ${this.equipoToDelete.cantidad_total} unidades disponibles`;
+    return;
+  }
+  
+  // Si todo está bien, limpiar el mensaje de error
+  this.errorCantidad = "";
+},
     
     verDetalles(equipo) {
       this.equipoDetalle = {...equipo};
@@ -518,49 +528,57 @@ export default {
     },
     
     async confirmDelete() {
-      // Validar la cantidad a eliminar
-      if (!this.cantidadValidaParaEliminar) {
-        this.errorCantidad = "Por favor ingrese una cantidad válida";
-        return;
+  // Validar nuevamente la cantidad al intentar eliminar
+  if (this.cantidadEliminar > this.equipoToDelete.cantidad_total) {
+    this.errorCantidad = `No puede eliminar más de ${this.equipoToDelete.cantidad_total} unidades disponibles`;
+    this.toast.error(`No se puede eliminar ${this.cantidadEliminar} unidades. Solo hay ${this.equipoToDelete.cantidad_total} disponibles.`);
+    return;
+  }
+  
+  // Validación general
+  if (!this.cantidadValidaParaEliminar) {
+    this.errorCantidad = "Por favor ingrese una cantidad válida";
+    this.toast.error("La cantidad ingresada no es válida");
+    return;
+  }
+  
+  this.isLoading = true;
+  
+  try {
+    // Enviar la cantidad como parámetro de consulta
+    await api.equipos.delete(this.equipoToDelete.id_equipo, {
+      cantidad: this.cantidadEliminar
+    });
+    
+    // Actualizar la interfaz de usuario después de la eliminación
+    const index = this.equipos.findIndex(e => e.id_equipo === this.equipoToDelete.id_equipo);
+    if (index !== -1) {
+      // Si eliminamos todos los equipos
+      if (this.cantidadEliminar >= this.equipoToDelete.cantidad_total) {
+        this.equipos.splice(index, 1);
+        this.toast.success("Equipo eliminado completamente");
+      } else {
+        // Actualizar el conteo total
+        this.equipos[index].cantidad_total -= this.cantidadEliminar;
+        this.toast.success(`Se eliminaron ${this.cantidadEliminar} unidades del equipo`);
       }
-      
-      this.isLoading = true;
-      
-      try {
-        // Enviar la cantidad como parámetro de consulta
-        await api.equipos.delete(this.equipoToDelete.id_equipo, {
-          cantidad: this.cantidadEliminar
-        });
-        
-        // Actualizar la interfaz de usuario después de la eliminación
-        const index = this.equipos.findIndex(e => e.id_equipo === this.equipoToDelete.id_equipo);
-        if (index !== -1) {
-          // Si eliminamos todos los equipos
-          if (this.cantidadEliminar >= this.equipoToDelete.cantidad_total) {
-            this.equipos.splice(index, 1);
-            this.toast.success("Equipo eliminado completamente");
-          } else {
-            // Actualizar el conteo total
-            this.equipos[index].cantidad_total -= this.cantidadEliminar;
-            this.toast.success(`Se eliminaron ${this.cantidadEliminar} unidades del equipo`);
-          }
-        }
-        
-        this.showConfirmModal = false;
-        this.equipoToDelete = null;
-      } catch (error) {
-        console.error("Error al eliminar equipo:", error);
-        let errorMsg = "Error al eliminar equipo";
-        
-        if (error.response && error.response.data && error.response.data.error) {
-          errorMsg = error.response.data.error;
-        }
-        
-        this.toast.error(errorMsg);
-      } finally {
-        this.isLoading = false;
-      }
-    },
+    }
+    
+    this.showConfirmModal = false;
+    this.equipoToDelete = null;
+  } catch (error) {
+    console.error("Error al eliminar equipo:", error);
+    let errorMsg = "Error al eliminar equipo";
+    
+    if (error.response && error.response.data && error.response.data.error) {
+      errorMsg = error.response.data.error;
+    }
+    
+    this.toast.error(errorMsg);
+  } finally {
+    this.isLoading = false;
+  }
+},
     
     // Método para eliminar todas las unidades de un equipo
     async deleteAll() {

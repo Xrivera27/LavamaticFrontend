@@ -230,27 +230,35 @@
     
               <div class="contenedor contenedor-derecho">
                 <div class="form-group">
-                  <label>Precio (LPS.):</label>
-                  <input 
-                    type="number" 
-                    v-model.number="servicioForm.precio" 
-                    min="0"
-                    step="0.01"
-                    required
-                    placeholder="Precio del servicio" 
-                  />
-                </div>
+  <label>Precio (LPS.):</label>
+  <input 
+    type="number" 
+    v-model.number="servicioForm.precio" 
+    min="0"
+    step="0.01"
+    required
+    placeholder="Precio del servicio" 
+    @input="validarPrecio"
+  />
+  <span v-if="validationErrors.precio" class="error-message" style="color: red; font-size: 0.9em;">
+    {{ validationErrors.precio }}
+  </span>
+</div>
 
-                <div class="form-group">
-                  <label>Tiempo Estimado (minutos):</label>
-                  <input 
-                    type="number" 
-                    v-model.number="servicioForm.tiempo_estimado" 
-                    min="1"
-                    required
-                    placeholder="Tiempo estimado en minutos" 
-                  />
-                </div>
+<div class="form-group">
+  <label>Tiempo Estimado (minutos):</label>
+  <input 
+    type="number" 
+    v-model.number="servicioForm.tiempo_estimado" 
+    min="1"
+    required
+    placeholder="Tiempo estimado en minutos" 
+    @input="validarTiempo"
+  />
+  <span v-if="validationErrors.tiempo_estimado" class="error-message" style="color: red; font-size: 0.9em;">
+    {{ validationErrors.tiempo_estimado }}
+  </span>
+</div>
 
                 <div class="form-group">
                   <label>Descripción:</label>
@@ -392,6 +400,32 @@ export default {
       this.servicioDetalle = {...servicio};
       this.showDetailsModal = true;
     },
+
+    validarPrecio() {
+  if (!this.servicioForm.precio) {
+    this.validationErrors.precio = "El precio es obligatorio";
+    return false;
+  } else if (this.servicioForm.precio <= 0) {
+    this.validationErrors.precio = "El precio debe ser mayor que cero";
+    return false;
+  } else {
+    this.validationErrors.precio = "";
+    return true;
+  }
+},
+
+validarTiempo() {
+  if (!this.servicioForm.tiempo_estimado) {
+    this.validationErrors.tiempo_estimado = "El tiempo estimado es obligatorio";
+    return false;
+  } else if (this.servicioForm.tiempo_estimado <= 0) {
+    this.validationErrors.tiempo_estimado = "El tiempo estimado debe ser mayor que cero minutos";
+    return false;
+  } else {
+    this.validationErrors.tiempo_estimado = "";
+    return true;
+  }
+},
     
     cerrarDetalles() {
       this.showDetailsModal = false;
@@ -426,37 +460,48 @@ export default {
   this.validationErrors = {};
 },
       
-      validarFormulario() {
-        let isValid = true;
-        this.validationErrors = {};
+validarFormulario() {
+  let isValid = true;
+  this.validationErrors = {};
+
+  // Validar nombre
+  if (!this.servicioForm.nombre.trim()) {
+    this.validationErrors.nombre = "El nombre es obligatorio";
+    isValid = false;
+  }
   
-        if (!this.servicioForm.nombre.trim()) {
-          this.validationErrors.nombre = "El nombre es obligatorio";
-          isValid = false;
-        }
-        
-        if (!this.servicioForm.categoria) {
-          this.validationErrors.categoria = "Debe seleccionar una categoría";
-          isValid = false;
-        }
-        
-        if (this.servicioForm.precio <= 0) {
-          this.validationErrors.precio = "El precio debe ser mayor que cero";
-          isValid = false;
-        }
-        
-        if (this.servicioForm.tiempo_estimado <= 0) {
-          this.validationErrors.tiempo_estimado = "El tiempo estimado debe ser mayor que cero";
-          isValid = false;
-        }
-        
-        if (!this.servicioForm.id_equipo) {
-          this.validationErrors.id_equipo = "Debe seleccionar un equipo";
-          isValid = false;
-        }
+  // Validar categoría
+  if (!this.servicioForm.categoria) {
+    this.validationErrors.categoria = "Debe seleccionar una categoría";
+    isValid = false;
+  }
   
-        return isValid;
-      },
+  // Validar precio
+  if (!this.servicioForm.precio) {
+    this.validationErrors.precio = "El precio es obligatorio";
+    isValid = false;
+  } else if (this.servicioForm.precio <= 0) {
+    this.validationErrors.precio = "El precio debe ser mayor que cero";
+    isValid = false;
+  }
+  
+  // Validar tiempo estimado
+  if (!this.servicioForm.tiempo_estimado) {
+    this.validationErrors.tiempo_estimado = "El tiempo estimado es obligatorio";
+    isValid = false;
+  } else if (this.servicioForm.tiempo_estimado <= 0) {
+    this.validationErrors.tiempo_estimado = "El tiempo estimado debe ser mayor que cero minutos";
+    isValid = false;
+  }
+  
+  // Validar equipo
+  if (!this.servicioForm.id_equipo) {
+    this.validationErrors.id_equipo = "Debe seleccionar un equipo";
+    isValid = false;
+  }
+
+  return isValid;
+},
       
       async guardarServicio() {
   if (!this.validarFormulario()) {

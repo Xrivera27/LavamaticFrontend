@@ -218,10 +218,9 @@
                 <div class="form-group">
                   <label>
                     <span
-                      class="info-icon"
-                      @mouseover="showTooltip = true"
-                      @mouseleave="showTooltip = false"
-                    >ℹ️</span>
+  class="info-icon"
+  @click="showTooltip = !showTooltip"
+>ℹ️</span>
                     Contraseña:
                   </label>
                   <div class="password-wrapper">
