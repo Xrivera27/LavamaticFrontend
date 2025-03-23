@@ -1,0 +1,161 @@
+/* Estilos del carrusel para dashboardClienteStyle.css */
+
+/* Contenedor del carrusel */
+.carousel-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+    max-width: 800px;
+  }
+  
+  .carousel-track-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .carousel-track {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+  
+  .carousel-slide {
+    width: 100%;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    padding: 0 10px;
+  }
+  
+  /* Botones de navegación */
+  .carousel-button {
+    background: rgba(37, 99, 235, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.3s;
+  }
+  
+  .carousel-button:hover {
+    background: rgba(37, 99, 235, 0.3);
+  }
+  
+  .carousel-button.prev {
+    margin-right: 10px;
+  }
+  
+  .carousel-button.next {
+    margin-left: 10px;
+  }
+  
+  /* Indicadores de posición */
+  .carousel-indicators {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .carousel-indicators span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #d1d5db;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .carousel-indicators span.active {
+    background-color: #2563EB;
+  }
+  
+  /* Tarjetas de servicio */
+  .service-card {
+    width: 280px;
+    height: 200px;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+  }
+  
+  .service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .service-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .service-description {
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    flex-grow: 1;
+  }
+  
+  .service-details {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 12px;
+  }
+  
+  .service-price, .service-time {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .service-price span, .service-time span {
+    opacity: 0.7;
+  }
+  
+  /* Botón de acción */
+  .action-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    bottom: 0;
+  }
+  
+  /* Colores específicos para cada tipo de servicio */
+  .service-card.premium {
+    background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+    color: white;
+  }
+  
+  .service-card.standard {
+    background: linear-gradient(135deg, #2563EB, #60a5fa);
+    color: white;
+  }
+  
+  .service-card.express {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: white;
+  }
+  
+  .service-card.secado {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: white;
+  }

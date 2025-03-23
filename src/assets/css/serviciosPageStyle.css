@@ -24,7 +24,7 @@
 /* Contenedor principal - estilo dashboard con margen superior ajustado */
 .contenedor-principal {
   background-color: #ffffff;
-  margin-top: 50%; /* Mantener este margen como en el dashboard */
+  margin-top: 80%; /* Mantener este margen como en el dashboard */
   margin-bottom: 5%;
   border-radius: 25px;
   max-width: 1024px;

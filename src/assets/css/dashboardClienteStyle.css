@@ -1,225 +1,610 @@
-:root {
-  --sidebar-width: 56px;
-  --sidebar-width-expanded: 200px;
-}
-
-.dashboard-layout {
-  margin-top: 8%;
-  margin-bottom: 5%;
-  display: flex;
-  min-height: 100vh;
-  background-color: #ffffff;
-  border-radius: 15px;
-  
-}
-
-.main-content {
-  flex: 1;
-  padding: 16px 24px;
-  margin-left: var(--sidebar-width);
-  transition: margin-left 0.3s ease;
-}
-
-.main-content.content-expanded {
-  margin-left: var(--sidebar-width-expanded);
-}
-
-.dashboard-container {
-  font-family: 'Roboto', sans-serif;
-  background-color: #ffffff;
-  margin-top: 8%;
-  margin-bottom: 5%;
-  border-radius: 25px;
-  max-width: 1024px;
-  margin: 0 auto;
-}
-
-/* Header */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  background-color: #000000;
-  border-radius: 25px;
-  padding: 15px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-}
-
-.logo i {
-  font-size: 20px;
-  color: #2563EB;
-}
-
-.notifications {
+/* Estilos del carrusel */
+.carousel-container {
   position: relative;
-  margin-left: auto;
-  margin-right: 24px;
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 800px;
 }
 
-.notification-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: #ef4444;
-  color: white;
+.carousel-track-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.carousel-slide {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+.carousel-button {
+  background: rgba(37, 99, 235, 0.1);
+  border: none;
   border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  font-size: 12px;
+  width: 40px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.3s;
 }
 
-.user-info {
+.carousel-button:hover {
+  background: rgba(37, 99, 235, 0.3);
+}
+
+.carousel-button.prev {
+  margin-right: 10px;
+}
+
+.carousel-button.next {
+  margin-left: 10px;
+}
+
+.carousel-indicators {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.user-role {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-/* Welcome title */
-.welcome-title {
-  text-align: center;
-  margin: 20px 0;
-}
-
-.welcome-title h1 {
-  font-size: 18px;
-  font-weight: 500;
-  color: #1f2937;
-}
-
-/* Services categories */
-.services-categories {
-  display: flex;
-  background-color: #e5edf9;
-  border-radius: 25px;
-  padding: 20px;
-  margin-bottom: 24px;
-}
-
-.service-column {
-  flex: 1;
-  padding: 0 16px;
-}
-
-.service-column h2 {
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #1e3a8a;
-}
-
-.vertical-divider {
-  width: 1px;
-  background-color: #94a3b8;
-  margin: 0 8px;
-}
-
-.service-group {
-  margin-bottom: 16px;
-}
-
-.service-group h3 {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: #1e3a8a;
-}
-
-.service-group p {
-  margin-bottom: 4px;
-  font-size: 13px;
-  color: #334155;
-  line-height: 1.3;
-}
-
-/* Service selection */
-.service-selection {
-  margin-top: 24px;
-}
-
-.selection-title {
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #1f2937;
-}
-
-.service-cards {
-  display: flex;
-  gap: 100px;
   justify-content: center;
+  margin-top: 20px;
 }
 
+.carousel-indicators span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #d1d5db;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.carousel-indicators span.active {
+  background-color: #2563EB;
+}
+
+/* Mejoras para las tarjetas de servicio - versión rectangular */
 .service-card {
-  width: 240px;
-  height: 120px;
+  width: 340px;
+  height: 190px;
   border-radius: 8px;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  cursor: pointer;
-  transition: transform 0.2s;
-  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .service-card:hover {
-  transform: translateY(-4px);
-}
-
-.service-card.standard {
-  background-color: #2563EB;
-  color: white;
-  position: relative;
-}
-
-.service-card.express {
-  background-color: #e0f2fe;
-  color: #1e3a8a;
-  position: relative;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
 .service-card h3 {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 30px;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
-.action-button {
+.service-description {
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  flex-grow: 0.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  text-align: center;
+}
+
+.service-details {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  position: absolute;
-  bottom: 16px;
-  font-size: 14px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 12px;
+  margin-top: auto;
 }
 
-.service-card.standard .action-button {
+.service-price, .service-time {
+  display: flex;
+  flex-direction: column;
+}
+
+.service-price span, .service-time span {
+  opacity: 0.7;
+}
+
+/* Contenedor para el equipo, si existe */
+.service-equipment {
+  text-align: center;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.service-equipment span {
+  opacity: 0.7;
+  margin-right: 5px;
+}
+
+/* Colores específicos para cada tipo de servicio - gradiente horizontal */
+.service-card.premium {
+  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
   color: white;
 }
 
-.service-card.express .action-button {
+.service-card.standard {
+  background: linear-gradient(90deg, #2563EB, #60a5fa);
+  color: white;
+}
+
+.service-card.express {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  color: white;
+}
+
+.service-card.secado {
+  background: linear-gradient(90deg, #10b981, #34d399);
+  color: white;
+}
+
+/* Para compatibilidad con el estilo anterior */
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  bottom: 0;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .service-card {
+    width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .service-card {
+    width: 260px;
+  }
+}
+
+
+/* Sección de últimos pedidos */
+.recent-orders-section {
+  margin-top: 10px;
+  padding: 24px;
+  background-color: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.recent-orders-table-container {
+  overflow-x: auto;
+}
+
+.recent-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.recent-orders-table th {
+  background-color: #e5edf9;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
   color: #1e3a8a;
 }
 
-.fa-eye {
-  margin-left: 8px;
+.recent-orders-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+.recent-orders-table tr:last-child td {
+  border-bottom: none;
+}
+
+.recent-orders-table tr:hover td {
+  background-color: #f3f4f6;
+}
+
+/* Badges de estado con los colores específicos para los 4 estados */
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-espera {
+  background-color: #fef3c7; /* Amarillo claro */
+  color: #92400e;
+}
+
+.status-camino {
+  background-color: #dbeafe; /* Azul claro */
+  color: #1e40af;
+}
+
+.status-entregada {
+  background-color: #dcfce7; /* Verde claro */
+  color: #166534;
+}
+
+.status-listo {
+  background-color: #e0f2fe; /* Celeste claro */
+  color: #0369a1;
+}
+
+/* Nuevo estilo para el botón de detalles (ojito) */
+.btn-details {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-details:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones de acción */
+.action-btn {
+  padding: 6px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  margin-right: 4px;
+  transition: background-color 0.2s;
+}
+
+.view-btn {
+  color: #2563eb;
+}
+
+.view-btn:hover {
+  background-color: #dbeafe;
+}
+
+.cancel-btn {
+  color: #dc2626;
+}
+
+.cancel-btn:hover {
+  background-color: #fee2e2;
+}
+
+/* Mensaje de no hay pedidos */
+.no-orders-message {
+  padding: 30px;
+}
+
+.no-orders-message i {
+  font-size: 32px;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.no-orders-message p {
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.new-order-btn {
+  padding: 8px 16px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.new-order-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* Estilos para el modal de detalles de orden */
+.order-details-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: modal-appear 0.3s ease-out;
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: white;
+  color: #000000;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: bold;
+}
+
+.close-btn:hover {
+  background-color: #e2e8f0;
+  color: #333;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+/* Layout principal de dos columnas */
+.order-main-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.order-left-column {
+  flex: 1;
+  min-width: 250px;
+}
+
+.order-right-column {
+  flex: 1;
+  min-width: 250px;
+}
+
+/* Estilos para el total destacado */
+.order-total-highlight {
+  background-color: #f3f4f6;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-total-highlight span:first-child {
+  font-weight: 500;
+  font-size: 16px;
+  color: #4b5563;
+}
+
+.total-price {
+  font-weight: 700;
+  font-size: 24px;
+  color: #111827;
+}
+
+/* Información básica */
+.order-basic-info {
+  background-color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  min-width: 100px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+/* Lista de servicios */
+.order-right-column h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 16px;
+  color: #111827;
+}
+
+.service-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.service-item:last-child {
+  border-bottom: none;
+}
+
+.service-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.service-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.service-quantity {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.service-price {
+  font-weight: 600;
+  color: #111827;
+}
+
+.no-services {
+  color: #6b7280;
+  font-style: italic;
+  padding: 12px 0;
+}
+
+/* Sección de seguimiento */
+.tracking-section {
+  margin-top: 32px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 24px;
+}
+
+.tracking-section h4 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #111827;
+}
+
+.tracking-timeline-horizontal {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.tracking-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+  position: relative;
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #6b7280;
+  margin-bottom: 8px;
+  z-index: 2;
+}
+
+.tracking-step.completed .step-icon {
+  background-color: #2563eb;
+  color: white;
+}
+
+.step-line {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  right: -50%;
+  height: 2px;
+  background-color: #e5e7eb;
+  z-index: 1;
+}
+
+.tracking-step.completed .step-line {
+  background-color: #2563eb;
+}
+
+.step-content {
+  text-align: center;
+  max-width: 100px;
+}
+
+.step-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
+.tracking-step.completed .step-title {
+  color: #111827;
+}
+
+.step-datetime {
+  font-size: 10px;
+  color: #6b7280;
 }
