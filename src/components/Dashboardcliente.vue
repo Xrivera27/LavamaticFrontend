@@ -264,6 +264,11 @@ export default {
       loading: true,
       error: null,
       
+      // Nuevas propiedades para el autoplay del carrusel
+      autoplayInterval: null,
+      autoplaySpeed: 5000, // 5 segundos
+      isPaused: false,
+      
       // Datos para la sección de pedidos
       ultimosPedidos: [],
       loadingPedidos: true,
@@ -292,7 +297,61 @@ export default {
     this.fetchServicios();
     this.fetchPedidosCliente();
   },
+  mounted() {
+    // Iniciar autoplay cuando el componente está montado
+    this.startAutoplay();
+    
+    // Agregar event listeners para pausar cuando el usuario interactúa con el carrusel
+    const carouselEl = this.$el.querySelector('.carousel-container');
+    if (carouselEl) {
+      carouselEl.addEventListener('mouseenter', this.pauseAutoplay);
+      carouselEl.addEventListener('mouseleave', this.resumeAutoplay);
+      carouselEl.addEventListener('touchstart', this.pauseAutoplay);
+      carouselEl.addEventListener('touchend', this.resumeAutoplay);
+    }
+  },
+  beforeUnmount() {
+  // Limpiar el intervalo cuando el componente se desmonta
+  this.stopAutoplay();
+  
+  // Eliminar event listeners
+  const carouselEl = this.$el.querySelector('.carousel-container');
+  if (carouselEl) {
+    carouselEl.removeEventListener('mouseenter', this.pauseAutoplay);
+    carouselEl.removeEventListener('mouseleave', this.resumeAutoplay);
+    carouselEl.removeEventListener('touchstart', this.pauseAutoplay);
+    carouselEl.removeEventListener('touchend', this.resumeAutoplay);
+  }
+},
   methods: {
+    // Métodos para el autoplay del carrusel
+    startAutoplay() {
+      if (this.autoplayInterval) {
+        clearInterval(this.autoplayInterval);
+      }
+      
+      this.autoplayInterval = setInterval(() => {
+        if (!this.isPaused && this.servicios.length > 0) {
+          this.nextSlide();
+        }
+      }, this.autoplaySpeed);
+    },
+    
+    stopAutoplay() {
+      if (this.autoplayInterval) {
+        clearInterval(this.autoplayInterval);
+        this.autoplayInterval = null;
+      }
+    },
+    
+    pauseAutoplay() {
+      this.isPaused = true;
+    },
+    
+    resumeAutoplay() {
+      this.isPaused = false;
+    },
+    
     // Función para formatear el precio correctamente
     formatPrecio(precio) {
       // Asegurarse de que precio sea un número
@@ -522,6 +581,9 @@ export default {
       this.activeSlideIndex = index;
     },
     selectService(servicio) {
+      // Asegurarse de detener el autoplay cuando se selecciona un servicio
+      this.pauseAutoplay();
+      
       this.$router.push({
         name: 'servicios',
         query: { 
