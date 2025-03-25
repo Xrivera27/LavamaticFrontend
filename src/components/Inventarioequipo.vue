@@ -91,28 +91,28 @@
           </table>
     
           <div class="pagination-wrapper" v-if="totalPages > 0">
-  <div class="pagination-info">
-    Mostrando {{ paginatedEquipos.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
-    {{ Math.min(currentPage * pageSize, filteredEquipos.length) }} de
-    {{ filteredEquipos.length }} registros
-  </div>
-  <div class="pagination-container">
-    <button
-      class="pagination-button"
-      :disabled="currentPage === 1"
-      @click="previousPage"
-    >
-      Anterior
-    </button>
-    <button
-      class="pagination-button"
-      :disabled="currentPage === totalPages"
-      @click="nextPage"
-    >
-      Siguiente
-    </button>
-  </div>
-</div>
+            <div class="pagination-info">
+              Mostrando {{ paginatedEquipos.length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} a
+              {{ Math.min(currentPage * pageSize, filteredEquipos.length) }} de
+              {{ filteredEquipos.length }} registros
+            </div>
+            <div class="pagination-container">
+              <button
+                class="pagination-button"
+                :disabled="currentPage === 1"
+                @click="previousPage"
+              >
+                Anterior
+              </button>
+              <button
+                class="pagination-button"
+                :disabled="currentPage === totalPages"
+                @click="nextPage"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
         </div>
     
         <!-- Modal de detalles -->
@@ -168,15 +168,16 @@
               <div class="form-group" style="margin-top: 20px;">
                 <label>Cantidad a eliminar:</label>
                 <input 
-  type="number" 
-  v-model.number="cantidadEliminar"
-  min="1"
-  :max="equipoToDelete ? equipoToDelete.cantidad_total : 0"
-  required
-  placeholder="Ingrese la cantidad"
-  class="input-cantidad"
-  @input="validarCantidadEliminar"
-/>
+                  type="number" 
+                  v-model.number="cantidadEliminar"
+                  min="1"
+                  :max="equipoToDelete ? equipoToDelete.cantidad_total : 0"
+                  required
+                  placeholder="Ingrese la cantidad"
+                  class="input-cantidad"
+                  @input="validarCantidadEliminar"
+                  @keyup="validarCantidadEliminar"
+                />
                 <p v-if="errorCantidad" class="error-message" style="color: red; margin-top: 5px;">
                   {{ errorCantidad }}
                 </p>
@@ -184,13 +185,59 @@
             </div>
             <div class="modal-footer">
               <div class="action-buttons">
-                <button class="btn btn-danger" @click="confirmDelete" :disabled="!cantidadValidaParaEliminar">
+                <button 
+                  class="btn btn-danger" 
+                  @click="preConfirmDelete(false)" 
+                  :disabled="!cantidadValidaParaEliminar"
+                  :style="cantidadValidaParaEliminar ? '' : 'opacity: 0.6; cursor: not-allowed;'"
+                >
                   Eliminar cantidad específica
                 </button>
-                <button class="btn btn-danger" @click="deleteAll" style="margin-left: 5px;">
+                <button 
+                  class="btn btn-danger" 
+                  @click="preConfirmDelete(true)" 
+                  style="margin-left: 5px;"
+                >
                   Eliminar todas las unidades
                 </button>
                 <button class="btn btn-secondary" @click="cancelDelete" style="margin-left: 5px;">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Modal de confirmación final -->
+        <div class="modal" v-if="showFinalConfirmModal">
+          <div class="modal-confirm" style="max-width: 400px;">
+            <div class="modal-header">
+              <h2>Confirmación Final</h2>
+            </div>
+            <div class="modal-body-confirm">
+              <p v-if="eliminarTodo">
+                ¿Está seguro que desea eliminar todas las unidades ({{ equipoToDelete ? equipoToDelete.cantidad_total : 0 }}) 
+                del equipo <strong>{{ equipoToDelete ? equipoToDelete.nombre : '' }}</strong>?
+              </p>
+              <p v-else>
+                ¿Está seguro que desea eliminar {{ cantidadEliminar }} unidad(es) 
+                del equipo <strong>{{ equipoToDelete ? equipoToDelete.nombre : '' }}</strong>?
+              </p>
+              <p style="margin-top: 10px; color: #d9534f;">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+              <div class="action-buttons">
+                <button 
+                  class="btn btn-danger" 
+                  @click="confirmarEliminacionFinal"
+                >
+                  Sí, eliminar
+                </button>
+                <button 
+                  class="btn btn-secondary" 
+                  @click="cancelFinalConfirm" 
+                  style="margin-left: 5px;"
+                >
                   Cancelar
                 </button>
               </div>
@@ -233,7 +280,6 @@
               </div>
     
               <div class="contenedor contenedor-derecho">
-
                 <div class="form-group">
                   <label>Descripción:</label>
                   <textarea 
@@ -286,6 +332,8 @@ export default {
       isSidebarExpanded: false,
       showConfirmModal: false,
       showDetailsModal: false,
+      showFinalConfirmModal: false,
+      eliminarTodo: false,
       equipoToDelete: null,
       equipoDetalle: null,
       isLoading: false,
@@ -294,7 +342,7 @@ export default {
       isEditing: false,
       editIndex: null,
       currentPage: 1,
-      pageSize: 4, // Cambiado a 4 como solicitado
+      pageSize: 4,
       validationErrors: {},
       cantidadEliminar: 1,
       errorCantidad: "",
@@ -349,8 +397,8 @@ export default {
         const response = await api.equipos.getAll();
         console.log("Datos de equipos recibidos:", response.data);
         
-        // Procesar los datos del servidor
-        this.equipos = response.data.map(equipo => {
+       // Procesar los datos del servidor
+       this.equipos = response.data.map(equipo => {
           return {
             id_equipo: equipo.id_equipo,
             nombre: equipo.nombre || '',
@@ -374,24 +422,24 @@ export default {
     },
 
     validarCantidadEliminar() {
-  // Asegurarse que sea un número
-  this.cantidadEliminar = Number(this.cantidadEliminar);
-  
-  // Validar que no sea menor o igual a cero
-  if (this.cantidadEliminar <= 0) {
-    this.errorCantidad = "La cantidad debe ser mayor a 0";
-    return;
-  }
-  
-  // Validar que no exceda la cantidad disponible
-  if (this.cantidadEliminar > this.equipoToDelete.cantidad_total) {
-    this.errorCantidad = `No puede eliminar más de ${this.equipoToDelete.cantidad_total} unidades disponibles`;
-    return;
-  }
-  
-  // Si todo está bien, limpiar el mensaje de error
-  this.errorCantidad = "";
-},
+      // Asegurarse que sea un número
+      this.cantidadEliminar = Number(this.cantidadEliminar);
+      
+      // Validar que no sea menor o igual a cero
+      if (this.cantidadEliminar <= 0) {
+        this.errorCantidad = "La cantidad debe ser mayor a 0";
+        return;
+      }
+      
+      // Validar que no exceda la cantidad disponible
+      if (this.cantidadEliminar > this.equipoToDelete.cantidad_total) {
+        this.errorCantidad = `No puede eliminar más de ${this.equipoToDelete.cantidad_total} unidades disponibles`;
+        return;
+      }
+      
+      // Si todo está bien, limpiar el mensaje de error
+      this.errorCantidad = "";
+    },
     
     verDetalles(equipo) {
       this.equipoDetalle = {...equipo};
@@ -527,6 +575,40 @@ export default {
       this.showConfirmModal = true;
     },
     
+    // Método para mostrar el modal de confirmación final
+    preConfirmDelete(eliminarTodo) {
+      // Validar si estamos eliminando una cantidad específica
+      if (!eliminarTodo && !this.cantidadValidaParaEliminar) {
+        this.errorCantidad = "Por favor ingrese una cantidad válida";
+        this.toast.error("La cantidad ingresada no es válida");
+        return;
+      }
+      
+      // Establecer si eliminaremos todo o una cantidad específica
+      this.eliminarTodo = eliminarTodo;
+      
+      // Mostrar el modal de confirmación final
+      this.showFinalConfirmModal = true;
+    },
+    
+    // Cancelar la confirmación final
+    cancelFinalConfirm() {
+      this.showFinalConfirmModal = false;
+    },
+    
+    // Método para confirmar la eliminación final
+    async confirmarEliminacionFinal() {
+      // Cerrar el modal de confirmación final
+      this.showFinalConfirmModal = false;
+      
+      // Ejecutar la eliminación correspondiente según la opción seleccionada
+      if (this.eliminarTodo) {
+        await this.deleteAll();
+      } else {
+        await this.confirmDelete();
+      }
+    },
+    
     async confirmDelete() {
   // Validar nuevamente la cantidad al intentar eliminar
   if (this.cantidadEliminar > this.equipoToDelete.cantidad_total) {
@@ -568,54 +650,82 @@ export default {
     this.equipoToDelete = null;
   } catch (error) {
     console.error("Error al eliminar equipo:", error);
-    let errorMsg = "Error al eliminar equipo";
     
+    // Mensaje por defecto más descriptivo
+    let errorMsg = `No se puede eliminar ${this.cantidadEliminar} unidades del equipo "${this.equipoToDelete.nombre}".`;
+    
+    // Si hay un mensaje de error específico del servidor, usarlo
     if (error.response && error.response.data && error.response.data.error) {
+      // Si el error está relacionado con pedidos activos
+      if (error.response.data.error.includes("pedido(s) activo(s)")) {
+        this.toast.error(
+          `No se puede eliminar ${this.cantidadEliminar} unidades del equipo "${this.equipoToDelete.nombre}" porque hay pedidos activos que lo están utilizando.`, 
+          { timeout: 8000 }
+        );
+        console.warn("Detalles completos:", error.response.data.error);
+        return;
+      }
+      // Para otros errores del servidor, mostrar su mensaje
       errorMsg = error.response.data.error;
     }
     
-    this.toast.error(errorMsg);
+    // Mostrar el mensaje de error
+    this.toast.error(errorMsg, { timeout: 5000 });
   } finally {
     this.isLoading = false;
   }
 },
+
+// Método para eliminar todas las unidades de un equipo
+async deleteAll() {
+  this.isLoading = true;
+  
+  try {
+    // Establecer la cantidad a eliminar al total disponible
+    const cantidadTotal = this.equipoToDelete.cantidad_total;
     
-    // Método para eliminar todas las unidades de un equipo
-    async deleteAll() {
-      this.isLoading = true;
-      
-      try {
-        // Establecer la cantidad a eliminar al total disponible
-        const cantidadTotal = this.equipoToDelete.cantidad_total;
-        
-        // Realizar la llamada a la API para eliminar todas las unidades
-        await api.equipos.delete(this.equipoToDelete.id_equipo, {
-          cantidad: cantidadTotal
-        });
-        
-        // Actualizar la interfaz de usuario (eliminar el equipo de la lista)
-        const index = this.equipos.findIndex(e => e.id_equipo === this.equipoToDelete.id_equipo);
-        if (index !== -1) {
-          this.equipos.splice(index, 1);
-        }
-        
-        this.toast.success("Se han eliminado todas las unidades del equipo");
-        this.showConfirmModal = false;
-        this.equipoToDelete = null;
-        
-      } catch (error) {
-        console.error("Error al eliminar equipo:", error);
-        let errorMsg = "Error al eliminar equipo";
-        
-        if (error.response && error.response.data && error.response.data.error) {
-          errorMsg = error.response.data.error;
-        }
-        
-        this.toast.error(errorMsg);
-      } finally {
-        this.isLoading = false;
+    // Realizar la llamada a la API para eliminar todas las unidades
+    await api.equipos.delete(this.equipoToDelete.id_equipo, {
+      cantidad: cantidadTotal
+    });
+    
+    // Actualizar la interfaz de usuario (eliminar el equipo de la lista)
+    const index = this.equipos.findIndex(e => e.id_equipo === this.equipoToDelete.id_equipo);
+    if (index !== -1) {
+      this.equipos.splice(index, 1);
+    }
+    
+    this.toast.success("Se han eliminado todas las unidades del equipo");
+    this.showConfirmModal = false;
+    this.equipoToDelete = null;
+    
+  } catch (error) {
+    console.error("Error al eliminar equipo:", error);
+    
+    // Mensaje por defecto más descriptivo
+    let errorMsg = `No se puede eliminar el equipo "${this.equipoToDelete.nombre}".`;
+    
+    // Si hay un mensaje de error específico del servidor, usarlo
+    if (error.response && error.response.data && error.response.data.error) {
+      // Si el error está relacionado con pedidos activos
+      if (error.response.data.error.includes("pedido(s) activo(s)")) {
+        this.toast.error(
+          `No se puede eliminar el equipo "${this.equipoToDelete.nombre}" porque hay pedidos activos que lo están utilizando.`, 
+          { timeout: 8000 }
+        );
+        console.warn("Detalles completos:", error.response.data.error);
+        return;
       }
-    },
+      // Para otros errores del servidor, mostrar su mensaje
+      errorMsg = error.response.data.error;
+    }
+    
+    // Mostrar el mensaje de error
+    this.toast.error(errorMsg, { timeout: 5000 });
+  } finally {
+    this.isLoading = false;
+  }
+},
     
     cancelDelete() {
       this.showConfirmModal = false;
@@ -640,4 +750,4 @@ export default {
 };
 </script>
   
-  <style src="@/assets/css/Crearinventario.css" scoped></style>
+<style src="@/assets/css/Crearinventario.css" scoped></style>
