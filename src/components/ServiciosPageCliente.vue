@@ -198,12 +198,16 @@
           <div class="info-content">
             <p>Esta es la manera en la cual volveremos a dejar su producto una vez finalizado el servicio:</p>
             
-            <div class="info-option">
+            <div class="info-option seleccionable" 
+                 :class="{ 'opcion-seleccionada': tipoEntrega === 'sucursal' }"
+                 @click="seleccionarTipoEntregaDesdeModal('sucursal')">
               <h4><i class="fa-solid fa-store"></i> En sucursal</h4>
               <p>El producto estará disponible para recogerlo en nuestra tienda física. Usted debe visitar nuestra sucursal para retirar sus prendas.</p>
             </div>
             
-            <div class="info-option">
+            <div class="info-option seleccionable"
+                 :class="{ 'opcion-seleccionada': tipoEntrega === 'domicilio' }"
+                 @click="seleccionarTipoEntregaDesdeModal('domicilio')">
               <h4><i class="fa-solid fa-truck"></i> A domicilio</h4>
               <p>Nuestro repartidor llevará el producto directamente a la dirección que usted especifique. Es necesario indicar el barrio o colonia para la entrega.</p>
             </div>
@@ -332,6 +336,7 @@ export default {
       maxFecha.setDate(maxFecha.getDate() + 30); // 30 días en el futuro
       return maxFecha.toISOString().split('T')[0];
     },
+   
     formularioValido() {
       // Verificar que haya servicios seleccionados
       const hayServicios = this.serviciosSeleccionados.length > 0;
@@ -428,6 +433,20 @@ export default {
     
     cerrarInfoModal() {
       this.showInfoModal = false;
+    },
+    
+    // Nuevo método para seleccionar tipo de entrega desde el modal
+    seleccionarTipoEntregaDesdeModal(tipo) {
+      this.tipoEntrega = tipo;
+      
+      // Si el tipo es 'sucursal', limpiar el campo de barrio
+      if (tipo === 'sucursal') {
+        this.barrioEntrega = '';
+        this.validacionErrores.barrioEntrega = false;
+      }
+      
+      // No cerramos el modal automáticamente para que el usuario pueda ver la selección
+      // y cerrar manualmente cuando entienda su elección
     },
     
     agregarServicioDesdeModal() {
@@ -583,6 +602,5 @@ export default {
   }
 };
 </script>
-
 
 <style src="@/assets/css/serviciosPageStyle.css" scoped></style>
