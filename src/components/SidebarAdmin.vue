@@ -55,12 +55,13 @@
       </router-link>
     </div>
     <div class="sidebar-footer">
-      <router-link to="/login" class="nav-item logout" 
-                   @click="logout"
-                   :title="isExpanded ? null : 'Cerrar Sesión'">
+      <!-- Cambiado de router-link a div para manejar el logout con función -->
+      <div class="nav-item logout" 
+           @click="logout"
+           :title="isExpanded ? null : 'Cerrar Sesión'">
         <i class="fas fa-sign-out-alt"></i>
         <span class="nav-text">Cerrar Sesión</span>
-      </router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -70,7 +71,7 @@ export default {
   name: 'SidebarAdmin',
   data() {
     return {
-      isExpanded: localStorage.getItem('sidebarExpanded') === 'true' || true
+      isExpanded: sessionStorage.getItem('sidebarExpanded') === 'true' || true
     }
   },
   computed: {
@@ -79,27 +80,24 @@ export default {
     }
   },
   mounted() {
-    // Add padding to body based on sidebar state
     this.updateBodyPadding();
-    
-    // Add event listener for window resize
     window.addEventListener('resize', this.handleResize);
     this.handleResize();
+    
+    // Añadir verificación de token al cargar
+    this.checkAuthentication();
   },
   beforeUnmount() {
-    // Remove event listener
     window.removeEventListener('resize', this.handleResize);
   },
   methods: {
     toggleSidebar() {
       this.isExpanded = !this.isExpanded;
-      // Save state to localStorage
-      localStorage.setItem('sidebarExpanded', this.isExpanded);
+      sessionStorage.setItem('sidebarExpanded', this.isExpanded);
       this.updateBodyPadding();
       this.$emit('sidebar-toggle', this.isExpanded);
     },
     updateBodyPadding() {
-      // Add padding to main content to prevent sidebar overlap
       if (window.innerWidth > 768) {
         const sidebarWidth = this.isExpanded 
           ? 'var(--sidebar-width-expanded)' 
@@ -111,19 +109,31 @@ export default {
     },
     handleResize() {
       if (window.innerWidth <= 768) {
-        // Auto collapse on small screens
         this.isExpanded = false;
-        localStorage.setItem('sidebarExpanded', 'false');
+        sessionStorage.setItem('sidebarExpanded', 'false');
       }
       this.updateBodyPadding();
     },
     logout() {
-      // Clear local storage
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('sidebarExpanded');
-      // Redirection handled by router-link
+      // Limpiar sessionStorage
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('userRole');
+      sessionStorage.removeItem('userName');
+      sessionStorage.removeItem('sidebarExpanded');
+      
+      // Redireccionar programáticamente y forzar recarga de la página
+      this.$router.push('/login').then(() => {
+        // Recargar la página para asegurar un estado limpio
+        window.location.reload();
+      });
+    },
+    checkAuthentication() {
+      // Verificar si el token existe
+      const token = sessionStorage.getItem('token');
+      if (!token && this.$route.path !== '/login') {
+        // Si no hay token y no estamos en login, redireccionar
+        this.$router.push('/login');
+      }
     }
   }
 };
