@@ -438,6 +438,7 @@
 import SidebarAdmin from './SidebarAdmin.vue';
 import api from '@/services/apiService';
 import { useToast } from "vue-toastification";
+import { io } from 'socket.io-client'; // Importar socket.io-client
 
 export default {
   name: "GestionPedidos",
@@ -467,7 +468,10 @@ export default {
       repartidorSeleccionado: null,
       repartidoresDisponibles: [],
       repartidorUsuarioMap: {}, // Añadido para mantener el mapeo
-      pedidos: []
+      pedidos: [],
+      // Variables para WebSocket
+      socket: null,
+      sonidoActivado: true
     };
   },
   computed: {
@@ -547,6 +551,169 @@ export default {
     },
   },
   methods: {
+    // WEBSOCKET METHODS - NUEVOS MÉTODOS
+    iniciarWebSocket() {
+  // Usar la misma URL base que tu API para asegurar consistencia
+  const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+  
+  // Para depuración - mostrar la URL que estamos usando
+  console.log('Intentando conectar WebSocket a:', API_URL);
+
+  // Inicializar Socket.io con opciones explícitas para mejor depuración
+  this.socket = io(API_URL, {
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    transports: ['websocket', 'polling']
+  });
+  
+  // Monitorear eventos de conexión para depuración
+  this.socket.on('connect', () => {
+    console.log('WebSocket conectado exitosamente con ID:', this.socket.id);
+    this.socket.emit('admin-connected');
+    console.log('Enviado evento admin-connected');
+  });
+  
+  this.socket.on('connect_error', (error) => {
+    console.error('Error de conexión WebSocket:', error.message);
+  });
+  
+  this.socket.on('disconnect', (reason) => {
+    console.log('WebSocket desconectado. Razón:', reason);
+  });
+  
+  this.socket.on('reconnect_attempt', (attemptNumber) => {
+    console.log(`Intento de reconexión #${attemptNumber}`);
+  });
+  
+  // Escuchar el evento específico para nuevos pedidos
+  this.socket.on('nuevo-pedido', (pedidoData) => {
+    console.log('✅ Evento nuevo-pedido recibido:', pedidoData);
+    this.manejarNuevoPedido(pedidoData);
+  });
+  
+  // Escuchar eventos de actualización de pedidos
+  this.socket.on('pedido-actualizado', (pedidoData) => {
+    console.log('Evento pedido-actualizado recibido:', pedidoData);
+    this.manejarPedidoActualizado(pedidoData);
+  });
+  
+  console.log('Inicialización de WebSocket completada');
+},
+    
+    // Manejar evento de actualización de pedido
+    manejarPedidoActualizado(pedidoData) {
+      console.log('Pedido actualizado:', pedidoData);
+      
+      // Buscar el pedido en la lista
+      const index = this.pedidos.findIndex(p => p.id_pedido === pedidoData.id);
+      
+      if (index !== -1) {
+        // Guardar el estado anterior para comprobaciones
+        const estadoAnterior = this.pedidos[index].estado;
+        
+        // Actualizar el pedido con la nueva información
+        this.pedidos[index] = {
+          ...this.pedidos[index],
+          estado: pedidoData.estado,
+          id_estado: this.obtenerEstadoId(pedidoData.estado)
+        };
+        
+        // Mostrar notificación de actualización
+        this.toast.info(`Pedido #${pedidoData.id} actualizado: ${estadoAnterior} → ${pedidoData.estado}`);
+      }
+    },
+
+    // Manejar evento de nuevo pedido
+manejarNuevoPedido(pedidoData) {
+  console.log('Nuevo pedido recibido:', pedidoData);
+  
+  // Convertir el pedido recibido al formato de la aplicación
+  const nuevoPedido = {
+    id_pedido: pedidoData.id,
+    cliente: pedidoData.cliente,
+    total: pedidoData.total || 0,
+    fecha: new Date(pedidoData.timestamp || Date.now()),
+    estado: 'En Espera',
+    id_estado: 1,
+    repartidor: null,
+    id_repartidor: null,
+    direccion_recogida: pedidoData.direccionRecogida || '',
+    direccion_entrega: pedidoData.direccionEntrega || '',
+    servicios: pedidoData.servicios || 'Servicio no especificado'
+  };
+  
+  // Añadir el nuevo pedido al principio de la lista
+  this.pedidos.unshift(nuevoPedido);
+  
+  // Mostrar notificación
+  this.mostrarNotificacionNuevoPedido(nuevoPedido);
+  
+  // Reproducir sonido de alerta
+  this.reproducirSonidoAlerta();
+},
+    
+    // Mostrar notificación para un nuevo pedido
+    mostrarNotificacionNuevoPedido(pedido) {
+      // Notificación en la aplicación
+      this.toast.success(`¡Nuevo pedido recibido! #${pedido.id_pedido} - Cliente: ${pedido.cliente}`, {
+        timeout: 10000,
+        closeButton: true,
+        icon: true
+      });
+      
+      // Notificación del navegador si está disponible
+      this.mostrarNotificacionNavegador(pedido);
+    },
+    
+    // Mostrar notificación del navegador
+    mostrarNotificacionNavegador(pedido) {
+      // Comprobar si el navegador soporta notificaciones
+      if ('Notification' in window) {
+        // Solicitar permiso si no está concedido
+        if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+          Notification.requestPermission();
+        }
+        
+        // Mostrar notificación si el permiso está concedido
+        if (Notification.permission === 'granted') {
+          new Notification('Nuevo Pedido', {
+            body: `Cliente: ${pedido.cliente}\nTotal: LPS.${Number(pedido.total).toFixed(2)}`,
+            icon: '/favicon.ico' // Ruta a tu icono
+          });
+        }
+      }
+    },
+    
+    // Reproducir sonido de alerta
+    reproducirSonidoAlerta() {
+      if (!this.sonidoActivado) return;
+      
+      try {
+        // Crear un elemento de audio
+        const audio = new Audio();
+        
+        // Establecer la fuente del sonido (ajustar según tu proyecto)
+        audio.src = '/sounds/notification.mp3';
+        
+        // Reproducir el sonido
+        audio.play().catch(error => {
+          console.error('Error al reproducir sonido:', error);
+        });
+      } catch (error) {
+        console.error('Error con reproducción de audio:', error);
+      }
+    },
+    
+    // Desconectar el socket al desmontar el componente
+    desconectarWebSocket() {
+      if (this.socket) {
+        this.socket.disconnect();
+        this.socket = null;
+        console.log('WebSocket desconectado');
+      }
+    },
+    // FIN DE WEBSOCKET METHODS
+
     getEstadoDisplayName() {
       switch(this.estadoActual) {
         case 'espera': return 'En Espera';
@@ -910,38 +1077,38 @@ export default {
     },
     
     async confirmarEntrega() {
-  this.isLoading = true;
-  
-  try {
-    // Cambiar estado a "Entregada" (id_estado 3)
-    const response = await api.pedidos.cambiarEstado(
-      this.pedidoSeleccionado.id_pedido, 
-      3
-    );
-    
-    console.log("Respuesta marcar como entregado:", response.data);
-    
-    // Actualizar localmente
-    const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
-    if (index !== -1) {
-      this.pedidos[index] = {
-        ...this.pedidoSeleccionado,
-        estado: 'Entregada',
-        id_estado: 3
-      };
-    }
-    
-    this.toast.success("Pedido marcado como entregado. Se ha enviado un email de agradecimiento al cliente.");
-    this.showEntregadoModal = false;
-    this.pedidoSeleccionado = null;
-  } catch (error) {
-    console.error("Error al marcar como entregado:", error);
-    const errorMsg = error.response?.data?.error || "Error al marcar el pedido como entregado";
-    this.toast.error(errorMsg);
-  } finally {
-    this.isLoading = false;
-  }
-},
+      this.isLoading = true;
+      
+      try {
+        // Cambiar estado a "Entregada" (id_estado 3)
+        const response = await api.pedidos.cambiarEstado(
+          this.pedidoSeleccionado.id_pedido, 
+          3
+        );
+        
+        console.log("Respuesta marcar como entregado:", response.data);
+        
+        // Actualizar localmente
+        const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
+        if (index !== -1) {
+          this.pedidos[index] = {
+            ...this.pedidoSeleccionado,
+            estado: 'Entregada',
+            id_estado: 3
+          };
+        }
+        
+        this.toast.success("Pedido marcado como entregado. Se ha enviado un email de agradecimiento al cliente.");
+        this.showEntregadoModal = false;
+        this.pedidoSeleccionado = null;
+      } catch (error) {
+        console.error("Error al marcar como entregado:", error);
+        const errorMsg = error.response?.data?.error || "Error al marcar el pedido como entregado";
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
+      }
+    },
     
     cancelarEntrega() {
       this.showEntregadoModal = false;
@@ -1012,7 +1179,15 @@ export default {
     }
   },
   mounted() {
+    // Cargar datos y iniciar WebSocket cuando el componente se monta
     this.cargarDatos();
+    
+    // Iniciar la conexión WebSocket
+    this.iniciarWebSocket();
+  },
+  beforeUnmount() {
+    // Desconectar WebSocket cuando el componente se desmonta
+    this.desconectarWebSocket();
   }
 };
 </script>
