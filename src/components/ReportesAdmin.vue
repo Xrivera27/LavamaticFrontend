@@ -1158,40 +1158,4 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-/* Estilos para los nuevos controles de datalist */
-.search-input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-input {
-  padding-right: 30px; /* Espacio para el botón de limpieza */
-  width: 100%;
-}
-
-.clear-button {
-  position: absolute;
-  right: 8px;
-  background: none;
-  border: none;
-  color: #999;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
-
-.clear-button:hover {
-  color: #333;
-  background-color: #f0f0f0;
-}
-
-@import url('@/assets/css/ReporteStyle.css');
-</style>
+<style src="@/assets/css/ReporteStyle.css" scoped></style>
