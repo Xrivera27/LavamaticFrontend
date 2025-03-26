@@ -553,17 +553,21 @@ export default {
   methods: {
     // WEBSOCKET METHODS - NUEVOS MÉTODOS
     iniciarWebSocket() {
-  // Usar la misma URL base que tu API para asegurar consistencia
-  const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+  // URL explícita para el entorno de producción
+  const API_URL = 'https://lavamaticbackend.onrender.com';
   
-  // Para depuración - mostrar la URL que estamos usando
   console.log('Intentando conectar WebSocket a:', API_URL);
 
-  // Inicializar Socket.io con opciones explícitas para mejor depuración
+  // Configuración más detallada para Socket.io
   this.socket = io(API_URL, {
-    reconnectionAttempts: 5,
+    path: '/socket.io/', // Asegúrate de que esta es la ruta correcta
+    transports: ['websocket', 'polling'], // Intenta websocket primero, luego polling
+    secure: true, // Importante para HTTPS
+    rejectUnauthorized: false, // Necesario en algunos casos
+    reconnection: true,
+    reconnectionAttempts: 10,
     reconnectionDelay: 1000,
-    transports: ['websocket', 'polling']
+    timeout: 20000 // Aumentar el tiempo de espera
   });
   
   // Monitorear eventos de conexión para depuración
@@ -571,18 +575,48 @@ export default {
     console.log('WebSocket conectado exitosamente con ID:', this.socket.id);
     this.socket.emit('admin-connected');
     console.log('Enviado evento admin-connected');
+    
+    // Mostrar notificación de conexión exitosa
+    this.toast.success("Conexión WebSocket establecida", {
+      timeout: 3000
+    });
   });
   
   this.socket.on('connect_error', (error) => {
     console.error('Error de conexión WebSocket:', error.message);
+    
+    // Mostrar error en la interfaz
+    this.toast.error(`Error de conexión: ${error.message}`, {
+      timeout: 5000
+    });
   });
   
   this.socket.on('disconnect', (reason) => {
     console.log('WebSocket desconectado. Razón:', reason);
+    
+    // Intentar reconectar manualmente después de cierto tiempo si la desconexión no es explícita
+    if (reason === 'io server disconnect') {
+      // Si el servidor cerró la conexión, intentar reconectar manualmente
+      setTimeout(() => {
+        console.log('Intentando reconexión manual...');
+        this.socket.connect();
+      }, 3000);
+    }
   });
   
   this.socket.on('reconnect_attempt', (attemptNumber) => {
     console.log(`Intento de reconexión #${attemptNumber}`);
+  });
+  
+  this.socket.on('reconnect', (attemptNumber) => {
+    console.log(`Reconectado después de ${attemptNumber} intentos`);
+    
+    // Volver a unirse a la sala de administradores
+    this.socket.emit('admin-connected');
+    
+    this.toast.success("Conexión WebSocket restablecida", {
+      timeout: 3000
+    });
   });
   
   // Escuchar el evento específico para nuevos pedidos
@@ -599,29 +633,6 @@ export default {
   
   console.log('Inicialización de WebSocket completada');
 },
-    
-    // Manejar evento de actualización de pedido
-    manejarPedidoActualizado(pedidoData) {
-      console.log('Pedido actualizado:', pedidoData);
-      
-      // Buscar el pedido en la lista
-      const index = this.pedidos.findIndex(p => p.id_pedido === pedidoData.id);
-      
-      if (index !== -1) {
-        // Guardar el estado anterior para comprobaciones
-        const estadoAnterior = this.pedidos[index].estado;
-        
-        // Actualizar el pedido con la nueva información
-        this.pedidos[index] = {
-          ...this.pedidos[index],
-          estado: pedidoData.estado,
-          id_estado: this.obtenerEstadoId(pedidoData.estado)
-        };
-        
-        // Mostrar notificación de actualización
-        this.toast.info(`Pedido #${pedidoData.id} actualizado: ${estadoAnterior} → ${pedidoData.estado}`);
-      }
-    },
 
     // Manejar evento de nuevo pedido
 manejarNuevoPedido(pedidoData) {
