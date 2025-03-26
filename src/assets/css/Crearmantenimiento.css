@@ -380,6 +380,32 @@ p{
   border-left: 4px solid #4a7dcb;
 }
 
+/* Estilos para alinear los botones de acciones horizontalmente */
+td[data-label="Acciones"] {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+td[data-label="Acciones"] .btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 2px !important;
+  padding: 0 !important;
+  border-radius: 4px;
+}
+
+/* Eliminar el margen inferior que causa que los botones se apilen */
+td[data-label="Acciones"] .btn-info,
+td[data-label="Acciones"] .btn-warning,
+td[data-label="Acciones"] .btn-danger {
+  margin-bottom: 0 !important;
+}
+
 /* Responsive para el modal de detalles */
 @media (max-width: 768px) {
   .modal-detalle {
@@ -393,5 +419,11 @@ p{
   
   .detalle-row strong {
     margin-bottom: 5px;
+  }
+  
+  /* Ajuste responsivo para botones en móviles */
+  td[data-label="Acciones"] {
+    justify-content: center;
+    padding: 10px 0;
   }
 }
