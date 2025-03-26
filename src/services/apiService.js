@@ -185,6 +185,44 @@ const api = {
   },
 
   
+reportes: {
+  // Obtener reporte de pedidos
+  getPedidosReport: (startDate, endDate, repartidor = null, estado = null) => {
+    let queryParams = `?startDate=${startDate}&endDate=${endDate}`;
+    if (repartidor) queryParams += `&repartidor=${repartidor}`;
+    if (estado) queryParams += `&estado=${estado}`;
+    return apiClient.get(`/reportes/pedidos${queryParams}`);
+  },
+  
+  // Obtener reporte de repartidores
+  getRepartidoresReport: (startDate, endDate) => {
+    return apiClient.get(`/reportes/repartidores?startDate=${startDate}&endDate=${endDate}`);
+  },
+  
+  // Obtener reporte de clientes
+  getClientesReport: (startDate, endDate, cliente = null) => {
+    let queryParams = `?startDate=${startDate}&endDate=${endDate}`;
+    if (cliente) queryParams += `&cliente=${cliente}`;
+    return apiClient.get(`/reportes/clientes${queryParams}`);
+  },
+  
+  // Obtener reporte de equipos
+  getEquiposReport: (startDate, endDate) => {
+    return apiClient.get(`/reportes/equipos?startDate=${startDate}&endDate=${endDate}`);
+  },
+  
+  // Obtener reporte de servicios
+  getServiciosReport: (startDate, endDate) => {
+    return apiClient.get(`/reportes/servicios?startDate=${startDate}&endDate=${endDate}`);
+  },
+  
+  // Obtener datos para los filtros
+  getRepartidores: () => apiClient.get('/reportes/filtros/repartidores'),
+  getEstados: () => apiClient.get('/reportes/filtros/estados'),
+  getClientes: () => apiClient.get('/reportes/filtros/clientes')
+},
+
+  
 };
 
 // Exportamos tanto la instancia de axios configurada como los servicios agrupados

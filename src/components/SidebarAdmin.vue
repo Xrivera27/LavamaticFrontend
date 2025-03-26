@@ -47,6 +47,13 @@
         <i class="fas fa-clipboard-list"></i>
         <span class="nav-text">Pedidos</span>
       </router-link>
+      <!-- Nuevo enlace a Reportes -->
+      <router-link to="/admin/reportes" class="nav-item" 
+                   :class="{ active: currentRoute === 'adminReportes' }"
+                   :title="isExpanded ? null : 'Reportes'">
+        <i class="fas fa-chart-bar"></i>
+        <span class="nav-text">Reportes</span>
+      </router-link>
       <router-link to="/admin/configuser" class="nav-item" 
                    :class="{ active: currentRoute === 'adminConfiguraciones' }"
                    :title="isExpanded ? null : 'Configuración'">

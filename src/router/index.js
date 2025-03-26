@@ -17,6 +17,7 @@ import Pedidos from '../components/PedidosAdmin.vue'
 import PedidosRepartidor from '../components/PedidosRepartidor.vue'
 import ConfiguracionRepartidor from '../components/ConfiguracionUsuarioRepartidor.vue'
 import HistorialRepartidor from '../components/HistorialRepartidor.vue'
+import ReportesAdmin from '../components/ReportesAdmin.vue'
 
 const routes = [
   {
@@ -92,35 +93,37 @@ const routes = [
     path: '/admin/servicios',
     name: 'adminServicios',
     component: gestionServicios
-  }
-  ,
-  // Ruta para gestión de servicios
+  },
+  // Ruta para configuración de usuario admin
   {
     path: '/admin/configuser',
     name: 'configuser',
     component: ConfiguracionUsuarioAdmin
-  }
-  ,
-  // Ruta para gestión de servicios
+  },
+  // Ruta para gestión de pedidos
   {
     path: '/admin/pedidos',
     name: 'adminPedidos',
     component: Pedidos
   },
-
+  // Nueva ruta para reportes
+  {
+    path: '/admin/reportes',
+    name: 'adminReportes',
+    component: ReportesAdmin
+  },
+  // Rutas de repartidor
   {
     path: '/repartidor/pedidos',
     name: 'repartidorPedidos',
     component: PedidosRepartidor
   },
-
   {
     path: '/repartidor/configuracion',
     name: 'repartidorConfiguracion',
     component: ConfiguracionRepartidor
-  }
-  ,
-  // Ruta para gestión de servicios
+  },
+  // Ruta para historial de repartidor
   {
     path: '/repartidor/historial',
     name: 'repartidorHistorial',

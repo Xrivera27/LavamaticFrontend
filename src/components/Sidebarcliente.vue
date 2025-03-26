@@ -9,7 +9,7 @@
                    :class="{ active: currentRoute === 'dashboard' }" 
                    :title="isExpanded ? null : 'Home'">
         <i class="fa-solid fa-house"></i>
-        <span class="nav-text">Dashboard</span>
+        <span class="nav-text">Home</span>
       </router-link>
       <router-link to="/servicios" class="nav-item" 
                    :class="{ active: currentRoute === 'servicios' }" 

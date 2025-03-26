@@ -187,39 +187,39 @@
       </div>
     </div>
     
-    <!-- Modal de Información de Tipo de Entrega -->
-    <div class="modal" v-if="showInfoModal" @click="cerrarInfoModal">
-      <div class="modal-contenido modal-info" @click.stop>
-        <div class="modal-header">
-          <h3>Información sobre tipo de entrega</h3>
-          <button class="btn-cerrar" @click="cerrarInfoModal">×</button>
+  <!-- Modal de Información de Tipo de Entrega -->
+<div class="modal" v-if="showInfoModal" @click="cerrarInfoModal">
+  <div class="modal-contenido modal-info" @click.stop>
+    <div class="modal-header">
+      <h3>¿Cómo deseas recibir tus prendas?</h3>
+      <button class="btn-cerrar" @click="cerrarInfoModal">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-content">
+        <p>Selecciona la opción que mejor se adapte a tu estilo de vida:</p>
+        
+        <div class="info-option seleccionable" 
+             :class="{ 'opcion-seleccionada': tipoEntrega === 'sucursal' }"
+             @click="seleccionarTipoEntregaDesdeModal('sucursal')">
+          <h4><i class="fa-solid fa-store"></i> Recoger en tienda</h4>
+          <p>¡Pasa por nuestra sucursal cuando te sea conveniente! Tus prendas estarán listas y esperándote en nuestro local.</p>
         </div>
-        <div class="modal-body">
-          <div class="info-content">
-            <p>Esta es la manera en la cual volveremos a dejar su producto una vez finalizado el servicio:</p>
-            
-            <div class="info-option seleccionable" 
-                 :class="{ 'opcion-seleccionada': tipoEntrega === 'sucursal' }"
-                 @click="seleccionarTipoEntregaDesdeModal('sucursal')">
-              <h4><i class="fa-solid fa-store"></i> En sucursal</h4>
-              <p>El producto estará disponible para recogerlo en nuestra tienda física. Usted debe visitar nuestra sucursal para retirar sus prendas.</p>
-            </div>
-            
-            <div class="info-option seleccionable"
-                 :class="{ 'opcion-seleccionada': tipoEntrega === 'domicilio' }"
-                 @click="seleccionarTipoEntregaDesdeModal('domicilio')">
-              <h4><i class="fa-solid fa-truck"></i> A domicilio</h4>
-              <p>Nuestro repartidor llevará el producto directamente a la dirección que usted especifique. Es necesario indicar el barrio o colonia para la entrega.</p>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-entendido" @click="cerrarInfoModal">
-            Entendido
-          </button>
+        
+        <div class="info-option seleccionable"
+             :class="{ 'opcion-seleccionada': tipoEntrega === 'domicilio' }"
+             @click="seleccionarTipoEntregaDesdeModal('domicilio')">
+          <h4><i class="fa-solid fa-truck"></i> Entrega a domicilio</h4>
+          <p>¡Nosotros te lo llevamos! Nuestro equipo entregará tus prendas frescas y limpias directamente a la puerta de tu hogar u oficina.</p>
         </div>
       </div>
     </div>
+    <div class="modal-footer">
+      <button class="btn-entendido" @click="cerrarInfoModal">
+        ¡Confirmar mi elección!
+      </button>
+    </div>
+  </div>
+</div>
     
     <!-- Modal de Carga y Éxito -->
     <div class="modal-overlay" v-if="showSuccessModal">
