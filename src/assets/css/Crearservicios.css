@@ -1,4 +1,4 @@
-/* src/assets/css/Crearservicios.css */
+/* src/assets/css/Crearservicios.css - ORIGINAL + RESPONSIVE */
 
 /* Importamos los estilos básicos que ya existen */
 /* Estilos básicos para el layout */
@@ -10,20 +10,6 @@
   background-color: #f8f9fa;
   border-radius: 15px;
 }
-
-/* .admin-layout {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: auto;
-  max-height: calc(100vh - 40px);
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 15px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-} */
 
 .main-content {
   flex: 1;
@@ -73,6 +59,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   color: black; /* Asegurando que el texto sea negro */
+  font-size: 16px; /* Evita zoom en iOS */
 }
 
 /* Tabla */
@@ -110,6 +97,10 @@
   padding: 8px 15px;
   cursor: pointer;
   transition: background-color 0.2s;
+  min-height: 44px; /* Para touch en móviles */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-primary {
@@ -155,6 +146,16 @@
   gap: 10px;
 }
 
+.pagination-info {
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
 .pagination-button {
   background-color: #4a7dcb;
   color: white;
@@ -163,6 +164,7 @@
   border-radius: 4px;
   cursor: pointer;
   margin-left: 5px;
+  min-height: 44px; /* Para touch en móviles */
 }
 
 .pagination-button:disabled {
@@ -182,6 +184,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 10px; /* Para móviles */
 }
 
 h2 {
@@ -258,6 +261,7 @@ p {
   border: 1px solid #ddd;
   border-radius: 4px;
   color: black; /* Color de texto para inputs */
+  font-size: 16px; /* Evita zoom en iOS */
 }
 
 /* Password input */
@@ -274,6 +278,8 @@ p {
   border: none;
   cursor: pointer;
   color: #333; /* Color para el icono de toggle password */
+  min-height: 44px; /* Para touch en móviles */
+  min-width: 44px;
 }
 
 /* Phone input */
@@ -344,32 +350,6 @@ input, select, textarea {
   color: black !important;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .modal-usuario {
-    width: 95%;
-  }
-  
-  .modal-body {
-    flex-direction: column;
-  }
-  
-  .action-buttons {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .table {
-    display: block;
-    overflow-x: auto;
-  }
-  
-  .btn-group {
-    justify-content: flex-start;
-  }
-}
-
 .badge-info {
   background-color: #17a2b8;
   color: white;
@@ -420,61 +400,11 @@ input, select, textarea {
   margin-right: 5px;
 }
 
-.pagination-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  background-color: #f8f9fa;
-  border-top: 1px solid #eee;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.pagination-info {
-  color: #333;
-  font-size: 0.9rem;
-}
-
-.pagination-container {
-  display: flex;
-  gap: 5px;
-}
-
-.pagination-button {
-  background-color: #4a7dcb;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 5px;
-}
-
-.pagination-button:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
-
-/* Estilos responsivos para la paginación */
-@media (max-width: 768px) {
-  .pagination-wrapper {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .pagination-info {
-    margin-bottom: 10px;
-    text-align: center;
-  }
-}
-
 /* Estilos específicos para la gestión de servicios */
 .admin-layout{
   height: auto;
   margin-top: 0;
   margin-bottom: 5%;
-  
 }
 
 #paginacion{
@@ -603,6 +533,7 @@ textarea {
   border: 1px solid #ddd;
   border-radius: 4px;
   resize: vertical;
+  font-size: 16px; /* Evita zoom en iOS */
 }
 
 /* Estilos para alinear los botones de acciones horizontalmente */
@@ -631,7 +562,184 @@ td[data-label="Acciones"] .btn-danger {
   margin-bottom: 0 !important;
 }
 
-/* Responsive */
+/* ========== RESPONSIVE AÑADIDO ========== */
+
+/* Móviles pequeños (hasta 480px) */
+@media (max-width: 480px) {
+  .admin-layout {
+    margin: 10px;
+    border-radius: 10px;
+  }
+  
+  .main-content {
+    padding: 15px;
+  }
+  
+  .page-title {
+    font-size: 20px;
+    text-align: center;
+  }
+  
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-bar {
+    max-width: 100%;
+    order: 2;
+  }
+  
+  .modal-usuario,
+  .modal-detalle {
+    width: 95%;
+  }
+  
+  .modal-confirm {
+    width: calc(100% - 40px);
+    max-width: 350px;
+  }
+  
+  /* Tabla en formato de tarjetas para móvil */
+  .table {
+    display: block;
+  }
+  
+  .table thead {
+    display: none;
+  }
+  
+  .table tbody {
+    display: block;
+  }
+  
+  .table tr {
+    display: block;
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background-color: white;
+  }
+  
+  .table td {
+    display: block;
+    text-align: right;
+    padding: 5px 0;
+    border: none;
+    position: relative;
+    padding-left: 50%;
+  }
+  
+  .table td:before {
+    content: attr(data-label) ": ";
+    position: absolute;
+    left: 0;
+    width: 45%;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  /* Botones de acción en móvil */
+  td[data-label="Acciones"] {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  
+  td[data-label="Acciones"]:before {
+    display: none;
+  }
+}
+
+/* Tablets (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .page-title {
+    text-align: left;
+  }
+  
+  .modal-usuario {
+    width: 90%;
+  }
+  
+  .modal-body {
+    flex-direction: column;
+  }
+  
+  .action-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Desktop (769px+) - Restaurar tabla normal */
+@media (min-width: 769px) {
+  /* Restaurar tabla normal en desktop */
+  .table {
+    display: table;
+  }
+  
+  .table thead {
+    display: table-header-group;
+  }
+  
+  .table tbody {
+    display: table-row-group;
+  }
+  
+  .table tr {
+    display: table-row;
+    margin-bottom: 0;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+  }
+  
+  .table td {
+    display: table-cell;
+    text-align: left;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    position: static;
+    padding-left: 15px;
+  }
+  
+  .table td:before {
+    display: none;
+  }
+  
+  /* Botones de acción en desktop */
+  td[data-label="Acciones"] {
+    justify-content: flex-start;
+    padding: 12px 15px;
+  }
+}
+
+/* Estilos responsivos para la paginación */
+@media (max-width: 768px) {
+  .pagination-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .pagination-info {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .btn-group {
+    justify-content: flex-start;
+  }
+}
+
+/* Responsive para modales de detalles */
 @media (max-width: 768px) {
   .modal-detalle {
     width: 95%;
@@ -656,5 +764,22 @@ td[data-label="Acciones"] .btn-danger {
   td[data-label="Acciones"] {
     justify-content: center;
     padding: 10px 0;
+  }
+}
+
+/* Mejoras de accesibilidad para dispositivos touch */
+@media (hover: none) and (pointer: coarse) {
+  .btn {
+    min-height: 48px;
+  }
+  
+  .toggle-password {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  .pagination-button {
+    min-height: 48px;
+    min-width: 48px;
   }
 }

@@ -1,6 +1,6 @@
 <template>
     <div class="repartidor-layout">
-      <SidebarRepartidor @sidebar-toggle="handleSidebarToggle" />
+      <SidebarDinamico @sidebar-toggle="handleSidebarToggle" />
       <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
         <div class="historial-wrapper">
           <div v-if="isLoading" class="loading-overlay">
@@ -158,12 +158,12 @@
   </template>
   
   <script>
-  import SidebarRepartidor from './SidebarRepartidor.vue';
+  import SidebarDinamico from './SidebarDinamico.vue';
   
   export default {
     name: 'HistorialRepartidor',
     components: {
-      SidebarRepartidor
+      SidebarDinamico
     },
     data() {
       return {

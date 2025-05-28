@@ -8,7 +8,7 @@
       </div>
     </div>
     
-    <SidebarAdmin />
+    <SidebarDinamico />
     <div class="main-content">
       <div class="reports-container">
         <h1>Reportes del Sistema</h1>
@@ -489,7 +489,7 @@
 </template>
 
 <script>
-import SidebarAdmin from './SidebarAdmin.vue';
+import SidebarDinamico from './SidebarDinamico.vue';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -499,7 +499,7 @@ import api from '@/services/apiService';
 export default {
   name: 'ReportesAdmin',
   components: {
-    SidebarAdmin
+    SidebarDinamico
   },
   setup() {
     const toast = useToast();

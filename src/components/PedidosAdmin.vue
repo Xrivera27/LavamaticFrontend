@@ -1,6 +1,6 @@
 <template>
   <div class="admin-layout">
-    <SidebarAdmin @sidebar-toggle="handleSidebarToggle" />
+    <SidebarDinamico @sidebar-toggle="handleSidebarToggle" />
     <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
       <div class="pedidos-wrapper">
         <div v-if="isLoading" class="loading-overlay">
@@ -435,7 +435,7 @@
 </template>
 
 <script>
-import SidebarAdmin from './SidebarAdmin.vue';
+import SidebarDinamico from './SidebarDinamico.vue';
 import api from '@/services/apiService';
 import { useToast } from "vue-toastification";
 import { io } from 'socket.io-client'; // Importar socket.io-client
@@ -443,7 +443,7 @@ import { io } from 'socket.io-client'; // Importar socket.io-client
 export default {
   name: "GestionPedidos",
   components: {
-    SidebarAdmin
+    SidebarDinamico
   },
   setup() {
     const toast = useToast();

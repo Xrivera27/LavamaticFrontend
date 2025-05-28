@@ -1,6 +1,6 @@
 <template>
   <div class="admin-layout">
-    <SidebarAdmin @sidebar-toggle="handleSidebarToggle" />
+    <SidebarDinamico @sidebar-toggle="handleSidebarToggle" />
     <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
       <div class="servicios-wrapper">
         <div v-if="isLoading" class="loading-overlay">
@@ -294,14 +294,14 @@
 </template>
 
 <script>
-import SidebarAdmin from './SidebarAdmin.vue';
+import SidebarDinamico from './SidebarDinamico.vue';
 import api from '@/services/apiService';
 import { useToast } from "vue-toastification";
 
 export default {
   name: "gestionServicios",
   components: {
-    SidebarAdmin
+    SidebarDinamico
   },
   setup() {
     const toast = useToast();

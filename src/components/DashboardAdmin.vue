@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-layout">
+  <div class="app-container">
     <!-- Modal de carga -->
     <div v-if="cargando" class="loading-modal">
       <div class="loading-container">
@@ -8,71 +8,92 @@
       </div>
     </div>
 
-    <SidebarAdmin />
-    <div class="main-content">
-      
-      <!-- Estados de pedidos -->
-      <div class="order-status-cards">
-        <div v-for="(estado, index) in estadosPedidos" :key="estado.id" class="order-status-card" :class="estado.clase">
-          <div class="status-icon emoji-icon">
-            <!-- Usar emojis en lugar de Font Awesome -->
-            <span v-if="index === 0">⏰</span>
-            <span v-else-if="index === 1">🚚</span>
-            <span v-else-if="index === 2">✅</span>
-            <span v-else-if="index === 3">📦</span>
-          </div>
-          <div class="status-info">
-            <h3>{{ estado.nombre }}</h3>
-            <p class="status-count">{{ estado.total }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Gráficos -->
-      <div class="charts-container">
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3>Pedidos asignados por Repartidor</h3>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <span class="legend-color repartidores"></span>
-                <span>Repartidores</span>
-              </div>
+    <!-- Sidebar -->
+    <SidebarDinamico />
+    
+    <!-- Dashboard Content -->
+    <div class="dashboard-wrapper">
+      <div class="dashboard-content">
+        
+        <!-- Status Cards -->
+        <div class="status-cards">
+          <div 
+            v-for="(estado, index) in estadosPedidos" 
+            :key="estado.id" 
+            class="status-card"
+            :class="getStatusClass(index)"
+          >
+            <div class="card-icon">
+              <span v-if="index === 0">⏰</span>
+              <span v-else-if="index === 1">🚚</span>
+              <span v-else-if="index === 2">✅</span>
+              <span v-else-if="index === 3">📦</span>
             </div>
-          </div>
-          <div class="chart-body">
-            <canvas id="repartidoresLineChart"></canvas>
+            <div class="card-content">
+              <h3>{{ estado.nombre }}</h3>
+              <div class="card-number">{{ estado.total }}</div>
+            </div>
           </div>
         </div>
 
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3>Distribución de Servicios </h3>
-            <div class="chart-legend">
-              <div class="legend-item" v-for="(item, index) in serviciosLegend" :key="index">
-                <span class="legend-color" :style="{ backgroundColor: item.color }"></span>
-                <span>{{ item.nombre }}</span>
+        <!-- Charts -->
+        <div class="charts-container">
+          
+          <!-- Chart 1 -->
+          <div class="chart-box">
+            <div class="chart-header">
+              <h3>Pedidos asignados por Repartidor</h3>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="dot blue"></span>
+                  <span>Repartidores</span>
+                </div>
               </div>
             </div>
+            <div class="chart-canvas">
+              <canvas id="repartidoresChart"></canvas>
+            </div>
           </div>
-          <div class="chart-body">
-            <canvas id="serviciosChart"></canvas>
+
+          <!-- Chart 2 -->
+          <div class="chart-box">
+            <div class="chart-header">
+              <h3>Distribución de Servicios</h3>
+              <div class="chart-legend">
+                <div 
+                  v-for="(item, index) in serviciosLegend" 
+                  :key="index" 
+                  class="legend-item"
+                >
+                  <span 
+                    class="dot" 
+                    :style="{ backgroundColor: item.color }"
+                  ></span>
+                  <span>{{ item.nombre }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="chart-canvas">
+              <canvas id="serviciosChart"></canvas>
+            </div>
           </div>
+          
         </div>
+        
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import SidebarAdmin from './SidebarAdmin.vue';
+import SidebarDinamico from './SidebarDinamico.vue';
 import Chart from 'chart.js/auto';
 import api from '@/services/apiService';
 
 export default {
   name: 'DashboardAdmin',
   components: {
-    SidebarAdmin
+    SidebarDinamico
   },
   data() {
     return {
@@ -80,29 +101,42 @@ export default {
       serviciosLegend: [],
       datosRepartidores: [],
       datosServicios: [],
-      repartidoresLineChart: null,
+      repartidoresChart: null,
       serviciosChart: null,
       cargando: true,
       error: null,
-      // Colores predefinidos para los servicios (independientes de la API)
+      // COLORES FIJOS PARA TODOS LOS SERVICIOS
       coloresServicios: {
-        'Básica': '#4361ee',  // Azul
-        'Premium': '#f72585', // Rosa
-        'Secado': '#7209b7'   // Morado
-      }
+        'Básica': '#06d6a0',     // Verde (como en tu imagen)
+        'Premium': '#f72585',    // Rosa
+        'Secado': '#7209b7',     // Morado
+        'Lavado': '#4361ee',     // Azul
+        // Colores adicionales por si aparecen otros servicios
+        'Express': '#ff6b35',    // Naranja
+        'Deluxe': '#ffd23f',     // Amarillo
+        'Económico': '#06ffa5',  // Verde claro
+        'VIP': '#b7094c'         // Rojo oscuro
+      },
+      // COLORES DE RESPALDO FIJOS (sin random)
+      coloresRespaldo: [
+        '#06d6a0', '#f72585', '#7209b7', '#4361ee', 
+        '#ff6b35', '#ffd23f', '#06ffa5', '#b7094c',
+        '#264653', '#2a9d8f', '#e9c46a', '#f4a261'
+      ]
     }
   },
   mounted() {
     this.cargarDatosDashboard();
+    window.addEventListener('resize', this.handleResize);
   },
   beforeUnmount() {
-    // Limpiar los gráficos para evitar memory leaks
-    if (this.repartidoresLineChart) {
-      this.repartidoresLineChart.destroy();
+    if (this.repartidoresChart) {
+      this.repartidoresChart.destroy();
     }
     if (this.serviciosChart) {
       this.serviciosChart.destroy();
     }
+    window.removeEventListener('resize', this.handleResize);
   },
   methods: {
     async cargarDatosDashboard() {
@@ -110,128 +144,94 @@ export default {
         this.cargando = true;
         this.error = null;
         
-        // Retardo simulado para asegurar que el modal sea visible (puedes quitar esto en producción)
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Llamada a la API para obtener los datos del dashboard
         const response = await api.dashboard.getData();
         const data = response.data;
         
-        // Asignar datos para los estados de pedidos y asegurar que tengan las clases correctas
-        this.estadosPedidos = data.estadoCards.map((estado, index) => {
-          // Asegurar que cada tarjeta tenga la clase correcta según su índice
-          if (!estado.clase) {
-            const clases = ['status-waiting', 'status-shipping', 'status-ready', 'status-delivered'];
-            estado.clase = clases[index % clases.length];
-          }
-          return estado;
-        });
+        this.estadosPedidos = data.estadoCards || [];
         
-        // Procesar los datos de servicios para asegurar que usen los colores correctos
-        this.datosServicios = data.datosServicios.map(item => {
-          // Forzar el color según el nombre del servicio
+        //  ASIGNACIÓN DE COLORES FIJA (sin random)
+        this.datosServicios = (data.datosServicios || []).map((item, index) => {
+          // Primero intentar usar colores específicos
           if (this.coloresServicios[item.name]) {
             item.color = this.coloresServicios[item.name];
           } else {
-            // Color aleatorio para servicios sin color predefinido
-            item.color = '#' + Math.floor(Math.random()*16777215).toString(16);
+            // Si no existe, usar colores de respaldo en orden secuencial
+            item.color = this.coloresRespaldo[index % this.coloresRespaldo.length];
           }
           return item;
         });
         
-        // Crear la leyenda basada en los datos de servicios actualizados
-        this.serviciosLegend = this.datosServicios.map(item => {
-          return {
-            nombre: item.name,
-            color: item.color
-          };
-        });
+        this.serviciosLegend = this.datosServicios.map(item => ({
+          nombre: item.name,
+          color: item.color
+        }));
         
-        // Asignar datos para los gráficos de repartidores
-        this.datosRepartidores = data.datosRepartidores;
+        this.datosRepartidores = data.datosRepartidores || [];
         
-        // Inicializar los gráficos con los datos
         this.$nextTick(() => {
           this.initCharts();
         });
+        
       } catch (error) {
         console.error('Error al cargar datos del dashboard:', error);
-        this.error = 'No se pudieron cargar los datos del dashboard. Por favor, intente nuevamente.';
+        this.error = 'No se pudieron cargar los datos del dashboard.';
       } finally {
         this.cargando = false;
       }
     },
     
+    getStatusClass(index) {
+      const classes = ['waiting', 'shipping', 'ready', 'delivered'];
+      return classes[index % classes.length];
+    },
+    
     initCharts() {
-      this.initRepartidoresLineChart();
+      this.initRepartidoresChart();
       this.initServiciosChart();
     },
     
-    initRepartidoresLineChart() {
-      const ctx = document.getElementById('repartidoresLineChart');
-      if (!ctx) {
-        console.error('No se encontró el elemento canvas para el gráfico de repartidores');
-        return;
+    initRepartidoresChart() {
+      const ctx = document.getElementById('repartidoresChart');
+      if (!ctx || !this.datosRepartidores.length) return;
+      
+      if (this.repartidoresChart) {
+        this.repartidoresChart.destroy();
       }
       
-      const context = ctx.getContext('2d');
-      
-      // Destruir el gráfico anterior si existe
-      if (this.repartidoresLineChart) {
-        this.repartidoresLineChart.destroy();
-      }
-      
-      // Verificar si hay datos para mostrar
-      if (!this.datosRepartidores || this.datosRepartidores.length === 0) {
-        console.warn('No hay datos de repartidores para mostrar');
-        return;
-      }
-      
-      // Preparar los datos para el gráfico de barras
       const labels = this.datosRepartidores.map(item => {
-        // Crear etiquetas más cortas para el gráfico
         if (item.name === 'Sin asignar') return 'Sin asignar';
-        
-        // Obtener solo el primer nombre para mostrar en el gráfico
         const nombres = item.name.split(' ');
         if (nombres.length >= 2) {
-          return `${nombres[0]} ${nombres[1].charAt(0)}.`; // Primer nombre + inicial de apellido
+          return `${nombres[0]} ${nombres[1].charAt(0)}.`;
         }
         return item.name;
       });
       
       const datos = this.datosRepartidores.map(item => item.pedidos);
-      
-      // Guardar los nombres completos para usar en tooltips
       const nombresCompletos = this.datosRepartidores.map(item => item.name);
       
-      this.repartidoresLineChart = new Chart(context, {
+      this.repartidoresChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: labels,
-          datasets: [
-            {
-              label: 'Pedidos Asignados',
-              data: datos,
-              backgroundColor: '#3498db',
-              borderWidth: 0,
-              borderRadius: 4
-            }
-          ]
+          datasets: [{
+            label: 'Pedidos Asignados',
+            data: datos,
+            backgroundColor: '#3498db',
+            borderWidth: 0,
+            borderRadius: 4
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display: false },
             tooltip: {
-              mode: 'index',
-              intersect: false,
               callbacks: {
                 title: function(tooltipItems) {
-                  // Mostrar el nombre completo en el tooltip
                   const index = tooltipItems[0].dataIndex;
                   return nombresCompletos[index];
                 }
@@ -241,32 +241,17 @@ export default {
           scales: {
             y: {
               beginAtZero: true,
-              grid: {
-                color: 'rgba(200, 200, 200, 0.1)'
-              },
-              ticks: {
-                color: '#999',
-                precision: 0 // Solo números enteros
-              }
+              grid: { color: 'rgba(200, 200, 200, 0.1)' },
+              ticks: { color: '#999', precision: 0 }
             },
             x: {
-              grid: {
-                display: false
-              },
+              grid: { display: false },
               ticks: {
                 color: '#999',
                 maxRotation: 45,
                 minRotation: 45,
-                autoSkip: false,
-                font: {
-                  size: 11
-                }
+                font: { size: 11 }
               }
-            }
-          },
-          layout: {
-            padding: {
-              bottom: 20
             }
           }
         }
@@ -275,66 +260,32 @@ export default {
     
     initServiciosChart() {
       const ctx = document.getElementById('serviciosChart');
-      if (!ctx) {
-        console.error('No se encontró el elemento canvas para el gráfico de servicios');
-        return;
-      }
+      if (!ctx || !this.datosServicios.length) return;
       
-      const context = ctx.getContext('2d');
-      
-      // Destruir el gráfico anterior si existe
       if (this.serviciosChart) {
         this.serviciosChart.destroy();
       }
       
-      // Verificar si hay datos para mostrar
-      if (!this.datosServicios || this.datosServicios.length === 0) {
-        console.warn('No hay datos de servicios para mostrar');
-        return;
-      }
-      
-      // Preparar los datos para el gráfico de pie
       const labels = this.datosServicios.map(item => item.name);
       const datos = this.datosServicios.map(item => item.value);
+      const colores = this.datosServicios.map(item => item.color);
       
-      // Usar DIRECTAMENTE los colores forzados sin depender de item.color
-      const colores = this.datosServicios.map(item => {
-        if (item.name === 'Básica') return '#4361ee';
-        if (item.name === 'Premium') return '#f72585';
-        if (item.name === 'Secado') return '#7209b7';
-        return '#' + Math.floor(Math.random()*16777215).toString(16);
-      });
-      
-      // Forzar colores específicos según el índice si los nombres no coinciden
-      if (colores.length >= 3) {
-        if (labels[0]) colores[0] = '#4361ee'; // Azul para el primer elemento
-        if (labels[1]) colores[1] = '#f72585'; // Rosa para el segundo elemento
-        if (labels[2]) colores[2] = '#7209b7'; // Morado para el tercer elemento
-      }
-      
-      console.log('Colores para el gráfico:', colores);
-      console.log('Nombres de los servicios:', labels);
-      
-      this.serviciosChart = new Chart(context, {
+      this.serviciosChart = new Chart(ctx, {
         type: 'pie',
         data: {
           labels: labels,
-          datasets: [
-            {
-              data: datos,
-              backgroundColor: colores,
-              borderColor: 'white',
-              borderWidth: 2
-            }
-          ]
+          datasets: [{
+            data: datos,
+            backgroundColor: colores,
+            borderColor: 'white',
+            borderWidth: 2
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display: false },
             tooltip: {
               callbacks: {
                 label: function(context) {
@@ -347,11 +298,21 @@ export default {
           }
         }
       });
+    },
+    
+    handleResize() {
+      setTimeout(() => {
+        if (this.repartidoresChart) {
+          this.repartidoresChart.resize();
+        }
+        if (this.serviciosChart) {
+          this.serviciosChart.resize();
+        }
+      }, 300);
     }
   }
 };
 </script>
 
 
-
-<style src="@/assets/css/DashboardAdmin.css" scoped></style>
+ <style src="@/assets/css/DashboardAdmin.css" scoped></style>

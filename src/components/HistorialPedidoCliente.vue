@@ -1,6 +1,6 @@
 <template>
   <div class="page-layout">
-    <Sidebarcliente @sidebar-toggle="handleSidebarToggle" />
+    <SidebarDinamico @sidebar-toggle="handleSidebarToggle" />
     <div class="main-content" :class="{ 'content-expanded': isSidebarExpanded }">
       <div class="header">
       
@@ -223,14 +223,14 @@
 </template>
 
 <script>
-import Sidebarcliente from './Sidebarcliente.vue';
+import SidebarDinamico from './SidebarDinamico.vue';
 import api from '@/services/apiService';
 import { useToast } from "vue-toastification";
 
 export default {
   name: 'HistorialPedidos',
   components: {
-    Sidebarcliente
+    SidebarDinamico
   },
   setup() {
     const toast = useToast();
