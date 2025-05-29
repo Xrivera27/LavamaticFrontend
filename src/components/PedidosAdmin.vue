@@ -312,7 +312,25 @@
             </div>
             <div class="modal-body-confirm">
               <p>¿Estás seguro de que quieres volver este pedido a estado "En Espera"?</p>
-              <p v-if="pedidoSeleccionado && pedidoSeleccionado.id_repartidor">El repartidor actual será desasignado.</p>
+              
+              <!-- Mensaje específico para pedidos que están Listos para Recoger -->
+              <p v-if="pedidoSeleccionado && pedidoSeleccionado.estado === 'Listo para recoger'">
+                <strong>Importante:</strong> Este pedido ya estaba marcado como listo para recoger. 
+                Al volver a "En Espera", el cliente será notificado que su pedido ya no está disponible para recoger.
+              </p>
+              
+              <!-- Mensaje específico para pedidos que están En Camino -->
+              <p v-if="pedidoSeleccionado && pedidoSeleccionado.estado === 'En camino'">
+                <strong>Atención:</strong> El pedido ya estaba en proceso de entrega. 
+                Al volver a "En Espera", se interrumpirá el proceso de entrega actual.
+              </p>
+              
+              <!-- Mensaje para pedidos con repartidor asignado -->
+              <p v-if="pedidoSeleccionado && pedidoSeleccionado.id_repartidor">
+                El repartidor asignado (<strong>{{ pedidoSeleccionado.repartidor }}</strong>) será desasignado del pedido.
+              </p>
+
+              <p>Esta acción no se puede deshacer automáticamente.</p>
             </div>
             <div class="modal-footer">
               <button class="btn btn-warning" @click="confirmarVolverAEspera" style="color: white;">
@@ -393,52 +411,12 @@
       </div>
     </div>
   </div>
-
-  <!-- Modal de confirmación para volver a espera -->
-<div class="modal" v-if="showConfirmModal">
-  <div class="modal-confirm">
-    <div class="modal-header">
-      <h2>Confirmación</h2>
-    </div>
-    <div class="modal-body-confirm">
-      <p>¿Estás seguro de que quieres volver este pedido a estado "En Espera"?</p>
-      
-      <!-- Mensaje específico para pedidos que están Listos para Recoger -->
-      <p v-if="pedidoSeleccionado && pedidoSeleccionado.estado === 'Listo para recoger'">
-        <strong>Importante:</strong> Este pedido ya estaba marcado como listo para recoger. 
-        Al volver a "En Espera", el cliente será notificado que su pedido ya no está disponible para recoger.
-      </p>
-      
-      <!-- Mensaje específico para pedidos que están En Camino -->
-      <p v-if="pedidoSeleccionado && pedidoSeleccionado.estado === 'En camino'">
-        <strong>Atención:</strong> El pedido ya estaba en proceso de entrega. 
-        Al volver a "En Espera", se interrumpirá el proceso de entrega actual.
-      </p>
-      
-      <!-- Mensaje para pedidos con repartidor asignado -->
-      <p v-if="pedidoSeleccionado && pedidoSeleccionado.id_repartidor">
-        El repartidor asignado (<strong>{{ pedidoSeleccionado.repartidor }}</strong>) será desasignado del pedido.
-      </p>
-
-      <p>Esta acción no se puede deshacer automáticamente.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-warning" @click="confirmarVolverAEspera" style="color: white;">
-        Sí, volver a espera
-      </button>
-      <button class="btn btn-secondary" @click="cancelarVolverAEspera">
-        No, cancelar
-      </button>
-    </div>
-  </div>
-</div>
 </template>
 
 <script>
 import SidebarDinamico from './SidebarDinamico.vue';
 import api from '@/services/apiService';
 import { useToast } from "vue-toastification";
-import { io } from 'socket.io-client'; // Importar socket.io-client
 
 export default {
   name: "GestionPedidos",
@@ -468,10 +446,7 @@ export default {
       repartidorSeleccionado: null,
       repartidoresDisponibles: [],
       repartidorUsuarioMap: {}, // Añadido para mantener el mapeo
-      pedidos: [],
-      // Variables para WebSocket
-      socket: null,
-      sonidoActivado: true
+      pedidos: []
     };
   },
   computed: {
@@ -551,180 +526,6 @@ export default {
     },
   },
   methods: {
-    // WEBSOCKET METHODS - NUEVOS MÉTODOS
-    iniciarWebSocket() {
-  // URL explícita para el entorno de producción
-  const API_URL = 'https://lavamaticbackend.onrender.com';
-  
-  console.log('Intentando conectar WebSocket a:', API_URL);
-
-  // Configuración más detallada para Socket.io
-  this.socket = io(API_URL, {
-    path: '/socket.io/', // Asegúrate de que esta es la ruta correcta
-    transports: ['websocket', 'polling'], // Intenta websocket primero, luego polling
-    secure: true, // Importante para HTTPS
-    rejectUnauthorized: false, // Necesario en algunos casos
-    reconnection: true,
-    reconnectionAttempts: 10,
-    reconnectionDelay: 1000,
-    timeout: 20000 // Aumentar el tiempo de espera
-  });
-  
-  // Monitorear eventos de conexión para depuración
-  this.socket.on('connect', () => {
-    console.log('WebSocket conectado exitosamente con ID:', this.socket.id);
-    this.socket.emit('admin-connected');
-    console.log('Enviado evento admin-connected');
-    
-    // Mostrar notificación de conexión exitosa
-    this.toast.success("Conexión WebSocket establecida", {
-      timeout: 3000
-    });
-  });
-  
-  this.socket.on('connect_error', (error) => {
-    console.error('Error de conexión WebSocket:', error.message);
-    
-    // Mostrar error en la interfaz
-    this.toast.error(`Error de conexión: ${error.message}`, {
-      timeout: 5000
-    });
-  });
-  
-  this.socket.on('disconnect', (reason) => {
-    console.log('WebSocket desconectado. Razón:', reason);
-    
-    // Intentar reconectar manualmente después de cierto tiempo si la desconexión no es explícita
-    if (reason === 'io server disconnect') {
-      // Si el servidor cerró la conexión, intentar reconectar manualmente
-      setTimeout(() => {
-        console.log('Intentando reconexión manual...');
-        this.socket.connect();
-      }, 3000);
-    }
-  });
-  
-  this.socket.on('reconnect_attempt', (attemptNumber) => {
-    console.log(`Intento de reconexión #${attemptNumber}`);
-  });
-  
-  this.socket.on('reconnect', (attemptNumber) => {
-    console.log(`Reconectado después de ${attemptNumber} intentos`);
-    
-    // Volver a unirse a la sala de administradores
-    this.socket.emit('admin-connected');
-    
-    this.toast.success("Conexión WebSocket restablecida", {
-      timeout: 3000
-    });
-  });
-  
-  // Escuchar el evento específico para nuevos pedidos
-  this.socket.on('nuevo-pedido', (pedidoData) => {
-    console.log('✅ Evento nuevo-pedido recibido:', pedidoData);
-    this.manejarNuevoPedido(pedidoData);
-  });
-  
-  // Escuchar eventos de actualización de pedidos
-  this.socket.on('pedido-actualizado', (pedidoData) => {
-    console.log('Evento pedido-actualizado recibido:', pedidoData);
-    this.manejarPedidoActualizado(pedidoData);
-  });
-  
-  console.log('Inicialización de WebSocket completada');
-},
-
-    // Manejar evento de nuevo pedido
-manejarNuevoPedido(pedidoData) {
-  console.log('Nuevo pedido recibido:', pedidoData);
-  
-  // Convertir el pedido recibido al formato de la aplicación
-  const nuevoPedido = {
-    id_pedido: pedidoData.id,
-    cliente: pedidoData.cliente,
-    total: pedidoData.total || 0,
-    fecha: new Date(pedidoData.timestamp || Date.now()),
-    estado: 'En Espera',
-    id_estado: 1,
-    repartidor: null,
-    id_repartidor: null,
-    direccion_recogida: pedidoData.direccionRecogida || '',
-    direccion_entrega: pedidoData.direccionEntrega || '',
-    servicios: pedidoData.servicios || 'Servicio no especificado'
-  };
-  
-  // Añadir el nuevo pedido al principio de la lista
-  this.pedidos.unshift(nuevoPedido);
-  
-  // Mostrar notificación
-  this.mostrarNotificacionNuevoPedido(nuevoPedido);
-  
-  // Reproducir sonido de alerta
-  this.reproducirSonidoAlerta();
-},
-    
-    // Mostrar notificación para un nuevo pedido
-    mostrarNotificacionNuevoPedido(pedido) {
-      // Notificación en la aplicación
-      this.toast.success(`¡Nuevo pedido recibido! #${pedido.id_pedido} - Cliente: ${pedido.cliente}`, {
-        timeout: 10000,
-        closeButton: true,
-        icon: true
-      });
-      
-      // Notificación del navegador si está disponible
-      this.mostrarNotificacionNavegador(pedido);
-    },
-    
-    // Mostrar notificación del navegador
-    mostrarNotificacionNavegador(pedido) {
-      // Comprobar si el navegador soporta notificaciones
-      if ('Notification' in window) {
-        // Solicitar permiso si no está concedido
-        if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-          Notification.requestPermission();
-        }
-        
-        // Mostrar notificación si el permiso está concedido
-        if (Notification.permission === 'granted') {
-          new Notification('Nuevo Pedido', {
-            body: `Cliente: ${pedido.cliente}\nTotal: LPS.${Number(pedido.total).toFixed(2)}`,
-            icon: '/favicon.ico' // Ruta a tu icono
-          });
-        }
-      }
-    },
-    
-    // Reproducir sonido de alerta
-    reproducirSonidoAlerta() {
-      if (!this.sonidoActivado) return;
-      
-      try {
-        // Crear un elemento de audio
-        const audio = new Audio();
-        
-        // Establecer la fuente del sonido (ajustar según tu proyecto)
-        audio.src = '/sounds/notification.mp3';
-        
-        // Reproducir el sonido
-        audio.play().catch(error => {
-          console.error('Error al reproducir sonido:', error);
-        });
-      } catch (error) {
-        console.error('Error con reproducción de audio:', error);
-      }
-    },
-    
-    // Desconectar el socket al desmontar el componente
-    desconectarWebSocket() {
-      if (this.socket) {
-        this.socket.disconnect();
-        this.socket = null;
-        console.log('WebSocket desconectado');
-      }
-    },
-    // FIN DE WEBSOCKET METHODS
-
     getEstadoDisplayName() {
       switch(this.estadoActual) {
         case 'espera': return 'En Espera';
@@ -1029,46 +830,46 @@ manejarNuevoPedido(pedidoData) {
     },
     
     async confirmarVolverAEspera() {
-  this.isLoading = true;
-  
-  try {
-    // Guardar el estado actual para mostrar el mensaje adecuado
-    const estadoAnterior = this.pedidoSeleccionado.estado;
-    const teniaRepartidor = this.pedidoSeleccionado.id_repartidor !== null;
-    
-    // Llamar a la API para volver el pedido a estado "En Espera"
-    const response = await api.pedidos.volverAEspera(this.pedidoSeleccionado.id_pedido);
-    console.log("Respuesta volver a espera:", response.data);
-    
-    // Actualizar localmente
-    const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
-    if (index !== -1) {
-      this.pedidos[index] = {
-        ...this.pedidoSeleccionado,
-        estado: 'En Espera',
-        id_estado: 1,
-        repartidor: null,
-        id_repartidor: null
-      };
-    }
-    
-    // Mostrar mensaje personalizado según el estado anterior
-    if (estadoAnterior === 'Listo para recoger' || estadoAnterior === 'En camino' || teniaRepartidor) {
-      this.toast.success("Pedido vuelto a estado 'En Espera' correctamente. Se ha enviado una notificación al cliente.");
-    } else {
-      this.toast.success("Pedido vuelto a estado 'En Espera' correctamente");
-    }
-    
-    this.showConfirmModal = false;
-    this.pedidoSeleccionado = null;
-  } catch (error) {
-    console.error("Error al volver a espera:", error);
-    const errorMsg = error.response?.data?.error || "Error al volver el pedido a espera";
-    this.toast.error(errorMsg);
-  } finally {
-    this.isLoading = false;
-  }
-},
+      this.isLoading = true;
+      
+      try {
+        // Guardar el estado actual para mostrar el mensaje adecuado
+        const estadoAnterior = this.pedidoSeleccionado.estado;
+        const teniaRepartidor = this.pedidoSeleccionado.id_repartidor !== null;
+        
+        // Llamar a la API para volver el pedido a estado "En Espera"
+        const response = await api.pedidos.volverAEspera(this.pedidoSeleccionado.id_pedido);
+        console.log("Respuesta volver a espera:", response.data);
+        
+        // Actualizar localmente
+        const index = this.pedidos.findIndex(p => p.id_pedido === this.pedidoSeleccionado.id_pedido);
+        if (index !== -1) {
+          this.pedidos[index] = {
+            ...this.pedidoSeleccionado,
+            estado: 'En Espera',
+            id_estado: 1,
+            repartidor: null,
+            id_repartidor: null
+          };
+        }
+        
+        // Mostrar mensaje personalizado según el estado anterior
+        if (estadoAnterior === 'Listo para recoger' || estadoAnterior === 'En camino' || teniaRepartidor) {
+          this.toast.success("Pedido vuelto a estado 'En Espera' correctamente. Se ha enviado una notificación al cliente.");
+        } else {
+          this.toast.success("Pedido vuelto a estado 'En Espera' correctamente");
+        }
+        
+        this.showConfirmModal = false;
+        this.pedidoSeleccionado = null;
+      } catch (error) {
+        console.error("Error al volver a espera:", error);
+        const errorMsg = error.response?.data?.error || "Error al volver el pedido a espera";
+        this.toast.error(errorMsg);
+      } finally {
+        this.isLoading = false;
+      }
+    },
     
     cancelarVolverAEspera() {
       this.showConfirmModal = false;
@@ -1190,15 +991,8 @@ manejarNuevoPedido(pedidoData) {
     }
   },
   mounted() {
-    // Cargar datos y iniciar WebSocket cuando el componente se monta
+    // Cargar datos cuando el componente se monta
     this.cargarDatos();
-    
-    // Iniciar la conexión WebSocket
-    this.iniciarWebSocket();
-  },
-  beforeUnmount() {
-    // Desconectar WebSocket cuando el componente se desmonta
-    this.desconectarWebSocket();
   }
 };
 </script>
