@@ -86,24 +86,105 @@
   color: white;
 }
 
-/* Estilos para los botones */
-.btn-success {
-  background-color: #28a745;
-  color: white;
+/* ESTILOS PARA BOTONES CON MÁXIMA ESPECIFICIDAD */
+
+/* Botón verde para aceptar pedido */
+.table-container .table tbody tr td .btn-group .btn.btn-success,
+.modal-detalle .modal-footer .action-buttons .btn.btn-success,
+.action-buttons .btn.btn-success,
+button.btn.btn-success {
+  background-color: #28a745 !important;
+  background-image: none !important;
+  border-color: #28a745 !important;
+  color: white !important;
+  border: 1px solid #28a745 !important;
+  transition: background-color 0.2s !important;
 }
 
-.btn-success:hover {
-  background-color: #218838;
+.table-container .table tbody tr td .btn-group .btn.btn-success:hover,
+.modal-detalle .modal-footer .action-buttons .btn.btn-success:hover,
+.action-buttons .btn.btn-success:hover,
+button.btn.btn-success:hover {
+  background-color: #218838 !important;
+  background-image: none !important;
+  border-color: #1e7e34 !important;
+  color: white !important;
 }
 
-.btn-info {
-  background-color: #17a2b8;
-  color: white;
-  margin-right: 5px;
+/* Botón azul para ver detalles (ojo) */
+.table-container .table tbody tr td .btn-group .btn.btn-info,
+.modal-detalle .modal-footer .action-buttons .btn.btn-info,
+.action-buttons .btn.btn-info,
+button.btn.btn-info {
+  background-color: #17a2b8 !important;
+  background-image: none !important;
+  border-color: #17a2b8 !important;
+  color: white !important;
+  border: 1px solid #17a2b8 !important;
+  margin-right: 5px !important;
+  transition: background-color 0.2s !important;
 }
 
-.btn-info:hover {
-  background-color: #138496;
+.table-container .table tbody tr td .btn-group .btn.btn-info:hover,
+.modal-detalle .modal-footer .action-buttons .btn.btn-info:hover,
+.action-buttons .btn.btn-info:hover,
+button.btn.btn-info:hover {
+  background-color: #138496 !important;
+  background-image: none !important;
+  border-color: #117a8b !important;
+  color: white !important;
+}
+
+/* Botón verde agua para ver ubicación */
+.table-container .table tbody tr td .btn-group .btn.btn-primary,
+.modal-detalle .modal-footer .action-buttons .btn.btn-primary,
+.action-buttons .btn.btn-primary,
+button.btn.btn-primary {
+  background-color: #20C997 !important;
+  background-image: none !important;
+  border-color: #20C997 !important;
+  color: white !important;
+  border: 1px solid #20C997 !important;
+  transition: background-color 0.2s !important;
+}
+
+.table-container .table tbody tr td .btn-group .btn.btn-primary:hover,
+.modal-detalle .modal-footer .action-buttons .btn.btn-primary:hover,
+.action-buttons .btn.btn-primary:hover,
+button.btn.btn-primary:hover {
+  background-color: #1BA085 !important;
+  background-image: none !important;
+  border-color: #17a2b8 !important;
+  color: white !important;
+}
+
+/* Asegurar que los iconos tengan el color correcto */
+.table-container .table tbody tr td .btn-group .btn.btn-success i,
+.modal-detalle .modal-footer .action-buttons .btn.btn-success i,
+.action-buttons .btn.btn-success i,
+button.btn.btn-success i {
+  color: white !important;
+}
+
+.table-container .table tbody tr td .btn-group .btn.btn-info i,
+.modal-detalle .modal-footer .action-buttons .btn.btn-info i,
+.action-buttons .btn.btn-info i,
+button.btn.btn-info i {
+  color: white !important;
+}
+
+.table-container .table tbody tr td .btn-group .btn.btn-primary i,
+.modal-detalle .modal-footer .action-buttons .btn.btn-primary i,
+.action-buttons .btn.btn-primary i,
+button.btn.btn-primary i {
+  color: white !important;
+}
+
+/* Remover cualquier estilo que pueda interferir */
+.btn-success, .btn-info, .btn-primary {
+  background-image: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
 }
 
 /* Estilos para el modal de detalles */
@@ -350,27 +431,6 @@
   display: inline-block;
 }
 
-.btn-obtener-ubicacion {
-  background-color: #4a7dcb;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  width: 100%;
-  justify-content: center;
-  margin: 0;
-}
-
-.btn-obtener-ubicacion:hover {
-  background-color: #3c6db3;
-}
-
 .ubicacion-actual-container {
   width: 100%;
   background-color: #f0f8ff;
@@ -458,4 +518,101 @@
   .btn-ver-ruta {
     width: 100%;
   }
+}
+
+/* Estilos específicos para el modal de ubicación */
+.modal-mapa .modal-footer {
+  display: flex !important;
+  justify-content: flex-start !important; /* Alinear a la izquierda */
+  padding: 15px !important;
+  border-top: 1px solid #e9ecef !important;
+}
+
+/* Botón cerrar en rojo y a la izquierda */
+.modal-mapa .modal-footer .btn.btn-secondary,
+.modal-mapa .modal-footer button.btn.btn-secondary {
+  background-color: #dc3545 !important;
+  background-image: none !important;
+  border-color: #dc3545 !important;
+  color: white !important;
+  border: 1px solid #dc3545 !important;
+  order: -1 !important; /* Forzar que esté a la izquierda */
+}
+
+.modal-mapa .modal-footer .btn.btn-secondary:hover,
+.modal-mapa .modal-footer button.btn.btn-secondary:hover {
+  background-color: #c82333 !important;
+  background-image: none !important;
+  border-color: #bd2130 !important;
+  color: white !important;
+}
+
+/* Si hay otros botones en el modal, mantenerlos a la derecha */
+.modal-mapa .modal-footer .btn:not(.btn-secondary) {
+  margin-left: auto !important;
+}
+
+/* Responsive para el modal de ubicación */
+@media (max-width: 576px) {
+  .modal-mapa .modal-footer {
+    justify-content: center !important;
+  }
+  
+  .modal-mapa .modal-footer .btn {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
+
+/* Botón "Obtener mi ubicación actual" en color cian */
+.btn-obtener-ubicacion {
+  background-color: #20C997 !important; /* Color cian/verde agua igual que ver ubicación */
+  color: white !important;
+  border: none !important;
+  padding: 12px 20px !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s !important;
+  width: 100% !important;
+  justify-content: center !important;
+  margin: 0 !important;
+}
+
+.btn-obtener-ubicacion:hover {
+  background-color: #1BA085 !important; /* Cian más oscuro para hover */
+}
+
+/* Asegurar que el icono también sea blanco */
+.btn-obtener-ubicacion i {
+  color: white !important;
+}
+/* FORZAR color cian para el botón obtener ubicación - MÁXIMA ESPECIFICIDAD */
+.modal-mapa .modal-body-mapa .btn-obtener-ubicacion,
+.modal .modal-mapa .modal-body-mapa .btn-obtener-ubicacion,
+div.modal div.modal-mapa div.modal-body-mapa button.btn-obtener-ubicacion {
+  background-color: #20C997 !important;
+  background-image: none !important;
+  border-color: #20C997 !important;
+  color: white !important;
+  border: 1px solid #20C997 !important;
+}
+
+.modal-mapa .modal-body-mapa .btn-obtener-ubicacion:hover,
+.modal .modal-mapa .modal-body-mapa .btn-obtener-ubicacion:hover,
+div.modal div.modal-mapa div.modal-body-mapa button.btn-obtener-ubicacion:hover {
+  background-color: #1BA085 !important;
+  background-image: none !important;
+  border-color: #1BA085 !important;
+  color: white !important;
+}
+
+/* Forzar icono blanco */
+.modal-mapa .modal-body-mapa .btn-obtener-ubicacion i,
+.modal .modal-mapa .modal-body-mapa .btn-obtener-ubicacion i,
+div.modal div.modal-mapa div.modal-body-mapa button.btn-obtener-ubicacion i {
+  color: white !important;
 }

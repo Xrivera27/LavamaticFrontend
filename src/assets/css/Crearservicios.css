@@ -783,3 +783,53 @@ td[data-label="Acciones"] .btn-danger {
     min-width: 48px;
   }
 }
+
+/* Estilos con máxima especificidad para sobrescribir Bootstrap */
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-warning,
+button.btn.btn-warning {
+  background-color: #ffc107 !important;
+  background-image: none !important;
+  color: #212529 !important;
+  border-color: #ffc107 !important;
+  border: 1px solid #ffc107 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-warning:hover,
+button.btn.btn-warning:hover {
+  background-color: #e0a800 !important;
+  background-image: none !important;
+  border-color: #d39e00 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-danger,
+button.btn.btn-danger {
+  background-color: #dc3545 !important;
+  background-image: none !important;
+  color: white !important;
+  border-color: #dc3545 !important;
+  border: 1px solid #dc3545 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-danger:hover,
+button.btn.btn-danger:hover {
+  background-color: #c82333 !important;
+  background-image: none !important;
+  border-color: #bd2130 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-warning i,
+button.btn.btn-warning i {
+  color: #212529 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-danger i,
+button.btn.btn-danger i {
+  color: white !important;
+}
+
+/* Remover todos los estilos que puedan estar interfiriendo */
+.btn-warning, .btn-danger {
+  background-image: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}

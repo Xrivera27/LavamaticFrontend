@@ -123,9 +123,9 @@
               </div>
 
               <div class="form-actions">
-                <button type="button" class="btn-cancelar" @click="resetForm">Cancelar</button>
-                <button type="submit" class="btn-guardar">Guardar Cambios</button>
-              </div>
+  <button type="submit" class="btn-guardar">Guardar Cambios</button>
+  <button type="button" class="btn-cancelar" @click="resetForm">Cancelar</button>
+</div>
             </form>
           </div>
         </div>

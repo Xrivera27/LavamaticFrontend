@@ -273,48 +273,52 @@
           </div>
         </div>
         
-        <!-- Modal del mapa -->
-        <div class="modal" v-if="showMapModal">
-          <div class="modal-mapa">
-            <div class="modal-header">
-              <h2>Ubicación de Entrega</h2>
-            </div>
-            <div class="modal-body-mapa">
-              <div class="mapa-placeholder">
-                <i class="fa-solid fa-map-location-dot"></i>
-                <p>Para este pedido, la dirección es:</p>
-                <p class="direccion-mapa">{{ pedidoSeleccionado?.direccion_entrega || 'No especificada' }}</p>
-                <p class="barrio-centro">{{ pedidoSeleccionado?.barrio }}</p>
-              </div>
-              
-              <button 
-                class="btn btn-obtener-ubicacion" 
-                @click="obtenerUbicacionActual"
-              >
-                <i class="fa-solid fa-location-crosshairs"></i> Obtener mi ubicación actual
-              </button>
-              
-              <div v-if="ubicacionActual" class="ubicacion-actual-container">
-                <h3>Mi ubicación actual:</h3>
-                <p>Latitud: {{ ubicacionActual.lat }}</p>
-                <p>Longitud: {{ ubicacionActual.lng }}</p>
-                
-                <a 
-                  :href="`https://www.google.com/maps/dir/?api=1&origin=${ubicacionActual.lat},${ubicacionActual.lng}&destination=${encodeURIComponent(pedidoSeleccionado?.direccion_entrega || 'La Ceiba')}, ${pedidoSeleccionado?.barrio}, La Ceiba`" 
-                  target="_blank" 
-                  class="btn btn-ver-ruta"
-                >
-                  <i class="fa-solid fa-directions"></i> Ver ruta en Google Maps
-                </a>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" @click="cerrarMapa">
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+     <!-- Modal del mapa -->
+<div class="modal" v-if="showMapModal">
+ <div class="modal-mapa">
+   <div class="modal-header">
+     <h2>Ubicación de Entrega</h2>
+   </div>
+   <div class="modal-body-mapa">
+     <div class="mapa-placeholder">
+       <i class="fa-solid fa-map-location-dot"></i>
+       <p>Para este pedido, la dirección es:</p>
+       <p class="direccion-mapa">{{ pedidoSeleccionado?.direccion_entrega || 'No especificada' }}</p>
+       <p class="barrio-centro">{{ pedidoSeleccionado?.barrio }}</p>
+     </div>
+     
+     <button 
+       class="btn btn-obtener-ubicacion" 
+       @click="obtenerUbicacionActual"
+     >
+       <i class="fa-solid fa-location-crosshairs"></i> Obtener mi ubicación actual
+     </button>
+     
+     <div v-if="ubicacionActual" class="ubicacion-actual-container">
+       <h3>Mi ubicación actual:</h3>
+       <p>Latitud: {{ ubicacionActual.lat }}</p>
+       <p>Longitud: {{ ubicacionActual.lng }}</p>
+       
+       <a 
+         :href="`https://www.google.com/maps/dir/?api=1&origin=${ubicacionActual.lat},${ubicacionActual.lng}&destination=${encodeURIComponent(pedidoSeleccionado?.direccion_entrega || 'La Ceiba')}, ${pedidoSeleccionado?.barrio}, La Ceiba`" 
+         target="_blank" 
+         class="btn btn-ver-ruta"
+       >
+         <i class="fa-solid fa-directions"></i> Ver ruta en Google Maps
+       </a>
+     </div>
+   </div>
+   <div class="modal-footer">
+     <button 
+       class="btn btn-secondary" 
+       style="width: auto; padding: 8px 20px; margin: 0; display: block;"
+       @click="cerrarMapa"
+     >
+       Cerrar
+     </button>
+   </div>
+ </div>
+</div>
       </div>
     </div>
   </div>

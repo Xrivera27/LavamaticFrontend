@@ -1,467 +1,722 @@
 /* Estilos básicos para el layout */
 .admin-layout {
-  display: flex;
-  min-height: auto;
-  margin-top: 0;
-  margin-bottom: 5%;
-  background-color: #f8f9fa;
-  border-radius: 15px;
+ display: flex;
+ min-height: auto;
+ margin-top: 0;
+ margin-bottom: 5%;
+ background-color: #f8f9fa;
+ border-radius: 15px;
 }
 
-/* .admin-layout {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: auto;
-  max-height: calc(100vh - 40px);
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 15px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-} */
-
 .main-content {
-  flex: 1;
-  padding: 20px;
+ flex: 1;
+ padding: 20px;
 }
 
 /* Estilos para la página */
 .empleados-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
+ max-width: 1200px;
+ margin: 0 auto;
+ position: relative;
 }
 
 .header-section {
-  margin-bottom: 20px;
-  color: black;
+ margin-bottom: 20px;
+ color: black;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
+ font-size: 24px;
+ margin-bottom: 20px;
 }
 
 /* Opciones y búsqueda */
 .opciones {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 10px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 20px;
+ flex-wrap: wrap;
+ gap: 10px;
 }
 
 .search-bar {
-  flex: 1;
-  max-width: 400px;
+ flex: 1;
+ max-width: 400px;
 }
 
 /* Asegurando que el texto de búsqueda sea negro */
 .search-bar .busqueda input {
-  color: black;
+ color: black;
 }
 
 .busqueda {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  color: black; /* Asegurando que el texto sea negro */
+ width: 100%;
+ padding: 10px;
+ border: 1px solid #ddd;
+ border-radius: 4px;
+ color: black; /* Asegurando que el texto sea negro */
 }
 
 /* Tabla */
 .table-container {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  margin-bottom: 20px;
+ background-color: white;
+ border-radius: 8px;
+ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ overflow: hidden;
+ margin-bottom: 20px;
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
+ width: 100%;
+ border-collapse: collapse;
 }
 
 .table th,
 .table td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  color: black;
+ padding: 12px 15px;
+ text-align: left;
+ border-bottom: 1px solid #eee;
+ color: black;
 }
 
 .table th {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  color: #333;
+ background-color: #f8f9fa;
+ font-weight: 600;
+ color: #333;
 }
 
 /* Botones de acción */
 .btn {
-  border: none;
-  border-radius: 4px;
-  padding: 8px 15px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+ border: none;
+ border-radius: 4px;
+ padding: 8px 15px;
+ cursor: pointer;
+ transition: background-color 0.2s;
 }
 
 .btn-primary {
-  background-color: #4a7dcb;
-  color: white;
+ background-color: #4a7dcb;
+ color: white;
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+ background-color: #6c757d;
+ color: white;
 }
 
 .btn-warning {
-  background-color: #ffc107;
-  color: #212529;
-  margin-right: 5px;
+ background-color: #ffc107 !important;
+ color: #212529 !important;
+ margin-right: 5px;
+}
+
+.btn-warning:hover {
+ background-color: #e0a800 !important;
 }
 
 .btn-danger {
-  background-color: #dc3545;
-  color: white;
+ background-color: #dc3545 !important;
+ color: white !important;
+}
+
+.btn-danger:hover {
+ background-color: #c82333 !important;
 }
 
 /* Grupo de botones horizontales */
 .btn-group {
-  display: flex;
-  gap: 5px;
+ display: flex;
+ gap: 5px;
 }
 
 .btn-group .btn {
-  margin-bottom: 0 !important;
+ margin-bottom: 0 !important;
+}
+
+/* Iconos dentro de los botones */
+.btn-warning i {
+ color: #212529 !important; /* Icono oscuro en botón amarillo */
+}
+
+.btn-danger i {
+ color: white !important; /* Icono blanco en botón rojo */
 }
 
 /* Paginación */
 .pagination-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  background-color: #f8f9fa;
-  border-top: 1px solid #eee;
-  flex-wrap: wrap;
-  gap: 10px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 10px 15px;
+ background-color: #f8f9fa;
+ border-top: 1px solid #eee;
+ flex-wrap: wrap;
+ gap: 10px;
 }
 
 .pagination-button {
-  background-color: #4a7dcb;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 5px;
+ background-color: #4a7dcb;
+ color: white;
+ border: none;
+ padding: 8px 15px;
+ border-radius: 4px;
+ cursor: pointer;
+ margin-left: 5px;
 }
 
 .pagination-button:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
+ background-color: #6c757d;
+ cursor: not-allowed;
 }
 
 /* Modal */
 .modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background-color: rgba(0, 0, 0, 0.5);
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ z-index: 1000;
 }
 
 h2 {
-  color: black;
+ color: black;
 }
 
 /* Asegurando que los placeholders tengan un color visible */
 input::placeholder, select::placeholder {
-  color: #666; /* Gris más oscuro para mejor visibilidad */
-  opacity: 1; /* Asegura visibilidad en todos los navegadores */
+ color: #666; /* Gris más oscuro para mejor visibilidad */
+ opacity: 1; /* Asegura visibilidad en todos los navegadores */
 }
 
 .modal-usuario {
-  background-color: white;
-  border-radius: 8px;
-  width: 80%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  color: black;
+ background-color: white;
+ border-radius: 8px;
+ width: 80%;
+ max-width: 800px;
+ max-height: 90vh;
+ overflow-y: auto;
+ color: black;
 }
 
 .modal-header {
-  padding: 15px;
-  border-bottom: 1px solid #eee;
+ padding: 15px;
+ border-bottom: 1px solid #eee;
 }
 
 .modal-body {
-  padding: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+ padding: 20px;
+ display: flex;
+ flex-wrap: wrap;
+ gap: 20px;
 }
 
 .contenedor {
-  flex: 1;
-  min-width: 300px;
+ flex: 1;
+ min-width: 300px;
 }
 
 .modal-footer {
-  padding: 15px;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+ padding: 15px;
+ border-top: 1px solid #eee;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ flex-wrap: wrap;
+ gap: 10px;
 }
 
 p {
-  color: black;
+ color: black;
 }
 
-.action-buttons button {
-  margin-bottom: 1rem;
+/* Alineación horizontal de botones en modal */
+.action-buttons {
+ display: flex;
+ gap: 10px;
+ align-items: center;
+ flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+ margin-bottom: 0 !important;
+ margin-right: 0;
+}
+
+/* Botón de editar contraseña */
+.btn.editar-password {
+ background-color: #6c757d;
+ color: white;
+ border: none;
+ padding: 8px 15px;
+ border-radius: 4px;
+ cursor: pointer;
+}
+
+.btn.editar-password:hover {
+ background-color: #5a6268;
 }
 
 .form-group {
-  margin-bottom: 15px;
+ margin-bottom: 15px;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: black; /* Asegurando que las etiquetas sean negras */
+ display: block;
+ margin-bottom: 5px;
+ font-weight: 500;
+ color: black; /* Asegurando que las etiquetas sean negras */
 }
 
 /* Asegurando que los inputs y selects tengan texto negro */
 .form-group input,
 .form-group select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  color: black; /* Color de texto para inputs */
+ width: 100%;
+ padding: 8px;
+ border: 1px solid #ddd;
+ border-radius: 4px;
+ color: black; /* Color de texto para inputs */
 }
 
 /* Password input */
 .password-wrapper {
-  position: relative;
+ position: relative;
 }
 
 .toggle-password {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #333; /* Color para el icono de toggle password */
+ position: absolute;
+ right: 10px;
+ top: 50%;
+ transform: translateY(-50%);
+ background: none;
+ border: none;
+ cursor: pointer;
+ color: #333; /* Color para el icono de toggle password */
 }
 
 /* Phone input */
 .phone-input-container {
-  display: flex;
-  gap: 5px;
+ display: flex;
+ gap: 5px;
 }
 
 .select-phone {
-  width: 70px; /* Aún más reducido para que sea más compacto */
-  color: black; /* Asegurando que el texto del select sea negro */
-  padding: 4px; /* Padding más pequeño */
+ width: 70px; /* Aún más reducido para que sea más compacto */
+ color: black; /* Asegurando que el texto del select sea negro */
+ padding: 4px; /* Padding más pequeño */
 }
 
 .input-phone {
-  flex: 1;
-  min-width: 140px; /* Asegura más espacio para el número */
-  color: black; /* Asegurando que el texto del input sea negro */
+ flex: 1;
+ min-width: 140px; /* Asegura más espacio para el número */
+ color: black; /* Asegurando que el texto del input sea negro */
 }
 
 /* Loading */
 .loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  color: white;
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background-color: rgba(0, 0, 0, 0.5);
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ z-index: 2000;
+ color: white;
 }
 
 .loading-spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid white;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
+ border: 4px solid rgba(255, 255, 255, 0.3);
+ border-top: 4px solid white;
+ border-radius: 50%;
+ width: 40px;
+ height: 40px;
+ animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+ 0% { transform: rotate(0deg); }
+ 100% { transform: rotate(360deg); }
 }
 
 /* Modal de confirmación */
 .modal-confirm {
-  background-color: white;
-  border-radius: 8px;
-  width: 400px;
-  padding: 20px;
-  color: black; /* Asegurando que el texto sea negro */
+ background-color: white;
+ border-radius: 8px;
+ width: 400px;
+ padding: 20px;
+ color: black; /* Asegurando que el texto sea negro */
 }
 
 .modal-body-confirm {
-  padding: 20px 0;
-  text-align: center;
-  color: black; /* Asegurando que el texto sea negro */
+ padding: 20px 0;
+ text-align: center;
+ color: black; /* Asegurando que el texto sea negro */
+}
+
+/* Botón verde para confirmar eliminación */
+.modal-confirm .modal-footer .action-buttons .btn.btn-danger,
+.modal-confirm .action-buttons button.btn.btn-danger {
+ background-color: #28a745 !important;
+ background-image: none !important;
+ border-color: #28a745 !important;
+ color: white !important;
+ border: 1px solid #28a745 !important;
+}
+
+.modal-confirm .modal-footer .action-buttons .btn.btn-danger:hover,
+.modal-confirm .action-buttons button.btn.btn-danger:hover {
+ background-color: #218838 !important;
+ background-image: none !important;
+ border-color: #1e7e34 !important;
+ color: white !important;
+}
+
+/* Asegurar que el botón "No, regresar" se mantenga rojo */
+.modal-confirm .modal-footer .action-buttons .btn.btn-secondary,
+.modal-confirm .action-buttons button.btn.btn-secondary {
+ background-color: #dc3545 !important;
+ background-image: none !important;
+ border-color: #dc3545 !important;
+ color: white !important;
+ border: 1px solid #dc3545 !important;
+}
+
+.modal-confirm .modal-footer .action-buttons .btn.btn-secondary:hover,
+.modal-confirm .action-buttons button.btn.btn-secondary:hover {
+ background-color: #c82333 !important;
+ background-image: none !important;
+ border-color: #bd2130 !important;
+ color: white !important;
 }
 
 /* Asegurando que cualquier input tenga texto negro */
 input, select, textarea {
-  color: black !important;
+ color: black !important;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .modal-usuario {
-    width: 95%;
-  }
-  
-  .modal-body {
-    flex-direction: column;
-  }
-  
-  .action-buttons {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .table {
-    display: block;
-    overflow-x: auto;
-  }
-  
-  .btn-group {
-    justify-content: flex-start;
-  }
+ .modal-usuario {
+   width: 95%;
+ }
+ 
+ .modal-body {
+   flex-direction: column;
+ }
+ 
+ .action-buttons {
+   width: 100%;
+   display: flex;
+   justify-content: space-between;
+ }
+ 
+ .table {
+   display: block;
+   overflow-x: auto;
+ }
+ 
+ .btn-group {
+   justify-content: flex-start;
+ }
 }
 
 .badge-info {
-  background-color: #17a2b8;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: inline-flex;
-  align-items: center;
+ background-color: #17a2b8;
+ color: white;
+ padding: 6px 10px;
+ border-radius: 12px;
+ font-weight: 600;
+ font-size: 0.9rem;
+ letter-spacing: 0.5px;
+ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ display: inline-flex;
+ align-items: center;
 }
 
 .badge-info::before {
-  content: "✓";
-  display: inline-block;
-  margin-right: 5px;
-  font-weight: bold;
+ content: "✓";
+ display: inline-block;
+ margin-right: 5px;
+ font-weight: bold;
 }
 
 /* Mejoras para otros badges */
 .badge-warning, .badge-primary, .badge-success, .badge-secondary {
-  padding: 6px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: inline-flex;
-  align-items: center;
+ padding: 6px 10px;
+ border-radius: 12px;
+ font-weight: 600;
+ font-size: 0.9rem;
+ letter-spacing: 0.5px;
+ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ display: inline-flex;
+ align-items: center;
 }
 
 .badge-warning::before {
-  content: "⌛";
-  display: inline-block;
-  margin-right: 5px;
+ content: "⌛";
+ display: inline-block;
+ margin-right: 5px;
 }
 
 .badge-primary::before {
-  content: "🚚";
-  display: inline-block;
-  margin-right: 5px;
+ content: "🚚";
+ display: inline-block;
+ margin-right: 5px;
 }
 
 .badge-success::before {
-  content: "✅";
-  display: inline-block;
-  margin-right: 5px;
+ content: "✅";
+ display: inline-block;
+ margin-right: 5px;
 }
 
 .pagination-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  background-color: #f8f9fa;
-  border-top: 1px solid #eee;
-  flex-wrap: wrap;
-  gap: 10px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 10px 15px;
+ background-color: #f8f9fa;
+ border-top: 1px solid #eee;
+ flex-wrap: wrap;
+ gap: 10px;
 }
 
 .pagination-info {
-  color: #333;
-  font-size: 0.9rem;
+ color: #333;
+ font-size: 0.9rem;
 }
 
 .pagination-container {
-  display: flex;
-  gap: 5px;
+ display: flex;
+ gap: 5px;
 }
 
 .pagination-button {
-  background-color: #4a7dcb;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 5px;
+ background-color: #4a7dcb;
+ color: white;
+ border: none;
+ padding: 8px 15px;
+ border-radius: 4px;
+ cursor: pointer;
+ margin-left: 5px;
 }
 
 .pagination-button:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
+ background-color: #6c757d;
+ cursor: not-allowed;
 }
 
 /* Estilos responsivos para la paginación */
 @media (max-width: 768px) {
-  .pagination-wrapper {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .pagination-info {
-    margin-bottom: 10px;
-    text-align: center;
-  }
+ .pagination-wrapper {
+   flex-direction: column;
+   align-items: center;
+ }
+ 
+ .pagination-info {
+   margin-bottom: 10px;
+   text-align: center;
+ }
+}
+
+/* Estilos con máxima especificidad para sobrescribir Bootstrap */
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-warning,
+button.btn.btn-warning {
+ background-color: #ffc107 !important;
+ background-image: none !important;
+ color: #212529 !important;
+ border-color: #ffc107 !important;
+ border: 1px solid #ffc107 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-warning:hover,
+button.btn.btn-warning:hover {
+ background-color: #e0a800 !important;
+ background-image: none !important;
+ border-color: #d39e00 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-danger,
+button.btn.btn-danger {
+ background-color: #dc3545 !important;
+ background-image: none !important;
+ color: white !important;
+ border-color: #dc3545 !important;
+ border: 1px solid #dc3545 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-danger:hover,
+button.btn.btn-danger:hover {
+ background-color: #c82333 !important;
+ background-image: none !important;
+ border-color: #bd2130 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-warning i,
+button.btn.btn-warning i {
+ color: #212529 !important;
+}
+
+.empleados-wrapper .table-container .table tbody tr td .btn-group .btn.btn-danger i,
+button.btn.btn-danger i {
+ color: white !important;
+}
+
+/* Remover todos los estilos que puedan estar interfiriendo */
+.btn-warning, .btn-danger {
+ background-image: none !important;
+ text-shadow: none !important;
+ box-shadow: none !important;
+}
+
+/* Alineación horizontal de botones en modal - MÁS ESPECÍFICO */
+.modal-footer .action-buttons {
+ display: flex !important;
+ flex-direction: row !important;
+ gap: 10px !important;
+ align-items: center !important;
+ flex-wrap: wrap !important;
+}
+
+.modal-footer .action-buttons .btn {
+ margin-bottom: 0 !important;
+ margin-right: 0 !important;
+ margin-top: 0 !important;
+ flex-shrink: 0;
+}
+
+/* Asegurar que el modal-footer esté configurado correctamente */
+.modal-usuario .modal-footer {
+ display: flex !important;
+ justify-content: space-between !important;
+ align-items: center !important;
+ flex-wrap: wrap !important;
+ gap: 10px !important;
+ padding: 15px !important;
+ border-top: 1px solid #eee !important;
+}
+
+/* Forzar que no haya estilos que interfieran */
+.modal-footer .action-buttons button {
+ display: inline-block !important;
+ margin: 0 !important;
+}
+/* FORZAR BOTONES HORIZONTALES - ÚLTIMA OPCIÓN */
+.modal-usuario .modal-footer .action-buttons {
+ display: flex !important;
+ flex-direction: row !important;
+ gap: 10px !important;
+ width: auto !important;
+}
+
+.modal-usuario .modal-footer .action-buttons > * {
+ margin: 0 !important;
+ margin-bottom: 0 !important;
+ margin-top: 0 !important;
+ margin-left: 0 !important;
+ margin-right: 0 !important;
+}
+
+.modal-usuario .modal-footer {
+ display: flex !important;
+ justify-content: space-between !important;
+ align-items: center !important;
+}
+
+/* FORZAR BOTONES LADO A LADO COMO LOS DE ACCION */
+.modal-footer .action-buttons {
+ display: flex !important;
+ flex-direction: row !important;
+ gap: 10px !important;
+ width: auto !important;
+}
+
+.modal-footer .action-buttons button {
+ width: auto !important;
+ display: inline-block !important;
+ margin: 0 !important;
+ flex: none !important;
+}
+
+/* Botón verde para guardar/agregar - MÁS ESPECÍFICO */
+.modal-usuario .modal-footer .action-buttons .btn.btn-primary,
+.modal-footer .action-buttons button.btn.btn-primary {
+ background-color: #28a745 !important;
+ background-image: none !important;
+ border-color: #28a745 !important;
+ color: white !important;
+ border: 1px solid #28a745 !important;
+}
+
+.modal-usuario .modal-footer .action-buttons .btn.btn-primary:hover,
+.modal-footer .action-buttons button.btn.btn-primary:hover {
+ background-color: #218838 !important;
+ background-image: none !important;
+ border-color: #1e7e34 !important;
+}
+
+/* Botón rojo para cerrar - MÁS ESPECÍFICO */
+.modal-usuario .modal-footer .action-buttons .btn.btn-secondary,
+.modal-footer .action-buttons button.btn.btn-secondary {
+ background-color: #dc3545 !important;
+ background-image: none !important;
+ border-color: #dc3545 !important;
+ color: white !important;
+ border: 1px solid #dc3545 !important;
+}
+
+.modal-usuario .modal-footer .action-buttons .btn.btn-secondary:hover,
+.modal-footer .action-buttons button.btn.btn-secondary:hover {
+ background-color: #c82333 !important;
+ background-image: none !important;
+ border-color: #bd2130 !important;
+}
+
+/* Remover cualquier estilo de Bootstrap que pueda interferir */
+.modal-footer .action-buttons .btn {
+ background-image: none !important;
+ text-shadow: none !important;
+ box-shadow: none !important;
+}
+/* Botón amarillo para editar contraseña */
+.modal-usuario .modal-footer .action-buttons .btn.editar-password,
+.modal-footer .action-buttons button.btn.editar-password {
+ background-color: #ffc107 !important;
+ background-image: none !important;
+ border-color: #ffc107 !important;
+ color: #212529 !important;
+ border: 1px solid #ffc107 !important;
+}
+
+.modal-usuario .modal-footer .action-buttons .btn.editar-password:hover,
+.modal-footer .action-buttons button.btn.editar-password:hover {
+ background-color: #e0a800 !important;
+ background-image: none !important;
+ border-color: #d39e00 !important;
+ color: #212529 !important;
+}
+/* Botón verde para agregar repartidor */
+.opciones .btn.btn-primary,
+button#btnAdd.btn.btn-primary {
+ background-color: #28a745 !important;
+ background-image: none !important;
+ border-color: #28a745 !important;
+ color: white !important;
+ border: 1px solid #28a745 !important;
+}
+
+.opciones .btn.btn-primary:hover,
+button#btnAdd.btn.btn-primary:hover {
+ background-color: #218838 !important;
+ background-image: none !important;
+ border-color: #1e7e34 !important;
 }

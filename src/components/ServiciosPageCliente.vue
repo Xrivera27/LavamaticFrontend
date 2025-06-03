@@ -54,18 +54,6 @@
             </div>
           </div>
 
-          <div class="seccion cargos">
-            <h2>CARGOS</h2>
-            <div class="fila-cargo">
-              <span>Subtotal</span>
-              <span>L.{{ formatearPrecio(calcularSubtotal()) }}</span>
-            </div>
-            <div class="fila-cargo total">
-              <span>Total</span>
-              <span>L.{{ formatearPrecio(calcularTotal()) }}</span>
-            </div>
-          </div>
-
           <div class="seccion domicilio">
             <h2>DETALLES DEL SERVICIO</h2>
 
@@ -135,6 +123,19 @@
               </div>
             </div>
 
+            <!-- Sección de CARGOS movida aquí -->
+            <div class="seccion cargos">
+              <h2>CARGOS</h2>
+              <div class="fila-cargo">
+                <span>Subtotal</span>
+                <span>L.{{ formatearPrecio(calcularSubtotal()) }}</span>
+              </div>
+              <div class="fila-cargo total">
+                <span>Total</span>
+                <span>L.{{ formatearPrecio(calcularTotal()) }}</span>
+              </div>
+            </div>
+
             <div class="botones">
               <button class="btn-cancelar" @click="cancelarOrden">Cancelar</button>
               <button 
@@ -187,39 +188,77 @@
       </div>
     </div>
     
-  <!-- Modal de Información de Tipo de Entrega -->
-<div class="modal" v-if="showInfoModal" @click="cerrarInfoModal">
-  <div class="modal-contenido modal-info" @click.stop>
-    <div class="modal-header">
-      <h3>¿Cómo deseas recibir tus prendas?</h3>
-      <button class="btn-cerrar" @click="cerrarInfoModal">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="info-content">
-        <p>Selecciona la opción que mejor se adapte a tu estilo de vida:</p>
-        
-        <div class="info-option seleccionable" 
-             :class="{ 'opcion-seleccionada': tipoEntrega === 'sucursal' }"
-             @click="seleccionarTipoEntregaDesdeModal('sucursal')">
-          <h4><i class="fa-solid fa-store"></i> Recoger en tienda</h4>
-          <p>¡Pasa por nuestra sucursal cuando te sea conveniente! Tus prendas estarán listas y esperándote en nuestro local.</p>
+    <!-- Modal de Información de Tipo de Entrega -->
+    <div class="modal" v-if="showInfoModal" @click="cerrarInfoModal">
+      <div class="modal-contenido modal-info" @click.stop>
+        <div class="modal-header">
+          <h3>¿Cómo deseas recibir tus prendas?</h3>
+          <button class="btn-cerrar" @click="cerrarInfoModal">×</button>
         </div>
-        
-        <div class="info-option seleccionable"
-             :class="{ 'opcion-seleccionada': tipoEntrega === 'domicilio' }"
-             @click="seleccionarTipoEntregaDesdeModal('domicilio')">
-          <h4><i class="fa-solid fa-truck"></i> Entrega a domicilio</h4>
-          <p>¡Nosotros te lo llevamos! Nuestro equipo entregará tus prendas frescas y limpias directamente a la puerta de tu hogar u oficina.</p>
+        <div class="modal-body">
+          <div class="info-content">
+            <p>Selecciona la opción que mejor se adapte a tu estilo de vida:</p>
+            
+            <div class="info-option seleccionable" 
+                 :class="{ 'opcion-seleccionada': tipoEntrega === 'sucursal' }"
+                 @click="seleccionarTipoEntregaDesdeModal('sucursal')">
+              <h4><i class="fa-solid fa-store"></i> Recoger en tienda</h4>
+              <p>¡Pasa por nuestra sucursal cuando te sea conveniente! Tus prendas estarán listas y esperándote en nuestro local.</p>
+            </div>
+            
+            <div class="info-option seleccionable"
+                 :class="{ 'opcion-seleccionada': tipoEntrega === 'domicilio' }"
+                 @click="seleccionarTipoEntregaDesdeModal('domicilio')">
+              <h4><i class="fa-solid fa-truck"></i> Entrega a domicilio</h4>
+              <p>¡Nosotros te lo llevamos! Nuestro equipo entregará tus prendas frescas y limpias directamente a la puerta de tu hogar u oficina.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-entendido" @click="cerrarInfoModal">
+            ¡Confirmar mi elección!
+          </button>
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-entendido" @click="cerrarInfoModal">
-        ¡Confirmar mi elección!
-      </button>
+
+    <!-- Modal de Confirmación de Cancelación -->
+    <div class="modal" v-if="showCancelModal" @click="cerrarModalCancelar">
+      <div class="modal-contenido modal-cancelar" @click.stop>
+        <div class="modal-header modal-header-cancel">
+          <h3><i class="fa-solid fa-triangle-exclamation"></i> Confirmar Cancelación</h3>
+          <button class="btn-cerrar" @click="cerrarModalCancelar">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="cancel-content">
+            <p class="cancel-message">¿Estás seguro de que deseas cancelar la orden?</p>
+            <p class="cancel-warning">Se perderán todos los datos ingresados y tendrás que empezar de nuevo.</p>
+            
+            <div class="cancel-details" v-if="serviciosSeleccionados.length > 0 || fechaServicio || horaServicio || (tipoEntrega === 'domicilio' && barrioEntrega)">
+              <h4>Datos que se perderán:</h4>
+              <ul>
+                <li v-if="serviciosSeleccionados.length > 0">
+                  {{ serviciosSeleccionados.length }} servicio(s) seleccionado(s)
+                </li>
+                <li v-if="fechaServicio">Fecha programada: {{ formatearFecha(fechaServicio) }}</li>
+                <li v-if="horaServicio">Horario seleccionado</li>
+                <li v-if="tipoEntrega === 'domicilio' && barrioEntrega">
+                  Dirección de entrega: {{ barrioEntrega }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-continuar" @click="cerrarModalCancelar">
+            <i class="fa-solid fa-arrow-left"></i> Continuar editando
+          </button>
+          <button class="btn-confirmar-cancelar" @click="confirmarCancelacion">
+            <i class="fa-solid fa-trash"></i> Sí, cancelar orden
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
     
     <!-- Modal de Carga y Éxito -->
     <div class="modal-overlay" v-if="showSuccessModal">
@@ -281,6 +320,7 @@ export default {
       // Modal
       showModal: false,
       showInfoModal: false,
+      showCancelModal: false, // Nueva propiedad para el modal de cancelación
       servicioSeleccionado: {
         id_servicio: null,
         nombre: '',
@@ -397,6 +437,16 @@ export default {
         : '0.00';
     },
     
+    formatearFecha(fecha) {
+      if (!fecha) return '';
+      const date = new Date(fecha);
+      return date.toLocaleDateString('es-HN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    },
+    
     seleccionarServicio(servicio) {
       const index = this.serviciosSeleccionados.findIndex(s => s.id_servicio === servicio.id_servicio);
       if (index === -1) {
@@ -433,6 +483,21 @@ export default {
     
     cerrarInfoModal() {
       this.showInfoModal = false;
+    },
+    
+    // Métodos para el modal de cancelación
+    cancelarOrden() {
+      this.showCancelModal = true;
+    },
+    
+    cerrarModalCancelar() {
+      this.showCancelModal = false;
+    },
+    
+    confirmarCancelacion() {
+      this.resetearFormulario();
+      this.showCancelModal = false;
+      this.toast.success('Orden cancelada correctamente');
     },
     
     // Nuevo método para seleccionar tipo de entrega desde el modal
@@ -506,12 +571,6 @@ export default {
       
       // Retornar si hay errores
       return !Object.values(this.validacionErrores).some(valor => valor);
-    },
-    
-    cancelarOrden() {
-      if (confirm('¿Estás seguro de cancelar la orden? Se perderán los datos ingresados.')) {
-        this.resetearFormulario();
-      }
     },
     
     resetearFormulario() {

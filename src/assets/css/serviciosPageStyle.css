@@ -307,8 +307,8 @@ select:focus {
 }
 
 .btn-cancelar {
-  background: #f0f3fa;
-  color: #555;
+  background: #dc3545; /* Rojo */
+  color: white;
   border: none;
   padding: 12px 24px;
   border-radius: 8px;
@@ -318,7 +318,7 @@ select:focus {
 }
 
 .btn-enviar {
-  background: #2563EB;
+  background: #28a745; /* Verde */
   color: white;
   border: none;
   padding: 12px 30px;
@@ -329,11 +329,11 @@ select:focus {
 }
 
 .btn-cancelar:hover {
-  background: #e2e6f0;
+  background: #c82333; /* Rojo más oscuro al hacer hover */
 }
 
 .btn-enviar:hover {
-  background: #1e40af;
+  background: #218838; /* Verde más oscuro al hacer hover */
 }
 
 .btn-enviar:active {
@@ -341,7 +341,7 @@ select:focus {
 }
 
 .btn-enviar:disabled {
-  background: #93c5fd;
+  background: #6c757d; /* Gris cuando está deshabilitado */
   cursor: not-allowed;
 }
 
@@ -712,6 +712,105 @@ input[type="text"]:focus {
   background-color: #1e40af;
 }
 
+/* Modal de Cancelación */
+.modal-cancelar {
+  max-width: 450px;
+}
+
+.modal-header-cancel {
+  background: #dc3545 !important;
+  color: white;
+}
+
+.modal-header-cancel h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-header-cancel i {
+  font-size: 20px;
+}
+
+.cancel-content {
+  text-align: center;
+}
+
+.cancel-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.cancel-warning {
+  color: #666;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.cancel-details {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.cancel-details h4 {
+  color: #495057;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.cancel-details ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.cancel-details li {
+  color: #6c757d;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.btn-continuar {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-continuar:hover {
+  background: #5a6268;
+}
+
+.btn-confirmar-cancelar {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-confirmar-cancelar:hover {
+  background: #c82333;
+}
+
 /* Asegurar la visualización en todos los dispositivos */
 html, body {
   overflow-x: hidden;
@@ -778,4 +877,22 @@ html, body {
   top: 15px;
   color: #007bff;
   font-weight: bold;
+}
+
+/* Responsive para el modal de cancelación */
+@media (max-width: 480px) {
+  .modal-cancelar {
+    width: 95%;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn-continuar,
+  .btn-confirmar-cancelar {
+    width: 100%;
+    justify-content: center;
+  }
 }

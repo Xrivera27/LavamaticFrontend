@@ -244,6 +244,9 @@
                   >
                     Marcar como listo para recoger
                   </button>
+                  <button class="btn btn-secondary" @click="cerrarDetalles">
+                    Cerrar
+                  </button>
                 </div>
                 <div class="detalle-acciones" v-if="pedidoDetalle.estado === 'Listo para recoger'">
                   <button 
@@ -251,6 +254,9 @@
                     @click="marcarComoEntregadoDesdeModal()"
                   >
                     Marcar como entregado
+                  </button>
+                  <button class="btn btn-secondary" @click="cerrarDetalles">
+                    Cerrar
                   </button>
                 </div>
                 <div class="detalle-acciones" v-if="pedidoDetalle.estado === 'En camino'">
@@ -260,10 +266,14 @@
                   >
                     Marcar como entregado
                   </button>
+                  <button class="btn btn-secondary" @click="cerrarDetalles">
+                    Cerrar
+                  </button>
                 </div>
               </div>
             </div>
-            <div class="modal-footer">
+            <!-- Solo mostrar footer cuando no hay botones de acción específicos -->
+            <div class="modal-footer" v-if="!((pedidoDetalle.estado === 'En Espera' && !pedidoDetalle.id_repartidor) || pedidoDetalle.estado === 'Listo para recoger' || pedidoDetalle.estado === 'En camino')">
               <button class="btn btn-secondary" @click="cerrarDetalles">
                 Cerrar
               </button>
@@ -412,6 +422,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import SidebarDinamico from './SidebarDinamico.vue';

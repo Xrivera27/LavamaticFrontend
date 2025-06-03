@@ -427,3 +427,72 @@ td[data-label="Acciones"] .btn-danger {
     padding: 10px 0;
   }
 }
+
+/* Botón verde oscuro para finalizar mantenimiento */
+td[data-label="Acciones"] .btn.btn-success,
+.btn.btn-success {
+  background-color: #1e7e34 !important;
+  background-image: none !important;
+  border-color: #1e7e34 !important;
+  color: white !important;
+  border: 1px solid #1e7e34 !important;
+}
+
+td[data-label="Acciones"] .btn.btn-success:hover,
+.btn.btn-success:hover {
+  background-color: #155724 !important;
+  background-image: none !important;
+  border-color: #0e4016 !important;
+}
+
+/* También aplicar a los botones de confirmación en modales */
+.modal-footer .action-buttons .btn.btn-success {
+  background-color: #1e7e34 !important;
+  background-image: none !important;
+  border-color: #1e7e34 !important;
+  color: white !important;
+  border: 1px solid #1e7e34 !important;
+}
+
+.modal-footer .action-buttons .btn.btn-success:hover {
+  background-color: #155724 !important;
+  background-image: none !important;
+  border-color: #0e4016 !important;
+}
+
+/* Modal de detalles - botón cerrar pequeño y a la izquierda */
+.modal-detalle .modal-footer,
+div.modal-detalle div.modal-footer {
+  padding: 15px !important;
+  border-top: 1px solid #eee !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  text-align: left !important;
+}
+
+/* Botón cerrar más pequeño y rojo */
+.modal-detalle .modal-footer button,
+.modal-detalle .modal-footer .btn,
+.modal-detalle .modal-footer .btn-secondary,
+div.modal-detalle div.modal-footer button {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: white !important;
+  background-image: none !important;
+  border: 1px solid #dc3545 !important;
+  padding: 6px 16px !important; /* Padding más pequeño */
+  font-size: 14px !important; /* Texto más pequeño */
+  min-width: auto !important; /* Sin ancho mínimo */
+  width: auto !important; /* Ancho automático */
+}
+
+.modal-detalle .modal-footer button:hover,
+.modal-detalle .modal-footer .btn:hover,
+.modal-detalle .modal-footer .btn-secondary:hover,
+div.modal-detalle div.modal-footer button:hover {
+  background-color: #c82333 !important;
+  border-color: #bd2130 !important;
+  color: white !important;
+  background-image: none !important;
+}

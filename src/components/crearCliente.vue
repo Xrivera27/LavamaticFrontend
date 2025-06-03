@@ -279,29 +279,34 @@
                 </div>
               </div>
             </div>
-            <div class="modal-footer">
-              <div class="action-buttons">
-                <button style="margin-bottom: 1rem;"
-                  class="btn btn-primary"
-                  @click="guardarCliente"
-                >
-                  {{ isEditing ? 'Guardar Cambios' : 'Agregar Cliente' }}
-                </button>
-                <button 
-                  class="btn btn-secondary"
-                  @click="closeModal"
-                >
-                  Cerrar
-                </button>
-              </div>
-              <button
-                v-if="isEditing"
-                class="btn editar-password"
-                @click="editarPassword"
-              >
-                Editar Contraseña
-              </button>
-            </div>
+           <div class="modal-footer">
+  <div class="action-buttons" style="display: flex !important; flex-direction: row !important; gap: 10px !important; align-items: center !important; width: 100% !important; justify-content: space-between !important;">
+    <div style="display: flex !important; gap: 10px !important;">
+      <button
+        class="btn btn-primary"
+        @click="guardarCliente"
+        style="margin: 0 !important; display: inline-block !important; width: auto !important;"
+      >
+        {{ isEditing ? 'Guardar Cambios' : 'Agregar Cliente' }}
+      </button>
+      <button
+        class="btn btn-secondary"
+        @click="closeModal"
+        style="margin: 0 !important; display: inline-block !important; width: auto !important;"
+      >
+        Cerrar
+      </button>
+    </div>
+    <button
+      v-if="isEditing"
+      class="btn editar-password"
+      @click="editarPassword"
+      style="margin: 0 !important;"
+    >
+      Editar Contraseña
+    </button>
+  </div>
+</div>
           </div>
         </div>
       </div>
