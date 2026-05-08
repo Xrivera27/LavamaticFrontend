@@ -557,7 +557,7 @@ SidebarDinamico
       if (!this.isPassEdit) return true;
       
       // Requiere al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo
-      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-={};':"\\|,.<>/?[\]])[A-Za-z\d!@#$%^&*()_+\-={};':"\\|,.<>/?[\]]{8,}$/;
       
       if (!this.clienteForm.password) {
         this.validationErrors.password = "La contraseña es obligatoria";
